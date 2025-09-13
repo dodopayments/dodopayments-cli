@@ -5,9 +5,9 @@ package cmd
 import (
 	"context"
 
+	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
-	"github.com/stainless-sdks/dodo-payments-cli/pkg/jsonflag"
 	"github.com/urfave/cli/v3"
 )
 

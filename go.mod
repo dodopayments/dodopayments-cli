@@ -1,4 +1,4 @@
-module github.com/stainless-sdks/dodo-payments-cli
+module github.com/dodopayments/dodopayments-cli
 
 go 1.24.0
 

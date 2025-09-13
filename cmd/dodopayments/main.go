@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/dodopayments/dodopayments-cli/pkg/cmd"
 	"github.com/dodopayments/dodopayments-go"
-	"github.com/stainless-sdks/dodo-payments-cli/pkg/cmd"
 )
 
 func main() {
