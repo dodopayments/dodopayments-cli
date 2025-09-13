@@ -125,6 +125,21 @@ func init() {
 				},
 			},
 			{
+				Name:     "customers:wallets",
+				Category: "API RESOURCE",
+				Commands: []*cli.Command{
+					&customersWalletsList,
+				},
+			},
+			{
+				Name:     "customers:wallets:ledger-entries",
+				Category: "API RESOURCE",
+				Commands: []*cli.Command{
+					&customersWalletsLedgerEntriesCreate,
+					&customersWalletsLedgerEntriesList,
+				},
+			},
+			{
 				Name:     "refunds",
 				Category: "API RESOURCE",
 				Commands: []*cli.Command{
