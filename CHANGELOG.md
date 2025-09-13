@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.53.3 (2025-09-13)
+
+Full Changelog: [v1.53.2...v1.53.3](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.2...v1.53.3)
+
+### Features
+
+* **api:** added typescript sdk for migration and updated org info ([33e8156](https://github.com/dodopayments/dodopayments-cli/commit/33e8156c308e2a7c4da1dc25c3e84e342da6e140))
+* **api:** manual updates ([5ed95d6](https://github.com/dodopayments/dodopayments-cli/commit/5ed95d6e4dc7e6ba8be0fda765107ee7520c269f))
+
 ## 1.53.2 (2025-09-13)
 
 Full Changelog: [v0.1.0...v1.53.2](https://github.com/dodopayments/dodopayments-cli/compare/v0.1.0...v1.53.2)
