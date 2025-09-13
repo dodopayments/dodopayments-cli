@@ -453,6 +453,22 @@ var subscriptionsCharge = cli.Command{
 				SetValue: true,
 			},
 		},
+		&jsonflag.JSONBoolFlag{
+			Name: "customer-balance-config.allow_customer_credits_purchase",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "customer_balance_config.allow_customer_credits_purchase",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "customer-balance-config.allow_customer_credits_usage",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "customer_balance_config.allow_customer_credits_usage",
+				SetValue: true,
+			},
+		},
 		&jsonflag.JSONStringFlag{
 			Name: "product-currency",
 			Config: jsonflag.JSONConfig{
