@@ -22,7 +22,7 @@ var (
 
 func init() {
 	Command = &cli.Command{
-		Name:    "dodo-payments",
+		Name:    "dodopayments",
 		Usage:   "CLI for the Dodo Payments API",
 		Version: Version,
 		Flags: []cli.Flag{
@@ -243,7 +243,7 @@ func init() {
 			{
 				Name:            "@manpages",
 				Usage:           "Generate documentation for 'man'",
-				UsageText:       "dodo-payments @manpages [-o dodo-payments.1] [--gzip]",
+				UsageText:       "dodopayments @manpages [-o dodopayments.1] [--gzip]",
 				Hidden:          true,
 				Action:          generateManpages,
 				HideHelpCommand: true,
@@ -286,7 +286,7 @@ func generateManpages(ctx context.Context, c *cli.Command) error {
 		// handle error
 	}
 	if c.Bool("text") {
-		file, err := os.Create(filepath.Join(dir, "man1", "dodo-payments.1"))
+		file, err := os.Create(filepath.Join(dir, "man1", "dodopayments.1"))
 		if err != nil {
 			return err
 		}
@@ -296,7 +296,7 @@ func generateManpages(ctx context.Context, c *cli.Command) error {
 		}
 	}
 	if c.Bool("gzip") {
-		file, err := os.Create(filepath.Join(dir, "man1", "dodo-payments.1.gz"))
+		file, err := os.Create(filepath.Join(dir, "man1", "dodopayments.1.gz"))
 		if err != nil {
 			return err
 		}

@@ -9,13 +9,13 @@ It is generated with [Stainless](https://www.stainless.com/).
 ### Installing with Go
 
 ```sh
-go install 'github.com/stainless-sdks/dodo-payments-cli/cmd/dodo-payments@latest'
+go install 'github.com/stainless-sdks/dodo-payments-cli/cmd/dodopayments@latest'
 ```
 
 ### Running Locally
 
 ```sh
-go run cmd/dodo-payments/main.go
+go run cmd/dodopayments/main.go
 ```
 
 ## Usage
@@ -23,11 +23,11 @@ go run cmd/dodo-payments/main.go
 The CLI follows a resource-based command structure:
 
 ```sh
-dodo-payments [resource] [command] [flags]
+dodopayments [resource] [command] [flags]
 ```
 
 ```sh
-dodo-payments checkout-sessions create \
+dodopayments checkout-sessions create \
   --product-cart.product_id product_id \
   --product-cart.quantity 0
 ```
