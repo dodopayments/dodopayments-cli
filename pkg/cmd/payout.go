@@ -1,0 +1,53 @@
+// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+
+package cmd
+
+import (
+	"context"
+
+	"github.com/dodopayments/dodopayments-go"
+	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/stainless-sdks/dodo-payments-cli/pkg/jsonflag"
+	"github.com/urfave/cli/v3"
+)
+
+var payoutsList = cli.Command{
+	Name:  "list",
+	Usage: "Perform list operation",
+	Flags: []cli.Flag{
+		&jsonflag.JSONIntFlag{
+			Name: "page-number",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Query,
+				Path: "page_number",
+			},
+		},
+		&jsonflag.JSONIntFlag{
+			Name: "page-size",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Query,
+				Path: "page_size",
+			},
+		},
+	},
+	Action:          handlePayoutsList,
+	HideHelpCommand: true,
+}
+
+func handlePayoutsList(ctx context.Context, cmd *cli.Command) error {
+	cc := getAPICommandContext(cmd)
+	params := dodopayments.PayoutListParams{}
+	res := []byte{}
+	_, err := cc.client.Payouts.List(
+		context.TODO(),
+		params,
+		option.WithMiddleware(cc.AsMiddleware()),
+		option.WithResponseBodyInto(&res),
+	)
+	if err != nil {
+		return err
+	}
+
+	format := cmd.Root().String("format")
+	return ShowJSON("payouts list", string(res), format)
+}
