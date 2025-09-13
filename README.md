@@ -8,15 +8,21 @@ It is generated with [Stainless](https://www.stainless.com/).
 
 ### Installing with Go
 
+<!-- x-release-please-start-version -->
+
 ```sh
-go install 'github.com/stainless-sdks/dodo-payments-cli/cmd/dodopayments@latest'
+go install 'github.com/dodopayments/dodopayments-cli/cmd/dodopayments@latest'
 ```
 
 ### Running Locally
 
+<!-- x-release-please-start-version -->
+
 ```sh
 go run cmd/dodopayments/main.go
 ```
+
+<!-- x-release-please-end -->
 
 ## Usage
 
