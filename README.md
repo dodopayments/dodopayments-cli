@@ -1,6 +1,6 @@
 # Dodo Payments CLI
 
-The official CLI for the [Dodo Payments REST API](https://docs.dodopayments.com).
+The official CLI for the [Dodo Payments REST API](https://docs.dodopayments.com/api-reference/introduction).
 
 It is generated with [Stainless](https://www.stainless.com/).
 

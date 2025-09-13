@@ -9,7 +9,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.6
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/term v0.2.1
-	github.com/dodopayments/dodopayments-go v1.52.4
+	github.com/dodopayments/dodopayments-go v1.53.2
 	github.com/itchyny/json2yaml v0.1.4
 	github.com/muesli/reflow v0.3.0
 	github.com/tidwall/gjson v1.18.0
