@@ -67,7 +67,7 @@ snapshot:
 
 nfpms:
   - license: Apache-2.0
-    maintainer: founders@dodopayments.com
+    maintainer: support@dodopayments.com
     bindir: /usr
     formats:
       - apk
