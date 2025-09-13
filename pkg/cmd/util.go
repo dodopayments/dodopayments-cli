@@ -14,11 +14,11 @@ import (
 	"os"
 	"strings"
 
+	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/pkg/jsonview"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/itchyny/json2yaml"
-	"github.com/stainless-sdks/dodo-payments-cli/pkg/jsonflag"
-	"github.com/stainless-sdks/dodo-payments-cli/pkg/jsonview"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/pretty"
 	"github.com/urfave/cli/v3"
