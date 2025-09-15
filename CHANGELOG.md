@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.53.4 (2025-09-15)
+
+Full Changelog: [v1.53.3...v1.53.4](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.3...v1.53.4)
+
+### Features
+
+* **api:** added ghcr deployment for mcp ([539873f](https://github.com/dodopayments/dodopayments-cli/commit/539873fb75f09a962008030dacf80a6d797b35f9))
+
 ## 1.53.3 (2025-09-13)
 
 Full Changelog: [v1.53.2...v1.53.3](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.2...v1.53.3)
