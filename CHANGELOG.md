@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.53.5 (2025-09-16)
+
+Full Changelog: [v1.53.4...v1.53.5](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.4...v1.53.5)
+
+### Bug Fixes
+
+* fix for issue with nil responses ([1fd332d](https://github.com/dodopayments/dodopayments-cli/commit/1fd332d21e1eedad9dc5cccafd536afa2a78dc18))
+
+
+### Chores
+
+* code cleanup for `interface{}` ([1e0c3bd](https://github.com/dodopayments/dodopayments-cli/commit/1e0c3bd5d62cbad22d05cf0a803191a53ac6ef8b))
+
 ## 1.53.4 (2025-09-15)
 
 Full Changelog: [v1.53.3...v1.53.4](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.3...v1.53.4)
