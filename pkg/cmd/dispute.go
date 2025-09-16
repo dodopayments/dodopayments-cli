@@ -83,7 +83,7 @@ var disputesList = cli.Command{
 
 func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Disputes.Get(
 		context.TODO(),
 		cmd.Value("dispute-id").(string),
@@ -101,7 +101,7 @@ func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleDisputesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.DisputeListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Disputes.List(
 		context.TODO(),
 		params,

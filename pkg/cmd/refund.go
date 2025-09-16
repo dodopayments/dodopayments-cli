@@ -131,7 +131,7 @@ var refundsList = cli.Command{
 func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.RefundNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Refunds.New(
 		context.TODO(),
 		params,
@@ -148,7 +148,7 @@ func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Refunds.Get(
 		context.TODO(),
 		cmd.Value("refund-id").(string),
@@ -166,7 +166,7 @@ func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.RefundListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Refunds.List(
 		context.TODO(),
 		params,

@@ -35,7 +35,7 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 
 func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Invoices.Payments.Get(
 		context.TODO(),
 		cmd.Value("payment-id").(string),
@@ -52,7 +52,7 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 
 func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Invoices.Payments.GetRefund(
 		context.TODO(),
 		cmd.Value("refund-id").(string),

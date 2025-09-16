@@ -297,7 +297,7 @@ var checkoutSessionsCreate = cli.Command{
 func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CheckoutSessionNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.CheckoutSessions.New(
 		context.TODO(),
 		params,

@@ -23,7 +23,7 @@ var customersWalletsList = cli.Command{
 
 func handleCustomersWalletsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.Wallets.List(
 		context.TODO(),
 		cmd.Value("customer-id").(string),

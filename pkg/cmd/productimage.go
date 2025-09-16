@@ -34,7 +34,7 @@ var productsImagesUpdate = cli.Command{
 func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.ProductImageUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Products.Images.Update(
 		context.TODO(),
 		cmd.Value("id").(string),

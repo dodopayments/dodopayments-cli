@@ -129,7 +129,7 @@ var usageEventsIngest = cli.Command{
 
 func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.UsageEvents.Get(
 		context.TODO(),
 		cmd.Value("event-id").(string),
@@ -147,7 +147,7 @@ func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.UsageEventListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.UsageEvents.List(
 		context.TODO(),
 		params,
@@ -165,7 +165,7 @@ func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 func handleUsageEventsIngest(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.UsageEventIngestParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.UsageEvents.Ingest(
 		context.TODO(),
 		params,

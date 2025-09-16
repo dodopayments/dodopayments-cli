@@ -130,7 +130,7 @@ var brandsUpdateImages = cli.Command{
 func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.BrandNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Brands.New(
 		context.TODO(),
 		params,
@@ -147,7 +147,7 @@ func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Brands.Get(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -165,7 +165,7 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.BrandUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Brands.Update(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -183,7 +183,7 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Brands.List(
 		context.TODO(),
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -199,7 +199,7 @@ func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 
 func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Brands.UpdateImages(
 		context.TODO(),
 		cmd.Value("id").(string),

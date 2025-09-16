@@ -37,7 +37,7 @@ var payoutsList = cli.Command{
 func handlePayoutsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.PayoutListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Payouts.List(
 		context.TODO(),
 		params,

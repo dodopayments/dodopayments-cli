@@ -83,7 +83,7 @@ var licensesValidate = cli.Command{
 func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.LicenseActivateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Licenses.Activate(
 		context.TODO(),
 		params,
@@ -111,7 +111,7 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.LicenseValidateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Licenses.Validate(
 		context.TODO(),
 		params,

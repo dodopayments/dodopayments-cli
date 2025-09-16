@@ -538,7 +538,7 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.SubscriptionNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Subscriptions.New(
 		context.TODO(),
 		params,
@@ -555,7 +555,7 @@ func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Subscriptions.Get(
 		context.TODO(),
 		cmd.Value("subscription-id").(string),
@@ -573,7 +573,7 @@ func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.SubscriptionUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Subscriptions.Update(
 		context.TODO(),
 		cmd.Value("subscription-id").(string),
@@ -592,7 +592,7 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.SubscriptionListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Subscriptions.List(
 		context.TODO(),
 		params,
@@ -621,7 +621,7 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.SubscriptionChargeParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Subscriptions.Charge(
 		context.TODO(),
 		cmd.Value("subscription-id").(string),
@@ -640,7 +640,7 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.SubscriptionGetUsageHistoryParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Subscriptions.GetUsageHistory(
 		context.TODO(),
 		cmd.Value("subscription-id").(string),
