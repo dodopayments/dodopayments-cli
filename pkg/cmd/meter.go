@@ -280,7 +280,7 @@ var metersUnarchive = cli.Command{
 func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.MeterNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Meters.New(
 		context.TODO(),
 		params,
@@ -297,7 +297,7 @@ func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Meters.Get(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -315,7 +315,7 @@ func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.MeterListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Meters.List(
 		context.TODO(),
 		params,

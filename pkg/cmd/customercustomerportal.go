@@ -34,7 +34,7 @@ var customersCustomerPortalCreate = cli.Command{
 func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CustomerCustomerPortalNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.CustomerPortal.New(
 		context.TODO(),
 		cmd.Value("customer-id").(string),

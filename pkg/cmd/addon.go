@@ -159,7 +159,7 @@ var addonsUpdateImages = cli.Command{
 func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.AddonNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Addons.New(
 		context.TODO(),
 		params,
@@ -176,7 +176,7 @@ func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Addons.Get(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -194,7 +194,7 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.AddonUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Addons.Update(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -213,7 +213,7 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.AddonListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Addons.List(
 		context.TODO(),
 		params,
@@ -230,7 +230,7 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 
 func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Addons.UpdateImages(
 		context.TODO(),
 		cmd.Value("id").(string),
