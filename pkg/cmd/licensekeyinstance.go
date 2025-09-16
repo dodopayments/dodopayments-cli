@@ -74,7 +74,7 @@ var licenseKeyInstancesList = cli.Command{
 
 func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.LicenseKeyInstances.Get(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -92,7 +92,7 @@ func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) er
 func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.LicenseKeyInstanceUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.LicenseKeyInstances.Update(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -111,7 +111,7 @@ func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) erro
 func handleLicenseKeyInstancesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.LicenseKeyInstanceListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.LicenseKeyInstances.List(
 		context.TODO(),
 		params,

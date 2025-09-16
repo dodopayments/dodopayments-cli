@@ -187,7 +187,7 @@ var webhooksRetrieveSecret = cli.Command{
 func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.WebhookNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Webhooks.New(
 		context.TODO(),
 		params,
@@ -204,7 +204,7 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Webhooks.Get(
 		context.TODO(),
 		cmd.Value("webhook-id").(string),
@@ -222,7 +222,7 @@ func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.WebhookUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Webhooks.Update(
 		context.TODO(),
 		cmd.Value("webhook-id").(string),
@@ -241,7 +241,7 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.WebhookListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Webhooks.List(
 		context.TODO(),
 		params,
@@ -267,7 +267,7 @@ func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Webhooks.GetSecret(
 		context.TODO(),
 		cmd.Value("webhook-id").(string),

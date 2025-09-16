@@ -263,7 +263,7 @@ var paymentsRetrieveLineItems = cli.Command{
 func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.PaymentNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Payments.New(
 		context.TODO(),
 		params,
@@ -280,7 +280,7 @@ func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Payments.Get(
 		context.TODO(),
 		cmd.Value("payment-id").(string),
@@ -298,7 +298,7 @@ func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.PaymentListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Payments.List(
 		context.TODO(),
 		params,
@@ -315,7 +315,7 @@ func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 
 func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Payments.GetLineItems(
 		context.TODO(),
 		cmd.Value("payment-id").(string),

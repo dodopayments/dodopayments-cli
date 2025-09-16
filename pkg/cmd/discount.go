@@ -208,7 +208,7 @@ var discountsDelete = cli.Command{
 func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.DiscountNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Discounts.New(
 		context.TODO(),
 		params,
@@ -225,7 +225,7 @@ func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Discounts.Get(
 		context.TODO(),
 		cmd.Value("discount-id").(string),
@@ -243,7 +243,7 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.DiscountUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Discounts.Update(
 		context.TODO(),
 		cmd.Value("discount-id").(string),
@@ -262,7 +262,7 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.DiscountListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Discounts.List(
 		context.TODO(),
 		params,

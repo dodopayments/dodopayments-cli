@@ -36,7 +36,7 @@ var webhooksHeadersUpdate = cli.Command{
 
 func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Webhooks.Headers.Get(
 		context.TODO(),
 		cmd.Value("webhook-id").(string),

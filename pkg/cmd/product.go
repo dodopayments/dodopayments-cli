@@ -645,7 +645,7 @@ var productsUpdateFiles = cli.Command{
 func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.ProductNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Products.New(
 		context.TODO(),
 		params,
@@ -662,7 +662,7 @@ func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Products.Get(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -691,7 +691,7 @@ func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.ProductListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Products.List(
 		context.TODO(),
 		params,
@@ -727,7 +727,7 @@ func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.ProductUpdateFilesParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Products.UpdateFiles(
 		context.TODO(),
 		cmd.Value("id").(string),

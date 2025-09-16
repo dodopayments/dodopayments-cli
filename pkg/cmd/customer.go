@@ -112,7 +112,7 @@ var customersList = cli.Command{
 func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CustomerNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.New(
 		context.TODO(),
 		params,
@@ -129,7 +129,7 @@ func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.Get(
 		context.TODO(),
 		cmd.Value("customer-id").(string),
@@ -147,7 +147,7 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CustomerUpdateParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.Update(
 		context.TODO(),
 		cmd.Value("customer-id").(string),
@@ -166,7 +166,7 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CustomerListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.List(
 		context.TODO(),
 		params,

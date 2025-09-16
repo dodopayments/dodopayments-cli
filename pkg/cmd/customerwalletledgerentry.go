@@ -94,7 +94,7 @@ var customersWalletsLedgerEntriesList = cli.Command{
 func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.New(
 		context.TODO(),
 		cmd.Value("customer-id").(string),
@@ -113,7 +113,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
-	res := []byte{}
+	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.List(
 		context.TODO(),
 		cmd.Value("customer-id").(string),
