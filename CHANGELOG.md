@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.53.6 (2025-09-20)
+
+Full Changelog: [v1.53.5...v1.53.6](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.5...v1.53.6)
+
+### Chores
+
+* do not install brew dependencies in ./scripts/bootstrap by default ([eba3565](https://github.com/dodopayments/dodopayments-cli/commit/eba3565dc10ac51c0f1969e3cf79728cd05f6c5c))
+
 ## 1.53.5 (2025-09-16)
 
 Full Changelog: [v1.53.4...v1.53.5](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.4...v1.53.5)
