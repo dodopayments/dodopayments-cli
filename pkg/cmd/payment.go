@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -262,6 +264,10 @@ var paymentsRetrieveLineItems = cli.Command{
 
 func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.PaymentNewParams{}
 	var res []byte
 	_, err := cc.client.Payments.New(
@@ -274,12 +280,22 @@ func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("payments create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("payments create", json, format, transform)
 }
 
 func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
+		cmd.Set("payment-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Payments.Get(
 		context.TODO(),
@@ -291,12 +307,18 @@ func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("payments retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("payments retrieve", json, format, transform)
 }
 
 func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.PaymentListParams{}
 	var res []byte
 	_, err := cc.client.Payments.List(
@@ -309,12 +331,22 @@ func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("payments list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("payments list", json, format, transform)
 }
 
 func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
+		cmd.Set("payment-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Payments.GetLineItems(
 		context.TODO(),
@@ -326,6 +358,8 @@ func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) erro
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("payments retrieve-line-items", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("payments retrieve-line-items", json, format, transform)
 }

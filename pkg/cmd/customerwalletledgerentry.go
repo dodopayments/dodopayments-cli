@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -93,6 +95,14 @@ var customersWalletsLedgerEntriesList = cli.Command{
 
 func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
+		cmd.Set("customer-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.New(
@@ -106,12 +116,22 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("customers:wallets:ledger-entries create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("customers:wallets:ledger-entries create", json, format, transform)
 }
 
 func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
+		cmd.Set("customer-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.List(
@@ -125,6 +145,8 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("customers:wallets:ledger-entries list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("customers:wallets:ledger-entries list", json, format, transform)
 }

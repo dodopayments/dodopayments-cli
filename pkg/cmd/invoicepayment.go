@@ -4,8 +4,10 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -35,6 +37,14 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 
 func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
+		cmd.Set("payment-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.Get(
 		context.TODO(),
@@ -46,12 +56,22 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("invoices:payments retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("invoices:payments retrieve", json, format, transform)
 }
 
 func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {
+		cmd.Set("refund-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.GetRefund(
 		context.TODO(),
@@ -63,6 +83,8 @@ func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command)
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("invoices:payments retrieve-refund", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("invoices:payments retrieve-refund", json, format, transform)
 }
