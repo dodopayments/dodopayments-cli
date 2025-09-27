@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
@@ -37,6 +38,14 @@ var webhooksHeadersUpdate = cli.Command{
 
 func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
+		cmd.Set("webhook-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Webhooks.Headers.Get(
 		context.TODO(),
@@ -56,6 +65,14 @@ func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error 
 
 func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
+		cmd.Set("webhook-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.WebhookHeaderUpdateParams{}
 	return cc.client.Webhooks.Headers.Update(
 		context.TODO(),

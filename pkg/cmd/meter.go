@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -280,6 +281,10 @@ var metersUnarchive = cli.Command{
 
 func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.MeterNewParams{}
 	var res []byte
 	_, err := cc.client.Meters.New(
@@ -300,6 +305,14 @@ func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Meters.Get(
 		context.TODO(),
@@ -319,6 +332,10 @@ func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.MeterListParams{}
 	var res []byte
 	_, err := cc.client.Meters.List(
@@ -339,6 +356,14 @@ func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 
 func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	return cc.client.Meters.Archive(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -348,6 +373,14 @@ func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
 
 func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	return cc.client.Meters.Unarchive(
 		context.TODO(),
 		cmd.Value("id").(string),
