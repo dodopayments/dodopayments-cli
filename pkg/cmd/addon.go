@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -158,6 +160,10 @@ var addonsUpdateImages = cli.Command{
 
 func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.AddonNewParams{}
 	var res []byte
 	_, err := cc.client.Addons.New(
@@ -170,12 +176,22 @@ func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("addons create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("addons create", json, format, transform)
 }
 
 func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Addons.Get(
 		context.TODO(),
@@ -187,12 +203,22 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("addons retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("addons retrieve", json, format, transform)
 }
 
 func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.AddonUpdateParams{}
 	var res []byte
 	_, err := cc.client.Addons.Update(
@@ -206,12 +232,18 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("addons update", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("addons update", json, format, transform)
 }
 
 func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.AddonListParams{}
 	var res []byte
 	_, err := cc.client.Addons.List(
@@ -224,12 +256,22 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("addons list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("addons list", json, format, transform)
 }
 
 func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Addons.UpdateImages(
 		context.TODO(),
@@ -241,6 +283,8 @@ func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("addons update-images", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("addons update-images", json, format, transform)
 }

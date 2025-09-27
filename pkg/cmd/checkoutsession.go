@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -296,6 +298,10 @@ var checkoutSessionsCreate = cli.Command{
 
 func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.CheckoutSessionNewParams{}
 	var res []byte
 	_, err := cc.client.CheckoutSessions.New(
@@ -308,6 +314,8 @@ func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("checkout-sessions create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("checkout-sessions create", json, format, transform)
 }

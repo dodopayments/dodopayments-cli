@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -644,6 +646,10 @@ var productsUpdateFiles = cli.Command{
 
 func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.ProductNewParams{}
 	var res []byte
 	_, err := cc.client.Products.New(
@@ -656,12 +662,22 @@ func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("products create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("products create", json, format, transform)
 }
 
 func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Products.Get(
 		context.TODO(),
@@ -673,12 +689,22 @@ func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("products retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("products retrieve", json, format, transform)
 }
 
 func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.ProductUpdateParams{}
 	return cc.client.Products.Update(
 		context.TODO(),
@@ -690,6 +716,10 @@ func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.ProductListParams{}
 	var res []byte
 	_, err := cc.client.Products.List(
@@ -702,12 +732,22 @@ func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("products list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("products list", json, format, transform)
 }
 
 func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	return cc.client.Products.Archive(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -717,6 +757,14 @@ func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
 
 func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	return cc.client.Products.Unarchive(
 		context.TODO(),
 		cmd.Value("id").(string),
@@ -726,6 +774,14 @@ func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 
 func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.ProductUpdateFilesParams{}
 	var res []byte
 	_, err := cc.client.Products.UpdateFiles(
@@ -739,6 +795,8 @@ func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("products update-files", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("products update-files", json, format, transform)
 }
