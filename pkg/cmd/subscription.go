@@ -4,6 +4,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -538,6 +539,10 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 
 func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.SubscriptionNewParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.New(
@@ -558,6 +563,14 @@ func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Subscriptions.Get(
 		context.TODO(),
@@ -577,6 +590,14 @@ func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.SubscriptionUpdateParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.Update(
@@ -598,6 +619,10 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.SubscriptionListParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.List(
@@ -618,6 +643,14 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 
 func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.SubscriptionChangePlanParams{}
 	return cc.client.Subscriptions.ChangePlan(
 		context.TODO(),
@@ -629,6 +662,14 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 
 func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.SubscriptionChargeParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.Charge(
@@ -650,6 +691,14 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 
 func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.SubscriptionGetUsageHistoryParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.GetUsageHistory(
