@@ -11,6 +11,7 @@ import (
 
 	"github.com/dodopayments/dodopayments-cli/pkg/cmd"
 	"github.com/dodopayments/dodopayments-go"
+	"github.com/tidwall/gjson"
 )
 
 func main() {
@@ -19,8 +20,9 @@ func main() {
 		var apierr *dodopayments.Error
 		if errors.As(err, &apierr) {
 			fmt.Fprintf(os.Stderr, "%s %q: %d %s\n", apierr.Request.Method, apierr.Request.URL, apierr.Response.StatusCode, http.StatusText(apierr.Response.StatusCode))
-			format := app.String("format")
-			show_err := cmd.ShowJSON("Error", apierr.JSON.RawJSON(), format)
+			format := app.String("format-error")
+			json := gjson.Parse(apierr.JSON.RawJSON())
+			show_err := cmd.ShowJSON("Error", json, format, app.String("transform-error"))
 			if show_err != nil {
 				// Just print the original error:
 				fmt.Fprintf(os.Stderr, "%s\n", err.Error())

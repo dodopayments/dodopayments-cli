@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -83,6 +85,14 @@ var disputesList = cli.Command{
 
 func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("dispute-id") && len(unusedArgs) > 0 {
+		cmd.Set("dispute-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Disputes.Get(
 		context.TODO(),
@@ -94,12 +104,18 @@ func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("disputes retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("disputes retrieve", json, format, transform)
 }
 
 func handleDisputesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.DisputeListParams{}
 	var res []byte
 	_, err := cc.client.Disputes.List(
@@ -112,6 +128,8 @@ func handleDisputesList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("disputes list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("disputes list", json, format, transform)
 }

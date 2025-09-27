@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -82,6 +84,10 @@ var licensesValidate = cli.Command{
 
 func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.LicenseActivateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Activate(
@@ -94,12 +100,18 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("licenses activate", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("licenses activate", json, format, transform)
 }
 
 func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.LicenseDeactivateParams{}
 	return cc.client.Licenses.Deactivate(
 		context.TODO(),
@@ -110,6 +122,10 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 
 func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.LicenseValidateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Validate(
@@ -122,6 +138,8 @@ func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("licenses validate", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("licenses validate", json, format, transform)
 }
