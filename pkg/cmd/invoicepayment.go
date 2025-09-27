@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -37,14 +36,6 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 
 func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
-		cmd.Set("payment-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.Get(
 		context.TODO(),
@@ -64,14 +55,6 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 
 func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {
-		cmd.Set("refund-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.GetRefund(
 		context.TODO(),

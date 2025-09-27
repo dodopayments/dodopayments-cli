@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -132,10 +131,6 @@ var refundsList = cli.Command{
 
 func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.RefundNewParams{}
 	var res []byte
 	_, err := cc.client.Refunds.New(
@@ -156,14 +151,6 @@ func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {
-		cmd.Set("refund-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Refunds.Get(
 		context.TODO(),
@@ -183,10 +170,6 @@ func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.RefundListParams{}
 	var res []byte
 	_, err := cc.client.Refunds.List(

@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -188,10 +187,6 @@ var webhooksRetrieveSecret = cli.Command{
 
 func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.WebhookNewParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.New(
@@ -212,14 +207,6 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
-		cmd.Set("webhook-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Webhooks.Get(
 		context.TODO(),
@@ -239,14 +226,6 @@ func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
-		cmd.Set("webhook-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.WebhookUpdateParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.Update(
@@ -268,10 +247,6 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.WebhookListParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.List(
@@ -292,14 +267,6 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
-		cmd.Set("webhook-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	return cc.client.Webhooks.Delete(
 		context.TODO(),
 		cmd.Value("webhook-id").(string),
@@ -309,14 +276,6 @@ func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
-		cmd.Set("webhook-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Webhooks.GetSecret(
 		context.TODO(),
