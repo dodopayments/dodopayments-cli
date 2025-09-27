@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -95,14 +94,6 @@ var customersWalletsLedgerEntriesList = cli.Command{
 
 func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
-		cmd.Set("customer-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.New(
@@ -124,14 +115,6 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 
 func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
-		cmd.Set("customer-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.List(
