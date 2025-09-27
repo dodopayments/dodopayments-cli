@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -84,10 +83,6 @@ var licensesValidate = cli.Command{
 
 func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.LicenseActivateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Activate(
@@ -108,10 +103,6 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 
 func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.LicenseDeactivateParams{}
 	return cc.client.Licenses.Deactivate(
 		context.TODO(),
@@ -122,10 +113,6 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 
 func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.LicenseValidateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Validate(

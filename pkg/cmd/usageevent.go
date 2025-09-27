@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -131,14 +130,6 @@ var usageEventsIngest = cli.Command{
 
 func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("event-id") && len(unusedArgs) > 0 {
-		cmd.Set("event-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.UsageEvents.Get(
 		context.TODO(),
@@ -158,10 +149,6 @@ func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.UsageEventListParams{}
 	var res []byte
 	_, err := cc.client.UsageEvents.List(
@@ -182,10 +169,6 @@ func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 
 func handleUsageEventsIngest(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.UsageEventIngestParams{}
 	var res []byte
 	_, err := cc.client.UsageEvents.Ingest(

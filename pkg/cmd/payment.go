@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
@@ -264,10 +263,6 @@ var paymentsRetrieveLineItems = cli.Command{
 
 func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.PaymentNewParams{}
 	var res []byte
 	_, err := cc.client.Payments.New(
@@ -288,14 +283,6 @@ func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 
 func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
-		cmd.Set("payment-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Payments.Get(
 		context.TODO(),
@@ -315,10 +302,6 @@ func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	params := dodopayments.PaymentListParams{}
 	var res []byte
 	_, err := cc.client.Payments.List(
@@ -339,14 +322,6 @@ func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 
 func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
-		cmd.Set("payment-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Payments.GetLineItems(
 		context.TODO(),

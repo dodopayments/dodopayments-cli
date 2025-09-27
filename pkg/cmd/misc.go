@@ -4,7 +4,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -21,10 +20,6 @@ var miscListSupportedCountries = cli.Command{
 
 func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
-	unusedArgs := cmd.Args().Slice()
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
 	var res []byte
 	_, err := cc.client.Misc.ListSupportedCountries(
 		context.TODO(),
