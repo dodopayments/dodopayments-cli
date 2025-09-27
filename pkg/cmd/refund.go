@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -130,6 +132,10 @@ var refundsList = cli.Command{
 
 func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.RefundNewParams{}
 	var res []byte
 	_, err := cc.client.Refunds.New(
@@ -142,12 +148,22 @@ func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("refunds create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("refunds create", json, format, transform)
 }
 
 func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {
+		cmd.Set("refund-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Refunds.Get(
 		context.TODO(),
@@ -159,12 +175,18 @@ func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("refunds retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("refunds retrieve", json, format, transform)
 }
 
 func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.RefundListParams{}
 	var res []byte
 	_, err := cc.client.Refunds.List(
@@ -177,6 +199,8 @@ func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("refunds list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("refunds list", json, format, transform)
 }

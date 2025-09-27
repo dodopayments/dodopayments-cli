@@ -4,8 +4,10 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -19,6 +21,10 @@ var miscListSupportedCountries = cli.Command{
 
 func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Misc.ListSupportedCountries(
 		context.TODO(),
@@ -29,6 +35,8 @@ func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) err
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("misc list-supported-countries", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("misc list-supported-countries", json, format, transform)
 }

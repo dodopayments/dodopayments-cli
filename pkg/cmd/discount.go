@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -207,6 +209,10 @@ var discountsDelete = cli.Command{
 
 func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.DiscountNewParams{}
 	var res []byte
 	_, err := cc.client.Discounts.New(
@@ -219,12 +225,22 @@ func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("discounts create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("discounts create", json, format, transform)
 }
 
 func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
+		cmd.Set("discount-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Discounts.Get(
 		context.TODO(),
@@ -236,12 +252,22 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("discounts retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("discounts retrieve", json, format, transform)
 }
 
 func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
+		cmd.Set("discount-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.DiscountUpdateParams{}
 	var res []byte
 	_, err := cc.client.Discounts.Update(
@@ -255,12 +281,18 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("discounts update", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("discounts update", json, format, transform)
 }
 
 func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.DiscountListParams{}
 	var res []byte
 	_, err := cc.client.Discounts.List(
@@ -273,12 +305,22 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("discounts list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("discounts list", json, format, transform)
 }
 
 func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
+		cmd.Set("discount-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	return cc.client.Discounts.Delete(
 		context.TODO(),
 		cmd.Value("discount-id").(string),
