@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -103,6 +105,14 @@ var licenseKeysList = cli.Command{
 
 func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.LicenseKeys.Get(
 		context.TODO(),
@@ -114,12 +124,22 @@ func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("license-keys retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("license-keys retrieve", json, format, transform)
 }
 
 func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.LicenseKeyUpdateParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeys.Update(
@@ -133,12 +153,18 @@ func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("license-keys update", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("license-keys update", json, format, transform)
 }
 
 func handleLicenseKeysList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.LicenseKeyListParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeys.List(
@@ -151,6 +177,8 @@ func handleLicenseKeysList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("license-keys list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("license-keys list", json, format, transform)
 }

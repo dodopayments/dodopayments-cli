@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -186,6 +188,10 @@ var webhooksRetrieveSecret = cli.Command{
 
 func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.WebhookNewParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.New(
@@ -198,12 +204,22 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("webhooks create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("webhooks create", json, format, transform)
 }
 
 func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
+		cmd.Set("webhook-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Webhooks.Get(
 		context.TODO(),
@@ -215,12 +231,22 @@ func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("webhooks retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("webhooks retrieve", json, format, transform)
 }
 
 func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
+		cmd.Set("webhook-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.WebhookUpdateParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.Update(
@@ -234,12 +260,18 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("webhooks update", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("webhooks update", json, format, transform)
 }
 
 func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.WebhookListParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.List(
@@ -252,12 +284,22 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("webhooks list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("webhooks list", json, format, transform)
 }
 
 func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
+		cmd.Set("webhook-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	return cc.client.Webhooks.Delete(
 		context.TODO(),
 		cmd.Value("webhook-id").(string),
@@ -267,6 +309,14 @@ func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 
 func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
+		cmd.Set("webhook-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Webhooks.GetSecret(
 		context.TODO(),
@@ -278,6 +328,8 @@ func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("webhooks retrieve-secret", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("webhooks retrieve-secret", json, format, transform)
 }

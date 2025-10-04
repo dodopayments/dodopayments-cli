@@ -4,10 +4,12 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
+	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
 )
 
@@ -129,6 +131,10 @@ var brandsUpdateImages = cli.Command{
 
 func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.BrandNewParams{}
 	var res []byte
 	_, err := cc.client.Brands.New(
@@ -141,12 +147,22 @@ func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("brands create", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("brands create", json, format, transform)
 }
 
 func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Brands.Get(
 		context.TODO(),
@@ -158,12 +174,22 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("brands retrieve", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("brands retrieve", json, format, transform)
 }
 
 func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	params := dodopayments.BrandUpdateParams{}
 	var res []byte
 	_, err := cc.client.Brands.Update(
@@ -177,12 +203,18 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("brands update", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("brands update", json, format, transform)
 }
 
 func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Brands.List(
 		context.TODO(),
@@ -193,12 +225,22 @@ func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("brands list", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("brands list", json, format, transform)
 }
 
 func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
 	var res []byte
 	_, err := cc.client.Brands.UpdateImages(
 		context.TODO(),
@@ -210,6 +252,8 @@ func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
+	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
-	return ShowJSON("brands update-images", string(res), format)
+	transform := cmd.Root().String("transform")
+	return ShowJSON("brands update-images", json, format, transform)
 }
