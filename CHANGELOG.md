@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.54.0 (2025-10-07)
+
+Full Changelog: [v1.53.7...v1.54.0](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.7...v1.54.0)
+
+### Features
+
+* added `--output-filter` flag and `--error-format` flag to support better visualization options ([f77dd2a](https://github.com/dodopayments/dodopayments-cli/commit/f77dd2a54ad060dcd70b3494cf9e8fb8eee28e2a))
+* better support for positional arguments ([63750f1](https://github.com/dodopayments/dodopayments-cli/commit/63750f1b1030bd83feda023df2a23437af2b6c0e))
+
+
+### Bug Fixes
+
+* downgrade urfave/cli-docs dependency ([d439477](https://github.com/dodopayments/dodopayments-cli/commit/d43947799d18935a86f421fe12439b44443c5db1))
+
+
+### Chores
+
+* bump Go version ([ad01d72](https://github.com/dodopayments/dodopayments-cli/commit/ad01d7286fe09bde2e01d05755f20c438ee24c1f))
+* **internal:** codegen related update ([7dcc932](https://github.com/dodopayments/dodopayments-cli/commit/7dcc93274b63beaa5cd37be044d969b120961d56))
+* **internal:** codegen related update ([5859fa2](https://github.com/dodopayments/dodopayments-cli/commit/5859fa256db4aab6de6a19a9798be1102298ea5a))
+
 ## 1.53.7 (2025-09-25)
 
 Full Changelog: [v1.53.6...v1.53.7](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.6...v1.53.7)
