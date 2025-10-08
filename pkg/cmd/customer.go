@@ -86,21 +86,24 @@ var customersList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "email",
+			Name:  "email",
+			Usage: "Filter by customer email",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "email",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -111,7 +114,7 @@ var customersList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -135,7 +138,7 @@ func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("customers create", json, format, transform)
 }
 
-func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -162,7 +165,7 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("customers retrieve", json, format, transform)
 }
 
-func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -191,7 +194,7 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("customers update", json, format, transform)
 }
 
-func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {

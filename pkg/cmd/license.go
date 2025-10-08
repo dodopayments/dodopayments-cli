@@ -82,7 +82,7 @@ var licensesValidate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
+func handleLicensesActivate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -106,7 +106,7 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("licenses activate", json, format, transform)
 }
 
-func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
+func handleLicensesDeactivate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -120,7 +120,7 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 	)
 }
 
-func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
+func handleLicensesValidate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {

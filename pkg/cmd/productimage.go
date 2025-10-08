@@ -33,7 +33,7 @@ var productsImagesUpdate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleProductsImagesUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {

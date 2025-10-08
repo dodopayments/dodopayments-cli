@@ -52,7 +52,6 @@ var checkoutSessionsCreate = cli.Command{
 				Path:     "product_cart.#.addons.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONIntFlag{
 			Name: "product-cart.amount",
@@ -62,72 +61,80 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "+product_cart",
+			Name: "+product-cart",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "product_cart.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "allowed-payment-method-types",
+			Name:  "allowed-payment-method-types",
+			Usage: "Customers will never see payment methods that are not in this list.\nHowever, adding a method here does not guarantee customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).\n\nDisclaimar: Always provide 'credit' and 'debit' as a fallback.\nIf all payment methods are unavailable, checkout session will fail.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "allowed_payment_method_types.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+allowed_payment_method_type",
+			Name:  "+allowed-payment-method-type",
+			Usage: "Customers will never see payment methods that are not in this list.\nHowever, adding a method here does not guarantee customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).\n\nDisclaimar: Always provide 'credit' and 'debit' as a fallback.\nIf all payment methods are unavailable, checkout session will fail.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "allowed_payment_method_types.-1",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-address.country",
+			Name:  "billing-address.country",
+			Usage: "Two-letter ISO country code (ISO 3166-1 alpha-2)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_address.country",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-address.city",
+			Name:  "billing-address.city",
+			Usage: "City name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_address.city",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-address.state",
+			Name:  "billing-address.state",
+			Usage: "State or province name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_address.state",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-address.street",
+			Name:  "billing-address.street",
+			Usage: "Street address including house number and unit/apartment if applicable",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_address.street",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-address.zipcode",
+			Name:  "billing-address.zipcode",
+			Usage: "Postal code or ZIP code",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_address.zipcode",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-currency",
+			Name:  "billing-currency",
+			Usage: "This field is ingored if adaptive pricing is disabled",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_currency",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "confirm",
+			Name:  "confirm",
+			Usage: "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "confirm",
@@ -163,7 +170,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "customization.show_on_demand_tag",
+			Name:  "customization.show_on_demand_tag",
+			Usage: "Show on demand tag\n\nDefault is true",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "customization.show_on_demand_tag",
@@ -171,7 +179,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "customization.show_order_details",
+			Name:  "customization.show_order_details",
+			Usage: "Show order details by default\n\nDefault is true",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "customization.show_order_details",
@@ -179,7 +188,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customization.theme",
+			Name:  "customization.theme",
+			Usage: "Theme of the page\n\nDefault is `System`.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "customization.theme",
@@ -193,7 +203,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "feature-flags.allow_currency_selection",
+			Name:  "feature-flags.allow_currency_selection",
+			Usage: "if customer is allowed to change currency, set it to true\n\nDefault is true",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "feature_flags.allow_currency_selection",
@@ -201,7 +212,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "feature-flags.allow_discount_code",
+			Name:  "feature-flags.allow_discount_code",
+			Usage: "If the customer is allowed to apply discount code, set it to true.\n\nDefault is true",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "feature_flags.allow_discount_code",
@@ -209,7 +221,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "feature-flags.allow_phone_number_collection",
+			Name:  "feature-flags.allow_phone_number_collection",
+			Usage: "If phone number is collected from customer, set it to rue\n\nDefault is true",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "feature_flags.allow_phone_number_collection",
@@ -217,7 +230,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "feature-flags.allow_tax_id",
+			Name:  "feature-flags.allow_tax_id",
+			Usage: "If the customer is allowed to add tax id, set it to true\n\nDefault is true",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "feature_flags.allow_tax_id",
@@ -225,7 +239,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "feature-flags.always_create_new_customer",
+			Name:  "feature-flags.always_create_new_customer",
+			Usage: "Set to true if a new customer object should be created.\nBy default email is used to find an existing customer to attach the session to\n\nDefault is false",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "feature_flags.always_create_new_customer",
@@ -233,14 +248,16 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "return-url",
+			Name:  "return-url",
+			Usage: "The url to redirect after payment failure or success.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "return_url",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "show-saved-payment-methods",
+			Name:  "show-saved-payment-methods",
+			Usage: "Display saved payment methods of a returning customer False by default",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "show_saved_payment_methods",
@@ -248,7 +265,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "subscription-data.on_demand.mandate_only",
+			Name:  "subscription-data.on_demand.mandate_only",
+			Usage: "If set as True, does not perform any charge and only authorizes payment method details for future use.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "subscription_data.on_demand.mandate_only",
@@ -256,7 +274,8 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "subscription-data.on_demand.adaptive_currency_fees_inclusive",
+			Name:  "subscription-data.on_demand.adaptive_currency_fees_inclusive",
+			Usage: "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "subscription_data.on_demand.adaptive_currency_fees_inclusive",
@@ -264,28 +283,32 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "subscription-data.on_demand.product_currency",
+			Name:  "subscription-data.on_demand.product_currency",
+			Usage: "Optional currency of the product price. If not specified, defaults to the currency of the product.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "subscription_data.on_demand.product_currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "subscription-data.on_demand.product_description",
+			Name:  "subscription-data.on_demand.product_description",
+			Usage: "Optional product description override for billing and line items.\nIf not specified, the stored description of the product will be used.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "subscription_data.on_demand.product_description",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "subscription-data.on_demand.product_price",
+			Name:  "subscription-data.on_demand.product_price",
+			Usage: "Product price for the initial charge to customer\nIf not specified the stored price of the product will be used\nRepresented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "subscription_data.on_demand.product_price",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "subscription-data.trial_period_days",
+			Name:  "subscription-data.trial_period_days",
+			Usage: "Optional trial period in days If specified, this value overrides the trial period set in the product's price Must be between 0 and 10000 days",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "subscription_data.trial_period_days",
@@ -296,7 +319,7 @@ var checkoutSessionsCreate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
+func handleCheckoutSessionsCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {

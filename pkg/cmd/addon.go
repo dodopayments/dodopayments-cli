@@ -18,35 +18,40 @@ var addonsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "The currency of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Name of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price",
+			Name:  "price",
+			Usage: "Amount of the addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-category",
+			Name:  "tax-category",
+			Usage: "Tax category applied to this Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_category",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Optional description of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
@@ -77,42 +82,48 @@ var addonsUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "The currency of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Description of the Addon, optional and must be at most 1000 characters.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "image-id",
+			Name:  "image-id",
+			Usage: "Addon image id after its uploaded to S3",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "image_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Name of the Addon, optional and must be at most 100 characters.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price",
+			Name:  "price",
+			Usage: "Amount of the addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-category",
+			Name:  "tax-category",
+			Usage: "Tax category of the Addon.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_category",
@@ -128,14 +139,16 @@ var addonsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -158,7 +171,7 @@ var addonsUpdateImages = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
+func handleAddonsCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -182,7 +195,7 @@ func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons create", json, format, transform)
 }
 
-func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleAddonsRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -209,7 +222,7 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons retrieve", json, format, transform)
 }
 
-func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleAddonsUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -238,7 +251,7 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons update", json, format, transform)
 }
 
-func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
+func handleAddonsList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -262,7 +275,7 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons list", json, format, transform)
 }
 
-func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
+func handleAddonsUpdateImages(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {

@@ -18,190 +18,212 @@ var metersCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "aggregation.type",
+			Name:  "aggregation.type",
+			Usage: "Aggregation type for the meter",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "aggregation.type",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "aggregation.key",
+			Name:  "aggregation.key",
+			Usage: "Required when type is not COUNT",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "aggregation.key",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "event-name",
+			Name:  "event-name",
+			Usage: "Event name to track",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "event_name",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "measurement-unit",
+			Name:  "measurement-unit",
+			Usage: "measurement unit",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "measurement_unit",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Name of the meter",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Optional description of the meter",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.key",
+			Name:  "filter.clauses.key",
+			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.key",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.operator",
+			Name:  "filter.clauses.operator",
+			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.operator",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.value",
+			Name:  "filter.clauses.value",
+			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.value",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "filter.+clause",
+			Name:  "filter.+clause",
+			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "filter.clauses.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.key",
+			Name:  "filter.clauses.clauses.key",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.key",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.operator",
+			Name:  "filter.clauses.clauses.operator",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.operator",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.value",
+			Name:  "filter.clauses.clauses.value",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.value",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "filter.clauses.+clause",
+			Name:  "filter.clauses.+clause",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "filter.clauses.#.clauses.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.key",
+			Name:  "filter.clauses.clauses.clauses.key",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.key",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.operator",
+			Name:  "filter.clauses.clauses.clauses.operator",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.operator",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.value",
+			Name:  "filter.clauses.clauses.clauses.value",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.value",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "filter.clauses.clauses.+clause",
+			Name:  "filter.clauses.clauses.+clause",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "filter.clauses.#.clauses.#.clauses.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.clauses.key",
+			Name:  "filter.clauses.clauses.clauses.clauses.key",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.clauses.#.key",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.clauses.operator",
+			Name:  "filter.clauses.clauses.clauses.clauses.operator",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.clauses.#.operator",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.clauses.value",
+			Name:  "filter.clauses.clauses.clauses.clauses.value",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.clauses.#.value",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "filter.clauses.clauses.clauses.+clause",
+			Name:  "filter.clauses.clauses.clauses.+clause",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "filter.clauses.#.clauses.#.clauses.#.clauses.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.clauses.conjunction",
+			Name:  "filter.clauses.clauses.clauses.conjunction",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.clauses.#.conjunction",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.clauses.conjunction",
+			Name:  "filter.clauses.clauses.conjunction",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.clauses.#.conjunction",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.clauses.conjunction",
+			Name:  "filter.clauses.conjunction",
+			Usage: "Nested filters - supports up to 3 levels deep",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.clauses.#.conjunction",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "filter.conjunction",
+			Name:  "filter.conjunction",
+			Usage: "Logical conjunction to apply between clauses (and/or)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "filter.conjunction",
@@ -229,7 +251,8 @@ var metersList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONBoolFlag{
-			Name: "archived",
+			Name:  "archived",
+			Usage: "List archived meters",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Query,
 				Path:     "archived",
@@ -237,14 +260,16 @@ var metersList = cli.Command{
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -279,7 +304,7 @@ var metersUnarchive = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
+func handleMetersCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -303,7 +328,7 @@ func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("meters create", json, format, transform)
 }
 
-func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleMetersRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -330,7 +355,7 @@ func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("meters retrieve", json, format, transform)
 }
 
-func handleMetersList(ctx context.Context, cmd *cli.Command) error {
+func handleMetersList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -354,7 +379,7 @@ func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("meters list", json, format, transform)
 }
 
-func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
+func handleMetersArchive(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -371,7 +396,7 @@ func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
 	)
 }
 
-func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
+func handleMetersUnarchive(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {

@@ -18,28 +18,32 @@ var productsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "price.currency",
+			Name:  "price.currency",
+			Usage: "The currency in which the payment is made.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.currency",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.discount",
+			Name:  "price.discount",
+			Usage: "Discount applied to the price, represented as a percentage (0 to 100).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.discount",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.price",
+			Name:  "price.price",
+			Usage: "The payment amount, in the smallest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.\n\nIf [`pay_what_you_want`](Self::pay_what_you_want) is set to `true`, this field represents\nthe **minimum** amount the customer must pay.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.price",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "price.purchasing_power_parity",
+			Name:  "price.purchasing_power_parity",
+			Usage: "Indicates if purchasing power parity adjustments are applied to the price.\nPurchasing power parity feature is not available as of now.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "price.purchasing_power_parity",
@@ -54,7 +58,8 @@ var productsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "price.pay_what_you_want",
+			Name:  "price.pay_what_you_want",
+			Usage: "Indicates whether the customer can pay any amount they choose.\nIf set to `true`, the [`price`](Self::price) field is the minimum amount.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "price.pay_what_you_want",
@@ -62,14 +67,16 @@ var productsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.suggested_price",
+			Name:  "price.suggested_price",
+			Usage: "A suggested price for the user to pay. This value is only considered if\n[`pay_what_you_want`](Self::pay_what_you_want) is `true`. Otherwise, it is ignored.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.suggested_price",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "price.tax_inclusive",
+			Name:  "price.tax_inclusive",
+			Usage: "Indicates if the price is tax inclusive.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "price.tax_inclusive",
@@ -77,42 +84,48 @@ var productsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.payment_frequency_count",
+			Name:  "price.payment_frequency_count",
+			Usage: "Number of units for the payment frequency.\nFor example, a value of `1` with a `payment_frequency_interval` of `month` represents monthly payments.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.payment_frequency_count",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "price.payment_frequency_interval",
+			Name:  "price.payment_frequency_interval",
+			Usage: "The time interval for the payment frequency (e.g., day, month, year).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.payment_frequency_interval",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.subscription_period_count",
+			Name:  "price.subscription_period_count",
+			Usage: "Number of units for the subscription period.\nFor example, a value of `12` with a `subscription_period_interval` of `month` represents a one-year subscription.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.subscription_period_count",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "price.subscription_period_interval",
+			Name:  "price.subscription_period_interval",
+			Usage: "The time interval for the subscription period (e.g., day, month, year).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.subscription_period_interval",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.trial_period_days",
+			Name:  "price.trial_period_days",
+			Usage: "Number of days for the trial period. A value of `0` indicates no trial period.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.trial_period_days",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.fixed_price",
+			Name:  "price.fixed_price",
+			Usage: "The fixed payment amount. Represented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.fixed_price",
@@ -167,66 +180,74 @@ var productsCreate = cli.Command{
 				Path:     "price.meters.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-category",
+			Name:  "tax-category",
+			Usage: "Tax category applied to this product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_category",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "addons",
+			Name:  "addons",
+			Usage: "Addons available for subscription product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+addon",
+			Name:  "+addon",
+			Usage: "Addons available for subscription product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.-1",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "brand-id",
+			Name:  "brand-id",
+			Usage: "Brand id for the product, if not provided will default to primary brand",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "brand_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Optional description of the product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "digital-product-delivery.external_url",
+			Name:  "digital-product-delivery.external_url",
+			Usage: "External URL to digital product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "digital_product_delivery.external_url",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "digital-product-delivery.instructions",
+			Name:  "digital-product-delivery.instructions",
+			Usage: "Instructions to download and use the digital product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "digital_product_delivery.instructions",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "license-key-activation-message",
+			Name:  "license-key-activation-message",
+			Usage: "Optional message displayed during license key activation",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "license_key_activation_message",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "license-key-activations-limit",
+			Name:  "license-key-activations-limit",
+			Usage: "The number of times the license key can be activated.\nMust be 0 or greater",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "license_key_activations_limit",
@@ -247,7 +268,8 @@ var productsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "license-key-enabled",
+			Name:  "license-key-enabled",
+			Usage: "When true, generates and sends a license key to your customer.\nDefaults to false",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "license_key_enabled",
@@ -255,7 +277,8 @@ var productsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Optional name of the product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
@@ -286,14 +309,16 @@ var productsUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "addons",
+			Name:  "addons",
+			Usage: "Available Addons for subscription products",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+addon",
+			Name:  "+addon",
+			Usage: "Available Addons for subscription products",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.-1",
@@ -307,56 +332,64 @@ var productsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Description of the product, optional and must be at most 1000 characters.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "digital-product-delivery.external_url",
+			Name:  "digital-product-delivery.external_url",
+			Usage: "External URL to digital product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "digital_product_delivery.external_url",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "digital-product-delivery.files",
+			Name:  "digital-product-delivery.files",
+			Usage: "Uploaded files ids of digital product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "digital_product_delivery.files.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "digital-product-delivery.+file",
+			Name:  "digital-product-delivery.+file",
+			Usage: "Uploaded files ids of digital product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "digital_product_delivery.files.-1",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "digital-product-delivery.instructions",
+			Name:  "digital-product-delivery.instructions",
+			Usage: "Instructions to download and use the digital product",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "digital_product_delivery.instructions",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "image-id",
+			Name:  "image-id",
+			Usage: "Product image id after its uploaded to S3",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "image_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "license-key-activation-message",
+			Name:  "license-key-activation-message",
+			Usage: "Message sent to the customer upon license key activation.\n\nOnly applicable if `license_key_enabled` is `true`. This message contains instructions for\nactivating the license key.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "license_key_activation_message",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "license-key-activations-limit",
+			Name:  "license-key-activations-limit",
+			Usage: "Limit for the number of activations for the license key.\n\nOnly applicable if `license_key_enabled` is `true`. Represents the maximum number of times\nthe license key can be activated.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "license_key_activations_limit",
@@ -377,7 +410,8 @@ var productsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "license-key-enabled",
+			Name:  "license-key-enabled",
+			Usage: "Whether the product requires a license key.\n\nIf `true`, additional fields related to license key (duration, activations limit, activation message)\nbecome applicable.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "license_key_enabled",
@@ -385,35 +419,40 @@ var productsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Name of the product, optional and must be at most 100 characters.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "price.currency",
+			Name:  "price.currency",
+			Usage: "The currency in which the payment is made.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.currency",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.discount",
+			Name:  "price.discount",
+			Usage: "Discount applied to the price, represented as a percentage (0 to 100).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.discount",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.price",
+			Name:  "price.price",
+			Usage: "The payment amount, in the smallest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.\n\nIf [`pay_what_you_want`](Self::pay_what_you_want) is set to `true`, this field represents\nthe **minimum** amount the customer must pay.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.price",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "price.purchasing_power_parity",
+			Name:  "price.purchasing_power_parity",
+			Usage: "Indicates if purchasing power parity adjustments are applied to the price.\nPurchasing power parity feature is not available as of now.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "price.purchasing_power_parity",
@@ -428,7 +467,8 @@ var productsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "price.pay_what_you_want",
+			Name:  "price.pay_what_you_want",
+			Usage: "Indicates whether the customer can pay any amount they choose.\nIf set to `true`, the [`price`](Self::price) field is the minimum amount.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "price.pay_what_you_want",
@@ -436,14 +476,16 @@ var productsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.suggested_price",
+			Name:  "price.suggested_price",
+			Usage: "A suggested price for the user to pay. This value is only considered if\n[`pay_what_you_want`](Self::pay_what_you_want) is `true`. Otherwise, it is ignored.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.suggested_price",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "price.tax_inclusive",
+			Name:  "price.tax_inclusive",
+			Usage: "Indicates if the price is tax inclusive.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "price.tax_inclusive",
@@ -451,42 +493,48 @@ var productsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.payment_frequency_count",
+			Name:  "price.payment_frequency_count",
+			Usage: "Number of units for the payment frequency.\nFor example, a value of `1` with a `payment_frequency_interval` of `month` represents monthly payments.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.payment_frequency_count",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "price.payment_frequency_interval",
+			Name:  "price.payment_frequency_interval",
+			Usage: "The time interval for the payment frequency (e.g., day, month, year).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.payment_frequency_interval",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.subscription_period_count",
+			Name:  "price.subscription_period_count",
+			Usage: "Number of units for the subscription period.\nFor example, a value of `12` with a `subscription_period_interval` of `month` represents a one-year subscription.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.subscription_period_count",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "price.subscription_period_interval",
+			Name:  "price.subscription_period_interval",
+			Usage: "The time interval for the subscription period (e.g., day, month, year).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.subscription_period_interval",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.trial_period_days",
+			Name:  "price.trial_period_days",
+			Usage: "Number of days for the trial period. A value of `0` indicates no trial period.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.trial_period_days",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price.fixed_price",
+			Name:  "price.fixed_price",
+			Usage: "The fixed payment amount. Represented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price.fixed_price",
@@ -541,10 +589,10 @@ var productsUpdate = cli.Command{
 				Path:     "price.meters.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-category",
+			Name:  "tax-category",
+			Usage: "Tax category of the product.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_category",
@@ -560,7 +608,8 @@ var productsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONBoolFlag{
-			Name: "archived",
+			Name:  "archived",
+			Usage: "List archived products",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Query,
 				Path:     "archived",
@@ -568,28 +617,32 @@ var productsList = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "brand-id",
+			Name:  "brand-id",
+			Usage: "filter by Brand id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "brand_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "recurring",
+			Name:  "recurring",
+			Usage: "Filter products by pricing type:\n- `true`: Show only recurring pricing products (e.g. subscriptions)\n- `false`: Show only one-time price products\n- `null` or absent: Show both types of products",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Query,
 				Path:     "recurring",
@@ -644,7 +697,7 @@ var productsUpdateFiles = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
+func handleProductsCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -668,7 +721,7 @@ func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("products create", json, format, transform)
 }
 
-func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleProductsRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -695,7 +748,7 @@ func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("products retrieve", json, format, transform)
 }
 
-func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleProductsUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -714,7 +767,7 @@ func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 	)
 }
 
-func handleProductsList(ctx context.Context, cmd *cli.Command) error {
+func handleProductsList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -738,7 +791,7 @@ func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("products list", json, format, transform)
 }
 
-func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
+func handleProductsArchive(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -755,7 +808,7 @@ func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
 	)
 }
 
-func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
+func handleProductsUnarchive(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -772,7 +825,7 @@ func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 	)
 }
 
-func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
+func handleProductsUpdateFiles(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
