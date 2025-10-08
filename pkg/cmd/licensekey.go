@@ -33,14 +33,16 @@ var licenseKeysUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "activations-limit",
+			Name:  "activations-limit",
+			Usage: "The updated activation limit for the license key.\nUse `null` to remove the limit, or omit this field to leave it unchanged.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "activations_limit",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "disabled",
+			Name:  "disabled",
+			Usage: "Indicates whether the license key should be disabled.\nA value of `true` disables the key, while `false` enables it. Omit this field to leave it unchanged.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "disabled",
@@ -48,7 +50,8 @@ var licenseKeysUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "expires-at",
+			Name:  "expires-at",
+			Usage: "The updated expiration timestamp for the license key in UTC.\nUse `null` to remove the expiration date, or omit this field to leave it unchanged.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "expires_at",
@@ -64,35 +67,40 @@ var licenseKeysList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter by customer ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-id",
+			Name:  "product-id",
+			Usage: "Filter by product ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "product_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "status",
+			Name:  "status",
+			Usage: "Filter by license key status",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "status",
@@ -103,7 +111,7 @@ var licenseKeysList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleLicenseKeysRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -130,7 +138,7 @@ func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("license-keys retrieve", json, format, transform)
 }
 
-func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleLicenseKeysUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -159,7 +167,7 @@ func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("license-keys update", json, format, transform)
 }
 
-func handleLicenseKeysList(ctx context.Context, cmd *cli.Command) error {
+func handleLicenseKeysList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {

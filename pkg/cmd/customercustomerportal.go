@@ -21,7 +21,8 @@ var customersCustomerPortalCreate = cli.Command{
 			Name: "customer-id",
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "send-email",
+			Name:  "send-email",
+			Usage: "If true, will send link to user.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Query,
 				Path:     "send_email",
@@ -33,7 +34,7 @@ var customersCustomerPortalCreate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersCustomerPortalCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {

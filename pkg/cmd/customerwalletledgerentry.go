@@ -28,21 +28,24 @@ var customersWalletsLedgerEntriesCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "Currency of the wallet to adjust",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "entry-type",
+			Name:  "entry-type",
+			Usage: "Type of ledger entry - credit or debit",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "entry_type",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "idempotency-key",
+			Name:  "idempotency-key",
+			Usage: "Optional idempotency key to prevent duplicate entries",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "idempotency_key",
@@ -68,7 +71,8 @@ var customersWalletsLedgerEntriesList = cli.Command{
 			Name: "customer-id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "Optional currency filter",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "currency",
@@ -93,7 +97,7 @@ var customersWalletsLedgerEntriesList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersWalletsLedgerEntriesCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -122,7 +126,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 	return ShowJSON("customers:wallets:ledger-entries create", json, format, transform)
 }
 
-func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
+func handleCustomersWalletsLedgerEntriesList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {

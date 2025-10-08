@@ -18,35 +18,40 @@ var paymentsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "billing.city",
+			Name:  "billing.city",
+			Usage: "City name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.city",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.country",
+			Name:  "billing.country",
+			Usage: "Two-letter ISO country code (ISO 3166-1 alpha-2)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.country",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.state",
+			Name:  "billing.state",
+			Usage: "State or province name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.state",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.street",
+			Name:  "billing.street",
+			Usage: "Street address including house number and unit/apartment if applicable",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.street",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.zipcode",
+			Name:  "billing.zipcode",
+			Usage: "Postal code or ZIP code",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.zipcode",
@@ -81,65 +86,73 @@ var paymentsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-cart.product_id",
+			Name:  "product-cart.product_id",
+			Usage: "List of products in the cart. Must contain at least 1 and at most 100 items.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_cart.#.product_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "product-cart.quantity",
+			Name:  "product-cart.quantity",
+			Usage: "List of products in the cart. Must contain at least 1 and at most 100 items.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_cart.#.quantity",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "product-cart.amount",
+			Name:  "product-cart.amount",
+			Usage: "List of products in the cart. Must contain at least 1 and at most 100 items.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_cart.#.amount",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "+product_cart",
+			Name:  "+product-cart",
+			Usage: "List of products in the cart. Must contain at least 1 and at most 100 items.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "product_cart.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "allowed-payment-method-types",
+			Name:  "allowed-payment-method-types",
+			Usage: "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "allowed_payment_method_types.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+allowed_payment_method_type",
+			Name:  "+allowed-payment-method-type",
+			Usage: "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "allowed_payment_method_types.-1",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-currency",
+			Name:  "billing-currency",
+			Usage: "Fix the currency in which the end customer is billed.\nIf Dodo Payments cannot support that currency for this transaction, it will not proceed",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "discount-code",
+			Name:  "discount-code",
+			Usage: "Discount Code to apply to the transaction",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "discount_code",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "payment-link",
+			Name:  "payment-link",
+			Usage: "Whether to generate a payment link. Defaults to false if not specified.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "payment_link",
@@ -147,14 +160,16 @@ var paymentsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "return-url",
+			Name:  "return-url",
+			Usage: "Optional URL to redirect the customer after payment.\nMust be a valid URL if provided.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "return_url",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "show-saved-payment-methods",
+			Name:  "show-saved-payment-methods",
+			Usage: "Display saved payment methods of a returning customer\nFalse by default",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "show_saved_payment_methods",
@@ -162,7 +177,8 @@ var paymentsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-id",
+			Name:  "tax-id",
+			Usage: "Tax ID in case the payment is B2B. If tax id validation fails the payment creation will fail",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_id",
@@ -190,56 +206,64 @@ var paymentsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "brand-id",
+			Name:  "brand-id",
+			Usage: "filter by Brand id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "brand_id",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-gte",
+			Name:  "created-at-gte",
+			Usage: "Get events after this created time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_gte",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-lte",
+			Name:  "created-at-lte",
+			Usage: "Get events created before this time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_lte",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter by customer id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "status",
+			Name:  "status",
+			Usage: "Filter by status",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "status",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "subscription-id",
+			Name:  "subscription-id",
+			Usage: "Filter by subscription id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "subscription_id",
@@ -262,7 +286,7 @@ var paymentsRetrieveLineItems = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
+func handlePaymentsCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -286,7 +310,7 @@ func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("payments create", json, format, transform)
 }
 
-func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handlePaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
@@ -313,7 +337,7 @@ func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("payments retrieve", json, format, transform)
 }
 
-func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
+func handlePaymentsList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -337,7 +361,7 @@ func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("payments list", json, format, transform)
 }
 
-func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) error {
+func handlePaymentsRetrieveLineItems(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {

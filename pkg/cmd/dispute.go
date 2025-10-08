@@ -30,49 +30,56 @@ var disputesList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-gte",
+			Name:  "created-at-gte",
+			Usage: "Get events after this created time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_gte",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-lte",
+			Name:  "created-at-lte",
+			Usage: "Get events created before this time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_lte",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter by customer_id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "dispute-stage",
+			Name:  "dispute-stage",
+			Usage: "Filter by dispute stage",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "dispute_stage",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "dispute-status",
+			Name:  "dispute-status",
+			Usage: "Filter by dispute status",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "dispute_status",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -83,7 +90,7 @@ var disputesList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleDisputesRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("dispute-id") && len(unusedArgs) > 0 {
@@ -110,7 +117,7 @@ func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("disputes retrieve", json, format, transform)
 }
 
-func handleDisputesList(ctx context.Context, cmd *cli.Command) error {
+func handleDisputesList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {

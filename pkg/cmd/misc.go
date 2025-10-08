@@ -19,7 +19,7 @@ var miscListSupportedCountries = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) error {
+func handleMiscListSupportedCountries(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
