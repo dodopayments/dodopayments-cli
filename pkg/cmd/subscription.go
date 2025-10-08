@@ -18,35 +18,40 @@ var subscriptionsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "billing.city",
+			Name:  "billing.city",
+			Usage: "City name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.city",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.country",
+			Name:  "billing.country",
+			Usage: "Two-letter ISO country code (ISO 3166-1 alpha-2)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.country",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.state",
+			Name:  "billing.state",
+			Usage: "State or province name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.state",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.street",
+			Name:  "billing.street",
+			Usage: "Street address including house number and unit/apartment if applicable",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.street",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.zipcode",
+			Name:  "billing.zipcode",
+			Usage: "Postal code or ZIP code",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.zipcode",
@@ -81,72 +86,81 @@ var subscriptionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-id",
+			Name:  "product-id",
+			Usage: "Unique identifier of the product to subscribe to",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "quantity",
+			Name:  "quantity",
+			Usage: "Number of units to subscribe for. Must be at least 1.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "quantity",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "addons.addon_id",
+			Name:  "addons.addon_id",
+			Usage: "Attach addons to this subscription",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.#.addon_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "addons.quantity",
+			Name:  "addons.quantity",
+			Usage: "Attach addons to this subscription",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.#.quantity",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "+addon",
+			Name:  "+addon",
+			Usage: "Attach addons to this subscription",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "addons.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "allowed-payment-method-types",
+			Name:  "allowed-payment-method-types",
+			Usage: "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "allowed_payment_method_types.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+allowed_payment_method_type",
+			Name:  "+allowed-payment-method-type",
+			Usage: "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "allowed_payment_method_types.-1",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing-currency",
+			Name:  "billing-currency",
+			Usage: "Fix the currency in which the end customer is billed.\nIf Dodo Payments cannot support that currency for this transaction, it will not proceed",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing_currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "discount-code",
+			Name:  "discount-code",
+			Usage: "Discount Code to apply to the subscription",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "discount_code",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "on-demand.mandate_only",
+			Name:  "on-demand.mandate_only",
+			Usage: "If set as True, does not perform any charge and only authorizes payment method details for future use.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "on_demand.mandate_only",
@@ -154,7 +168,8 @@ var subscriptionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "on-demand.adaptive_currency_fees_inclusive",
+			Name:  "on-demand.adaptive_currency_fees_inclusive",
+			Usage: "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "on_demand.adaptive_currency_fees_inclusive",
@@ -162,28 +177,32 @@ var subscriptionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "on-demand.product_currency",
+			Name:  "on-demand.product_currency",
+			Usage: "Optional currency of the product price. If not specified, defaults to the currency of the product.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "on_demand.product_currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "on-demand.product_description",
+			Name:  "on-demand.product_description",
+			Usage: "Optional product description override for billing and line items.\nIf not specified, the stored description of the product will be used.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "on_demand.product_description",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "on-demand.product_price",
+			Name:  "on-demand.product_price",
+			Usage: "Product price for the initial charge to customer\nIf not specified the stored price of the product will be used\nRepresented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "on_demand.product_price",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "payment-link",
+			Name:  "payment-link",
+			Usage: "If true, generates a payment link.\nDefaults to false if not specified.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "payment_link",
@@ -191,14 +210,16 @@ var subscriptionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "return-url",
+			Name:  "return-url",
+			Usage: "Optional URL to redirect after successful subscription creation",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "return_url",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "show-saved-payment-methods",
+			Name:  "show-saved-payment-methods",
+			Usage: "Display saved payment methods of a returning customer\nFalse by default",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "show_saved_payment_methods",
@@ -206,14 +227,16 @@ var subscriptionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-id",
+			Name:  "tax-id",
+			Usage: "Tax ID in case the payment is B2B. If tax id validation fails the payment creation will fail",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "trial-period-days",
+			Name:  "trial-period-days",
+			Usage: "Optional trial period in days\nIf specified, this value overrides the trial period set in the product's price\nMust be between 0 and 10000 days",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "trial_period_days",
@@ -244,42 +267,48 @@ var subscriptionsUpdate = cli.Command{
 			Name: "subscription-id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.city",
+			Name:  "billing.city",
+			Usage: "City name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.city",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.country",
+			Name:  "billing.country",
+			Usage: "Two-letter ISO country code (ISO 3166-1 alpha-2)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.country",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.state",
+			Name:  "billing.state",
+			Usage: "State or province name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.state",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.street",
+			Name:  "billing.street",
+			Usage: "Street address including house number and unit/apartment if applicable",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.street",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "billing.zipcode",
+			Name:  "billing.zipcode",
+			Usage: "Postal code or ZIP code",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "billing.zipcode",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "cancel-at-next-billing-date",
+			Name:  "cancel-at-next-billing-date",
+			Usage: "When set, the subscription will remain active until the end of billing period",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "cancel_at_next_billing_date",
@@ -324,49 +353,56 @@ var subscriptionsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "brand-id",
+			Name:  "brand-id",
+			Usage: "filter by Brand id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "brand_id",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-gte",
+			Name:  "created-at-gte",
+			Usage: "Get events after this created time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_gte",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-lte",
+			Name:  "created-at-lte",
+			Usage: "Get events created before this time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_lte",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter by customer id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "status",
+			Name:  "status",
+			Usage: "Filter by status",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "status",
@@ -385,48 +421,53 @@ var subscriptionsChangePlan = cli.Command{
 			Name: "subscription-id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-id",
+			Name:  "product-id",
+			Usage: "Unique identifier of the product to subscribe to",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "proration-billing-mode",
+			Name:  "proration-billing-mode",
+			Usage: "Proration Billing Mode",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "proration_billing_mode",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "quantity",
+			Name:  "quantity",
+			Usage: "Number of units to subscribe for. Must be at least 1.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "quantity",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "addons.addon_id",
+			Name:  "addons.addon_id",
+			Usage: "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.#.addon_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "addons.quantity",
+			Name:  "addons.quantity",
+			Usage: "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "addons.#.quantity",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "+addon",
+			Name:  "+addon",
+			Usage: "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "addons.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 	},
 	Action:          handleSubscriptionsChangePlan,
@@ -441,14 +482,16 @@ var subscriptionsCharge = cli.Command{
 			Name: "subscription-id",
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "product-price",
+			Name:  "product-price",
+			Usage: "The product price. Represented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_price",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "adaptive-currency-fees-inclusive",
+			Name:  "adaptive-currency-fees-inclusive",
+			Usage: "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "adaptive_currency_fees_inclusive",
@@ -456,7 +499,8 @@ var subscriptionsCharge = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "customer-balance-config.allow_customer_credits_purchase",
+			Name:  "customer-balance-config.allow_customer_credits_purchase",
+			Usage: "Allows Customer Credit to be purchased to settle payments",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "customer_balance_config.allow_customer_credits_purchase",
@@ -464,7 +508,8 @@ var subscriptionsCharge = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "customer-balance-config.allow_customer_credits_usage",
+			Name:  "customer-balance-config.allow_customer_credits_usage",
+			Usage: "Allows Customer Credit Balance to be used to settle payments",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "customer_balance_config.allow_customer_credits_usage",
@@ -472,14 +517,16 @@ var subscriptionsCharge = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-currency",
+			Name:  "product-currency",
+			Usage: "Optional currency of the product price. If not specified, defaults to the currency of the product.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-description",
+			Name:  "product-description",
+			Usage: "Optional product description override for billing and line items.\nIf not specified, the stored description of the product will be used.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "product_description",
@@ -498,35 +545,40 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 			Name: "subscription-id",
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "end-date",
+			Name:  "end-date",
+			Usage: "Filter by end date (inclusive)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "end_date",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "meter-id",
+			Name:  "meter-id",
+			Usage: "Filter by specific meter ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "meter_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number (default: 0)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size (default: 10, max: 100)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "start-date",
+			Name:  "start-date",
+			Usage: "Filter by start date (inclusive)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "start_date",
@@ -537,7 +589,7 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -561,7 +613,7 @@ func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions create", json, format, transform)
 }
 
-func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -588,7 +640,7 @@ func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions retrieve", json, format, transform)
 }
 
-func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -617,7 +669,7 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions update", json, format, transform)
 }
 
-func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -641,7 +693,7 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions list", json, format, transform)
 }
 
-func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsChangePlan(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -660,7 +712,7 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 	)
 }
 
-func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsCharge(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -689,7 +741,7 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions charge", json, format, transform)
 }
 
-func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Command) error {
+func handleSubscriptionsRetrieveUsageHistory(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {

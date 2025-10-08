@@ -35,7 +35,7 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleInvoicesPaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
@@ -62,7 +62,7 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 	return ShowJSON("invoices:payments retrieve", json, format, transform)
 }
 
-func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command) error {
+func handleInvoicesPaymentsRetrieveRefund(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {

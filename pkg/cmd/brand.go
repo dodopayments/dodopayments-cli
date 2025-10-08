@@ -77,7 +77,8 @@ var brandsUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "image-id",
+			Name:  "image-id",
+			Usage: "The UUID you got back from the presigned‐upload call",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "image_id",
@@ -129,7 +130,7 @@ var brandsUpdateImages = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
+func handleBrandsCreate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -153,7 +154,7 @@ func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands create", json, format, transform)
 }
 
-func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
+func handleBrandsRetrieve(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -180,7 +181,7 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands retrieve", json, format, transform)
 }
 
-func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
+func handleBrandsUpdate(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -209,7 +210,7 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands update", json, format, transform)
 }
 
-func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
+func handleBrandsList(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -231,7 +232,7 @@ func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands list", json, format, transform)
 }
 
-func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
+func handleBrandsUpdateImages(_ context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
