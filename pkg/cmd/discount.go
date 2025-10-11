@@ -223,7 +223,7 @@ var discountsDelete = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleDiscountsCreate(_ context.Context, cmd *cli.Command) error {
+func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -232,7 +232,7 @@ func handleDiscountsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.DiscountNewParams{}
 	var res []byte
 	_, err := cc.client.Discounts.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -247,7 +247,7 @@ func handleDiscountsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("discounts create", json, format, transform)
 }
 
-func handleDiscountsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
@@ -259,7 +259,7 @@ func handleDiscountsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Discounts.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("discount-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -274,7 +274,7 @@ func handleDiscountsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("discounts retrieve", json, format, transform)
 }
 
-func handleDiscountsUpdate(_ context.Context, cmd *cli.Command) error {
+func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
@@ -287,7 +287,7 @@ func handleDiscountsUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.DiscountUpdateParams{}
 	var res []byte
 	_, err := cc.client.Discounts.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("discount-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -303,7 +303,7 @@ func handleDiscountsUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("discounts update", json, format, transform)
 }
 
-func handleDiscountsList(_ context.Context, cmd *cli.Command) error {
+func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -312,7 +312,7 @@ func handleDiscountsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.DiscountListParams{}
 	var res []byte
 	_, err := cc.client.Discounts.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -327,7 +327,7 @@ func handleDiscountsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("discounts list", json, format, transform)
 }
 
-func handleDiscountsDelete(_ context.Context, cmd *cli.Command) error {
+func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
@@ -338,7 +338,7 @@ func handleDiscountsDelete(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Discounts.Delete(
-		context.TODO(),
+		ctx,
 		cmd.Value("discount-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)

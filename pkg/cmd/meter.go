@@ -304,7 +304,7 @@ var metersUnarchive = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleMetersCreate(_ context.Context, cmd *cli.Command) error {
+func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -313,7 +313,7 @@ func handleMetersCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.MeterNewParams{}
 	var res []byte
 	_, err := cc.client.Meters.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -328,7 +328,7 @@ func handleMetersCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("meters create", json, format, transform)
 }
 
-func handleMetersRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -340,7 +340,7 @@ func handleMetersRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Meters.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -355,7 +355,7 @@ func handleMetersRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("meters retrieve", json, format, transform)
 }
 
-func handleMetersList(_ context.Context, cmd *cli.Command) error {
+func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -364,7 +364,7 @@ func handleMetersList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.MeterListParams{}
 	var res []byte
 	_, err := cc.client.Meters.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -379,7 +379,7 @@ func handleMetersList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("meters list", json, format, transform)
 }
 
-func handleMetersArchive(_ context.Context, cmd *cli.Command) error {
+func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -390,13 +390,13 @@ func handleMetersArchive(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Meters.Archive(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleMetersUnarchive(_ context.Context, cmd *cli.Command) error {
+func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -407,7 +407,7 @@ func handleMetersUnarchive(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Meters.Unarchive(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)

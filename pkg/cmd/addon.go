@@ -171,7 +171,7 @@ var addonsUpdateImages = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleAddonsCreate(_ context.Context, cmd *cli.Command) error {
+func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -180,7 +180,7 @@ func handleAddonsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.AddonNewParams{}
 	var res []byte
 	_, err := cc.client.Addons.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -195,7 +195,7 @@ func handleAddonsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons create", json, format, transform)
 }
 
-func handleAddonsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -207,7 +207,7 @@ func handleAddonsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Addons.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -222,7 +222,7 @@ func handleAddonsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons retrieve", json, format, transform)
 }
 
-func handleAddonsUpdate(_ context.Context, cmd *cli.Command) error {
+func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -235,7 +235,7 @@ func handleAddonsUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.AddonUpdateParams{}
 	var res []byte
 	_, err := cc.client.Addons.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -251,7 +251,7 @@ func handleAddonsUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons update", json, format, transform)
 }
 
-func handleAddonsList(_ context.Context, cmd *cli.Command) error {
+func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -260,7 +260,7 @@ func handleAddonsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.AddonListParams{}
 	var res []byte
 	_, err := cc.client.Addons.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -275,7 +275,7 @@ func handleAddonsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("addons list", json, format, transform)
 }
 
-func handleAddonsUpdateImages(_ context.Context, cmd *cli.Command) error {
+func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -287,7 +287,7 @@ func handleAddonsUpdateImages(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Addons.UpdateImages(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

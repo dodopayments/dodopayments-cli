@@ -111,7 +111,7 @@ var licenseKeysList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleLicenseKeysRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -123,7 +123,7 @@ func handleLicenseKeysRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.LicenseKeys.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -138,7 +138,7 @@ func handleLicenseKeysRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("license-keys retrieve", json, format, transform)
 }
 
-func handleLicenseKeysUpdate(_ context.Context, cmd *cli.Command) error {
+func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -151,7 +151,7 @@ func handleLicenseKeysUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseKeyUpdateParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeys.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -167,7 +167,7 @@ func handleLicenseKeysUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("license-keys update", json, format, transform)
 }
 
-func handleLicenseKeysList(_ context.Context, cmd *cli.Command) error {
+func handleLicenseKeysList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -176,7 +176,7 @@ func handleLicenseKeysList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseKeyListParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeys.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

@@ -23,7 +23,7 @@ var customersWalletsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersWalletsList(_ context.Context, cmd *cli.Command) error {
+func handleCustomersWalletsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -35,7 +35,7 @@ func handleCustomersWalletsList(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.List(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

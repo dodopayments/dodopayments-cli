@@ -77,7 +77,7 @@ var licenseKeyInstancesList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleLicenseKeyInstancesRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -89,7 +89,7 @@ func handleLicenseKeyInstancesRetrieve(_ context.Context, cmd *cli.Command) erro
 	}
 	var res []byte
 	_, err := cc.client.LicenseKeyInstances.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -104,7 +104,7 @@ func handleLicenseKeyInstancesRetrieve(_ context.Context, cmd *cli.Command) erro
 	return ShowJSON("license-key-instances retrieve", json, format, transform)
 }
 
-func handleLicenseKeyInstancesUpdate(_ context.Context, cmd *cli.Command) error {
+func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -117,7 +117,7 @@ func handleLicenseKeyInstancesUpdate(_ context.Context, cmd *cli.Command) error 
 	params := dodopayments.LicenseKeyInstanceUpdateParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeyInstances.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -133,7 +133,7 @@ func handleLicenseKeyInstancesUpdate(_ context.Context, cmd *cli.Command) error 
 	return ShowJSON("license-key-instances update", json, format, transform)
 }
 
-func handleLicenseKeyInstancesList(_ context.Context, cmd *cli.Command) error {
+func handleLicenseKeyInstancesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -142,7 +142,7 @@ func handleLicenseKeyInstancesList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseKeyInstanceListParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeyInstances.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

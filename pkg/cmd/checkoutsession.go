@@ -319,7 +319,7 @@ var checkoutSessionsCreate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCheckoutSessionsCreate(_ context.Context, cmd *cli.Command) error {
+func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -328,7 +328,7 @@ func handleCheckoutSessionsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.CheckoutSessionNewParams{}
 	var res []byte
 	_, err := cc.client.CheckoutSessions.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

@@ -140,7 +140,7 @@ var usageEventsIngest = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleUsageEventsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("event-id") && len(unusedArgs) > 0 {
@@ -152,7 +152,7 @@ func handleUsageEventsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.UsageEvents.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("event-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -167,7 +167,7 @@ func handleUsageEventsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("usage-events retrieve", json, format, transform)
 }
 
-func handleUsageEventsList(_ context.Context, cmd *cli.Command) error {
+func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -176,7 +176,7 @@ func handleUsageEventsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.UsageEventListParams{}
 	var res []byte
 	_, err := cc.client.UsageEvents.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -191,7 +191,7 @@ func handleUsageEventsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("usage-events list", json, format, transform)
 }
 
-func handleUsageEventsIngest(_ context.Context, cmd *cli.Command) error {
+func handleUsageEventsIngest(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -200,7 +200,7 @@ func handleUsageEventsIngest(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.UsageEventIngestParams{}
 	var res []byte
 	_, err := cc.client.UsageEvents.Ingest(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

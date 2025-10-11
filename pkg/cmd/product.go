@@ -697,7 +697,7 @@ var productsUpdateFiles = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleProductsCreate(_ context.Context, cmd *cli.Command) error {
+func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -706,7 +706,7 @@ func handleProductsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.ProductNewParams{}
 	var res []byte
 	_, err := cc.client.Products.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -721,7 +721,7 @@ func handleProductsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("products create", json, format, transform)
 }
 
-func handleProductsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -733,7 +733,7 @@ func handleProductsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Products.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -748,7 +748,7 @@ func handleProductsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("products retrieve", json, format, transform)
 }
 
-func handleProductsUpdate(_ context.Context, cmd *cli.Command) error {
+func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -760,14 +760,14 @@ func handleProductsUpdate(_ context.Context, cmd *cli.Command) error {
 	}
 	params := dodopayments.ProductUpdateParams{}
 	return cc.client.Products.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleProductsList(_ context.Context, cmd *cli.Command) error {
+func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -776,7 +776,7 @@ func handleProductsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.ProductListParams{}
 	var res []byte
 	_, err := cc.client.Products.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -791,7 +791,7 @@ func handleProductsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("products list", json, format, transform)
 }
 
-func handleProductsArchive(_ context.Context, cmd *cli.Command) error {
+func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -802,13 +802,13 @@ func handleProductsArchive(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Products.Archive(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleProductsUnarchive(_ context.Context, cmd *cli.Command) error {
+func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -819,13 +819,13 @@ func handleProductsUnarchive(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Products.Unarchive(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleProductsUpdateFiles(_ context.Context, cmd *cli.Command) error {
+func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -838,7 +838,7 @@ func handleProductsUpdateFiles(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.ProductUpdateFilesParams{}
 	var res []byte
 	_, err := cc.client.Products.UpdateFiles(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

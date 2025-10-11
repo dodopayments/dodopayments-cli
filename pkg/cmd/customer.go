@@ -114,7 +114,7 @@ var customersList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersCreate(_ context.Context, cmd *cli.Command) error {
+func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -123,7 +123,7 @@ func handleCustomersCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.CustomerNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -138,7 +138,7 @@ func handleCustomersCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("customers create", json, format, transform)
 }
 
-func handleCustomersRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -150,7 +150,7 @@ func handleCustomersRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Customers.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -165,7 +165,7 @@ func handleCustomersRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("customers retrieve", json, format, transform)
 }
 
-func handleCustomersUpdate(_ context.Context, cmd *cli.Command) error {
+func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -178,7 +178,7 @@ func handleCustomersUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.CustomerUpdateParams{}
 	var res []byte
 	_, err := cc.client.Customers.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -194,7 +194,7 @@ func handleCustomersUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("customers update", json, format, transform)
 }
 
-func handleCustomersList(_ context.Context, cmd *cli.Command) error {
+func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -203,7 +203,7 @@ func handleCustomersList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.CustomerListParams{}
 	var res []byte
 	_, err := cc.client.Customers.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

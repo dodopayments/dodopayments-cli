@@ -199,7 +199,7 @@ var webhooksRetrieveSecret = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleWebhooksCreate(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -208,7 +208,7 @@ func handleWebhooksCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.WebhookNewParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -223,7 +223,7 @@ func handleWebhooksCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("webhooks create", json, format, transform)
 }
 
-func handleWebhooksRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
@@ -235,7 +235,7 @@ func handleWebhooksRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Webhooks.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -250,7 +250,7 @@ func handleWebhooksRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("webhooks retrieve", json, format, transform)
 }
 
-func handleWebhooksUpdate(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
@@ -263,7 +263,7 @@ func handleWebhooksUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.WebhookUpdateParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -279,7 +279,7 @@ func handleWebhooksUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("webhooks update", json, format, transform)
 }
 
-func handleWebhooksList(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -288,7 +288,7 @@ func handleWebhooksList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.WebhookListParams{}
 	var res []byte
 	_, err := cc.client.Webhooks.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -303,7 +303,7 @@ func handleWebhooksList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("webhooks list", json, format, transform)
 }
 
-func handleWebhooksDelete(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
@@ -314,13 +314,13 @@ func handleWebhooksDelete(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Webhooks.Delete(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleWebhooksRetrieveSecret(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
@@ -332,7 +332,7 @@ func handleWebhooksRetrieveSecret(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Webhooks.GetSecret(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
