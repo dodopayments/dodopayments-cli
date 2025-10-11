@@ -18,28 +18,32 @@ var refundsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "payment-id",
+			Name:  "payment-id",
+			Usage: "The unique identifier of the payment to be refunded.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "payment_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "items.item_id",
+			Name:  "items.item_id",
+			Usage: "Partially Refund an Individual Item",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "items.#.item_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "items.amount",
+			Name:  "items.amount",
+			Usage: "Partially Refund an Individual Item",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "items.#.amount",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "items.tax_inclusive",
+			Name:  "items.tax_inclusive",
+			Usage: "Partially Refund an Individual Item",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "items.#.tax_inclusive",
@@ -47,16 +51,17 @@ var refundsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "+item",
+			Name:  "+item",
+			Usage: "Partially Refund an Individual Item",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "items.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "reason",
+			Name:  "reason",
+			Usage: "The reason for the refund, if any. Maximum length is 3000 characters. Optional.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "reason",
@@ -84,42 +89,48 @@ var refundsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-gte",
+			Name:  "created-at-gte",
+			Usage: "Get events after this created time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_gte",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "created-at-lte",
+			Name:  "created-at-lte",
+			Usage: "Get events created before this time",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "created_at_lte",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter by customer_id",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "status",
+			Name:  "status",
+			Usage: "Filter by status",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "status",
@@ -139,7 +150,7 @@ func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.RefundNewParams{}
 	var res []byte
 	_, err := cc.client.Refunds.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -166,7 +177,7 @@ func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Refunds.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("refund-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -190,7 +201,7 @@ func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.RefundListParams{}
 	var res []byte
 	_, err := cc.client.Refunds.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

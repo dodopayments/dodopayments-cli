@@ -33,14 +33,16 @@ var licenseKeysUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "activations-limit",
+			Name:  "activations-limit",
+			Usage: "The updated activation limit for the license key.\nUse `null` to remove the limit, or omit this field to leave it unchanged.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "activations_limit",
 			},
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "disabled",
+			Name:  "disabled",
+			Usage: "Indicates whether the license key should be disabled.\nA value of `true` disables the key, while `false` enables it. Omit this field to leave it unchanged.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "disabled",
@@ -48,7 +50,8 @@ var licenseKeysUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "expires-at",
+			Name:  "expires-at",
+			Usage: "The updated expiration timestamp for the license key in UTC.\nUse `null` to remove the expiration date, or omit this field to leave it unchanged.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "expires_at",
@@ -64,35 +67,40 @@ var licenseKeysList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter by customer ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "product-id",
+			Name:  "product-id",
+			Usage: "Filter by product ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "product_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "status",
+			Name:  "status",
+			Usage: "Filter by license key status",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "status",
@@ -115,7 +123,7 @@ func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.LicenseKeys.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -143,7 +151,7 @@ func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseKeyUpdateParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeys.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -168,7 +176,7 @@ func handleLicenseKeysList(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseKeyListParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeys.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

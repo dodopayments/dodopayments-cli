@@ -18,28 +18,32 @@ var discountsCreate = cli.Command{
 	Usage: "POST /discounts If `code` is omitted or empty, a random 16-char uppercase code\nis generated.",
 	Flags: []cli.Flag{
 		&jsonflag.JSONIntFlag{
-			Name: "amount",
+			Name:  "amount",
+			Usage: "The discount amount.\n\n- If `discount_type` is **not** `percentage`, `amount` is in **USD cents**. For example, `100` means `$1.00`.\n  Only USD is allowed.\n- If `discount_type` **is** `percentage`, `amount` is in **basis points**. For example, `540` means `5.4%`.\n\nMust be at least 1.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "amount",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "type",
+			Name:  "type",
+			Usage: "The discount type (e.g. `percentage`, `flat`, or `flat_per_unit`).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "type",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "code",
+			Name:  "code",
+			Usage: "Optionally supply a code (will be uppercased).\n- Must be at least 3 characters if provided.\n- If omitted, a random 16-character code is generated.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "code",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "expires-at",
+			Name:  "expires-at",
+			Usage: "When the discount expires, if ever.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "expires_at",
@@ -53,28 +57,32 @@ var discountsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "restricted-to",
+			Name:  "restricted-to",
+			Usage: "List of product IDs to restrict usage (if any).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "restricted_to.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+restricted_to",
+			Name:  "+restricted-to",
+			Usage: "List of product IDs to restrict usage (if any).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "restricted_to.-1",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "subscription-cycles",
+			Name:  "subscription-cycles",
+			Usage: "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "subscription_cycles",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "usage-limit",
+			Name:  "usage-limit",
+			Usage: "How many times this discount can be used (if any).\nMust be >= 1 if provided.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "usage_limit",
@@ -105,14 +113,16 @@ var discountsUpdate = cli.Command{
 			Name: "discount-id",
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "amount",
+			Name:  "amount",
+			Usage: "If present, update the discount amount:\n- If `discount_type` is `percentage`, this represents **basis points** (e.g., `540` = `5.4%`).\n- Otherwise, this represents **USD cents** (e.g., `100` = `$1.00`).\n\nMust be at least 1 if provided.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "amount",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "code",
+			Name:  "code",
+			Usage: "If present, update the discount code (uppercase).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "code",
@@ -133,28 +143,32 @@ var discountsUpdate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "restricted-to",
+			Name:  "restricted-to",
+			Usage: "If present, replaces all restricted product IDs with this new set.\nTo remove all restrictions, send empty array",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "restricted_to.#",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "+restricted_to",
+			Name:  "+restricted-to",
+			Usage: "If present, replaces all restricted product IDs with this new set.\nTo remove all restrictions, send empty array",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "restricted_to.-1",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "subscription-cycles",
+			Name:  "subscription-cycles",
+			Usage: "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "subscription_cycles",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "type",
+			Name:  "type",
+			Usage: "If present, update the discount type.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "type",
@@ -177,14 +191,16 @@ var discountsList = cli.Command{
 	Usage: "GET /discounts",
 	Flags: []cli.Flag{
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number (default = 0).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size (default = 10, max = 100).",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -216,7 +232,7 @@ func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.DiscountNewParams{}
 	var res []byte
 	_, err := cc.client.Discounts.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -243,7 +259,7 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Discounts.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("discount-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -271,7 +287,7 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.DiscountUpdateParams{}
 	var res []byte
 	_, err := cc.client.Discounts.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("discount-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -296,7 +312,7 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.DiscountListParams{}
 	var res []byte
 	_, err := cc.client.Discounts.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -322,7 +338,7 @@ func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	return cc.client.Discounts.Delete(
-		context.TODO(),
+		ctx,
 		cmd.Value("discount-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 	)

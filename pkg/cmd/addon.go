@@ -18,35 +18,40 @@ var addonsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "The currency of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Name of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price",
+			Name:  "price",
+			Usage: "Amount of the addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-category",
+			Name:  "tax-category",
+			Usage: "Tax category applied to this Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_category",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Optional description of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
@@ -77,42 +82,48 @@ var addonsUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "The currency of the Addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "description",
+			Name:  "description",
+			Usage: "Description of the Addon, optional and must be at most 1000 characters.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "description",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "image-id",
+			Name:  "image-id",
+			Usage: "Addon image id after its uploaded to S3",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "image_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "name",
+			Name:  "name",
+			Usage: "Name of the Addon, optional and must be at most 100 characters.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "name",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "price",
+			Name:  "price",
+			Usage: "Amount of the addon",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "price",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "tax-category",
+			Name:  "tax-category",
+			Usage: "Tax category of the Addon.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "tax_category",
@@ -128,14 +139,16 @@ var addonsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -167,7 +180,7 @@ func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.AddonNewParams{}
 	var res []byte
 	_, err := cc.client.Addons.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -194,7 +207,7 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Addons.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -222,7 +235,7 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.AddonUpdateParams{}
 	var res []byte
 	_, err := cc.client.Addons.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -247,7 +260,7 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.AddonListParams{}
 	var res []byte
 	_, err := cc.client.Addons.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -274,7 +287,7 @@ func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Addons.UpdateImages(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

@@ -46,7 +46,7 @@ func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.ProductImageUpdateParams{}
 	var res []byte
 	_, err := cc.client.Products.Images.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

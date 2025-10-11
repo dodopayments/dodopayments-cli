@@ -48,7 +48,7 @@ func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error 
 	}
 	var res []byte
 	_, err := cc.client.Webhooks.Headers.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -75,7 +75,7 @@ func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
 	}
 	params := dodopayments.WebhookHeaderUpdateParams{}
 	return cc.client.Webhooks.Headers.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

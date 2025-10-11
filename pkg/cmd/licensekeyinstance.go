@@ -49,21 +49,24 @@ var licenseKeyInstancesList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "license-key-id",
+			Name:  "license-key-id",
+			Usage: "Filter by license key ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "license_key_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -86,7 +89,7 @@ func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) er
 	}
 	var res []byte
 	_, err := cc.client.LicenseKeyInstances.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -114,7 +117,7 @@ func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) erro
 	params := dodopayments.LicenseKeyInstanceUpdateParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeyInstances.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -139,7 +142,7 @@ func handleLicenseKeyInstancesList(ctx context.Context, cmd *cli.Command) error 
 	params := dodopayments.LicenseKeyInstanceListParams{}
 	var res []byte
 	_, err := cc.client.LicenseKeyInstances.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

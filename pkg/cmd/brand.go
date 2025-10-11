@@ -77,7 +77,8 @@ var brandsUpdate = cli.Command{
 			Name: "id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "image-id",
+			Name:  "image-id",
+			Usage: "The UUID you got back from the presigned‐upload call",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "image_id",
@@ -138,7 +139,7 @@ func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.BrandNewParams{}
 	var res []byte
 	_, err := cc.client.Brands.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -165,7 +166,7 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Brands.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -193,7 +194,7 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.BrandUpdateParams{}
 	var res []byte
 	_, err := cc.client.Brands.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -217,7 +218,7 @@ func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Brands.List(
-		context.TODO(),
+		ctx,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
 	)
@@ -243,7 +244,7 @@ func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Brands.UpdateImages(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

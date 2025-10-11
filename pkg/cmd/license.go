@@ -91,7 +91,7 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseActivateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Activate(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -114,7 +114,7 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 	}
 	params := dodopayments.LicenseDeactivateParams{}
 	return cc.client.Licenses.Deactivate(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
@@ -129,7 +129,7 @@ func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseValidateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Validate(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

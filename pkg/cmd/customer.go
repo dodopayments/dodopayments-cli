@@ -86,21 +86,24 @@ var customersList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "email",
+			Name:  "email",
+			Usage: "Filter by customer email",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "email",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number default is 0",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Page size default is 10 max is 100",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
@@ -120,7 +123,7 @@ func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.CustomerNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -147,7 +150,7 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Customers.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -175,7 +178,7 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.CustomerUpdateParams{}
 	var res []byte
 	_, err := cc.client.Customers.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -200,7 +203,7 @@ func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.CustomerListParams{}
 	var res []byte
 	_, err := cc.client.Customers.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

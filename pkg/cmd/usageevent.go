@@ -30,49 +30,56 @@ var usageEventsList = cli.Command{
 	Usage: "Fetch events from your account with powerful filtering capabilities. This\nendpoint is ideal for:",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "customer-id",
+			Name:  "customer-id",
+			Usage: "Filter events by customer ID",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "customer_id",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "end",
+			Name:  "end",
+			Usage: "Filter events created before this timestamp",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "end",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "event-name",
+			Name:  "event-name",
+			Usage: "Filter events by event name. If both event_name and meter_id are provided, they must match the meter's configured event_name",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "event_name",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "meter-id",
+			Name:  "meter-id",
+			Usage: "Filter events by meter ID. When provided, only events that match the meter's event_name and filter criteria will be returned",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "meter_id",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-number",
+			Name:  "page-number",
+			Usage: "Page number (0-based, default: 0)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_number",
 			},
 		},
 		&jsonflag.JSONIntFlag{
-			Name: "page-size",
+			Name:  "page-size",
+			Usage: "Number of events to return per page (default: 10)",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "page_size",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "start",
+			Name:  "start",
+			Usage: "Filter events created after this timestamp",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "start",
@@ -88,41 +95,45 @@ var usageEventsIngest = cli.Command{
 	Usage: "This endpoint allows you to ingest custom events that can be used for:",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
-			Name: "events.customer_id",
+			Name:  "events.customer_id",
+			Usage: "List of events to be pushed",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "events.#.customer_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "events.event_id",
+			Name:  "events.event_id",
+			Usage: "List of events to be pushed",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "events.#.event_id",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "events.event_name",
+			Name:  "events.event_name",
+			Usage: "List of events to be pushed",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "events.#.event_name",
 			},
 		},
 		&jsonflag.JSONDatetimeFlag{
-			Name: "events.timestamp",
+			Name:  "events.timestamp",
+			Usage: "List of events to be pushed",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "events.#.timestamp",
 			},
 		},
 		&jsonflag.JSONAnyFlag{
-			Name: "+event",
+			Name:  "+event",
+			Usage: "List of events to be pushed",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "events.-1",
 				SetValue: map[string]interface{}{},
 			},
-			Value: map[string]interface{}{},
 		},
 	},
 	Action:          handleUsageEventsIngest,
@@ -141,7 +152,7 @@ func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.UsageEvents.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("event-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -165,7 +176,7 @@ func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.UsageEventListParams{}
 	var res []byte
 	_, err := cc.client.UsageEvents.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -189,7 +200,7 @@ func handleUsageEventsIngest(ctx context.Context, cmd *cli.Command) error {
 	params := dodopayments.UsageEventIngestParams{}
 	var res []byte
 	_, err := cc.client.UsageEvents.Ingest(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

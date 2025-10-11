@@ -47,7 +47,7 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("payment-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -74,7 +74,7 @@ func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command)
 	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.GetRefund(
-		context.TODO(),
+		ctx,
 		cmd.Value("refund-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

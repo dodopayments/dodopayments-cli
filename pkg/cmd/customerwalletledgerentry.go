@@ -28,21 +28,24 @@ var customersWalletsLedgerEntriesCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "Currency of the wallet to adjust",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "currency",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "entry-type",
+			Name:  "entry-type",
+			Usage: "Type of ledger entry - credit or debit",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "entry_type",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "idempotency-key",
+			Name:  "idempotency-key",
+			Usage: "Optional idempotency key to prevent duplicate entries",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "idempotency_key",
@@ -68,7 +71,8 @@ var customersWalletsLedgerEntriesList = cli.Command{
 			Name: "customer-id",
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "currency",
+			Name:  "currency",
+			Usage: "Optional currency filter",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Query,
 				Path: "currency",
@@ -106,7 +110,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.New(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -135,7 +139,7 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.List(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

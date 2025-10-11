@@ -27,7 +27,7 @@ func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) err
 	}
 	var res []byte
 	_, err := cc.client.Misc.ListSupportedCountries(
-		context.TODO(),
+		ctx,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
 	)

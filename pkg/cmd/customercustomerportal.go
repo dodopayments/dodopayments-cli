@@ -21,7 +21,8 @@ var customersCustomerPortalCreate = cli.Command{
 			Name: "customer-id",
 		},
 		&jsonflag.JSONBoolFlag{
-			Name: "send-email",
+			Name:  "send-email",
+			Usage: "If true, will send link to user.",
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Query,
 				Path:     "send_email",
@@ -46,7 +47,7 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 	params := dodopayments.CustomerCustomerPortalNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.CustomerPortal.New(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

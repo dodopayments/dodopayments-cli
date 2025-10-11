@@ -35,7 +35,7 @@ func handleCustomersWalletsList(ctx context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.List(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
