@@ -82,7 +82,7 @@ var licensesValidate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleLicensesActivate(_ context.Context, cmd *cli.Command) error {
+func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -91,7 +91,7 @@ func handleLicensesActivate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseActivateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Activate(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -106,7 +106,7 @@ func handleLicensesActivate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("licenses activate", json, format, transform)
 }
 
-func handleLicensesDeactivate(_ context.Context, cmd *cli.Command) error {
+func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -114,13 +114,13 @@ func handleLicensesDeactivate(_ context.Context, cmd *cli.Command) error {
 	}
 	params := dodopayments.LicenseDeactivateParams{}
 	return cc.client.Licenses.Deactivate(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleLicensesValidate(_ context.Context, cmd *cli.Command) error {
+func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -129,7 +129,7 @@ func handleLicensesValidate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.LicenseValidateParams{}
 	var res []byte
 	_, err := cc.client.Licenses.Validate(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

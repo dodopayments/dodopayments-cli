@@ -97,7 +97,7 @@ var customersWalletsLedgerEntriesList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersWalletsLedgerEntriesCreate(_ context.Context, cmd *cli.Command) error {
+func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -110,7 +110,7 @@ func handleCustomersWalletsLedgerEntriesCreate(_ context.Context, cmd *cli.Comma
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.New(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -126,7 +126,7 @@ func handleCustomersWalletsLedgerEntriesCreate(_ context.Context, cmd *cli.Comma
 	return ShowJSON("customers:wallets:ledger-entries create", json, format, transform)
 }
 
-func handleCustomersWalletsLedgerEntriesList(_ context.Context, cmd *cli.Command) error {
+func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -139,7 +139,7 @@ func handleCustomersWalletsLedgerEntriesList(_ context.Context, cmd *cli.Command
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
 	var res []byte
 	_, err := cc.client.Customers.Wallets.LedgerEntries.List(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

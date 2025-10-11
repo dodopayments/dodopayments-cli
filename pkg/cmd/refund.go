@@ -141,7 +141,7 @@ var refundsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleRefundsCreate(_ context.Context, cmd *cli.Command) error {
+func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -150,7 +150,7 @@ func handleRefundsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.RefundNewParams{}
 	var res []byte
 	_, err := cc.client.Refunds.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -165,7 +165,7 @@ func handleRefundsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("refunds create", json, format, transform)
 }
 
-func handleRefundsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {
@@ -177,7 +177,7 @@ func handleRefundsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Refunds.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("refund-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -192,7 +192,7 @@ func handleRefundsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("refunds retrieve", json, format, transform)
 }
 
-func handleRefundsList(_ context.Context, cmd *cli.Command) error {
+func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -201,7 +201,7 @@ func handleRefundsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.RefundListParams{}
 	var res []byte
 	_, err := cc.client.Refunds.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

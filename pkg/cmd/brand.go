@@ -130,7 +130,7 @@ var brandsUpdateImages = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleBrandsCreate(_ context.Context, cmd *cli.Command) error {
+func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -139,7 +139,7 @@ func handleBrandsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.BrandNewParams{}
 	var res []byte
 	_, err := cc.client.Brands.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -154,7 +154,7 @@ func handleBrandsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands create", json, format, transform)
 }
 
-func handleBrandsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -166,7 +166,7 @@ func handleBrandsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Brands.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -181,7 +181,7 @@ func handleBrandsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands retrieve", json, format, transform)
 }
 
-func handleBrandsUpdate(_ context.Context, cmd *cli.Command) error {
+func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -194,7 +194,7 @@ func handleBrandsUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.BrandUpdateParams{}
 	var res []byte
 	_, err := cc.client.Brands.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -210,7 +210,7 @@ func handleBrandsUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands update", json, format, transform)
 }
 
-func handleBrandsList(_ context.Context, cmd *cli.Command) error {
+func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -218,7 +218,7 @@ func handleBrandsList(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Brands.List(
-		context.TODO(),
+		ctx,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
 	)
@@ -232,7 +232,7 @@ func handleBrandsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("brands list", json, format, transform)
 }
 
-func handleBrandsUpdateImages(_ context.Context, cmd *cli.Command) error {
+func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -244,7 +244,7 @@ func handleBrandsUpdateImages(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Brands.UpdateImages(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

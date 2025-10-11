@@ -33,7 +33,7 @@ var productsImagesUpdate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleProductsImagesUpdate(_ context.Context, cmd *cli.Command) error {
+func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
@@ -46,7 +46,7 @@ func handleProductsImagesUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.ProductImageUpdateParams{}
 	var res []byte
 	_, err := cc.client.Products.Images.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

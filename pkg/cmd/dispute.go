@@ -90,7 +90,7 @@ var disputesList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleDisputesRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("dispute-id") && len(unusedArgs) > 0 {
@@ -102,7 +102,7 @@ func handleDisputesRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Disputes.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("dispute-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -117,7 +117,7 @@ func handleDisputesRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("disputes retrieve", json, format, transform)
 }
 
-func handleDisputesList(_ context.Context, cmd *cli.Command) error {
+func handleDisputesList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -126,7 +126,7 @@ func handleDisputesList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.DisputeListParams{}
 	var res []byte
 	_, err := cc.client.Disputes.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

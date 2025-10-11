@@ -38,7 +38,7 @@ var payoutsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handlePayoutsList(_ context.Context, cmd *cli.Command) error {
+func handlePayoutsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -47,7 +47,7 @@ func handlePayoutsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.PayoutListParams{}
 	var res []byte
 	_, err := cc.client.Payouts.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
