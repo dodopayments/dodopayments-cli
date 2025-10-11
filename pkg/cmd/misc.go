@@ -19,7 +19,7 @@ var miscListSupportedCountries = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleMiscListSupportedCountries(_ context.Context, cmd *cli.Command) error {
+func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -27,7 +27,7 @@ func handleMiscListSupportedCountries(_ context.Context, cmd *cli.Command) error
 	}
 	var res []byte
 	_, err := cc.client.Misc.ListSupportedCountries(
-		context.TODO(),
+		ctx,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
 	)

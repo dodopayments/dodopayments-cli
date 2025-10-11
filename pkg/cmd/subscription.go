@@ -589,7 +589,7 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleSubscriptionsCreate(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -598,7 +598,7 @@ func handleSubscriptionsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.SubscriptionNewParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -613,7 +613,7 @@ func handleSubscriptionsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions create", json, format, transform)
 }
 
-func handleSubscriptionsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -625,7 +625,7 @@ func handleSubscriptionsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Subscriptions.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("subscription-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -640,7 +640,7 @@ func handleSubscriptionsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions retrieve", json, format, transform)
 }
 
-func handleSubscriptionsUpdate(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -653,7 +653,7 @@ func handleSubscriptionsUpdate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.SubscriptionUpdateParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("subscription-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -669,7 +669,7 @@ func handleSubscriptionsUpdate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions update", json, format, transform)
 }
 
-func handleSubscriptionsList(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -678,7 +678,7 @@ func handleSubscriptionsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.SubscriptionListParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -693,7 +693,7 @@ func handleSubscriptionsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions list", json, format, transform)
 }
 
-func handleSubscriptionsChangePlan(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -705,14 +705,14 @@ func handleSubscriptionsChangePlan(_ context.Context, cmd *cli.Command) error {
 	}
 	params := dodopayments.SubscriptionChangePlanParams{}
 	return cc.client.Subscriptions.ChangePlan(
-		context.TODO(),
+		ctx,
 		cmd.Value("subscription-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 	)
 }
 
-func handleSubscriptionsCharge(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -725,7 +725,7 @@ func handleSubscriptionsCharge(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.SubscriptionChargeParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.Charge(
-		context.TODO(),
+		ctx,
 		cmd.Value("subscription-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
@@ -741,7 +741,7 @@ func handleSubscriptionsCharge(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("subscriptions charge", json, format, transform)
 }
 
-func handleSubscriptionsRetrieveUsageHistory(_ context.Context, cmd *cli.Command) error {
+func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
@@ -754,7 +754,7 @@ func handleSubscriptionsRetrieveUsageHistory(_ context.Context, cmd *cli.Command
 	params := dodopayments.SubscriptionGetUsageHistoryParams{}
 	var res []byte
 	_, err := cc.client.Subscriptions.GetUsageHistory(
-		context.TODO(),
+		ctx,
 		cmd.Value("subscription-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

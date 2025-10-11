@@ -34,7 +34,7 @@ var customersCustomerPortalCreate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleCustomersCustomerPortalCreate(_ context.Context, cmd *cli.Command) error {
+func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
@@ -47,7 +47,7 @@ func handleCustomersCustomerPortalCreate(_ context.Context, cmd *cli.Command) er
 	params := dodopayments.CustomerCustomerPortalNewParams{}
 	var res []byte
 	_, err := cc.client.Customers.CustomerPortal.New(
-		context.TODO(),
+		ctx,
 		cmd.Value("customer-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),

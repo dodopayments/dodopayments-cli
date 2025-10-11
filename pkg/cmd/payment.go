@@ -286,7 +286,7 @@ var paymentsRetrieveLineItems = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handlePaymentsCreate(_ context.Context, cmd *cli.Command) error {
+func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -295,7 +295,7 @@ func handlePaymentsCreate(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.PaymentNewParams{}
 	var res []byte
 	_, err := cc.client.Payments.New(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -310,7 +310,7 @@ func handlePaymentsCreate(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("payments create", json, format, transform)
 }
 
-func handlePaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
@@ -322,7 +322,7 @@ func handlePaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Payments.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("payment-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -337,7 +337,7 @@ func handlePaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("payments retrieve", json, format, transform)
 }
 
-func handlePaymentsList(_ context.Context, cmd *cli.Command) error {
+func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
@@ -346,7 +346,7 @@ func handlePaymentsList(_ context.Context, cmd *cli.Command) error {
 	params := dodopayments.PaymentListParams{}
 	var res []byte
 	_, err := cc.client.Payments.List(
-		context.TODO(),
+		ctx,
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -361,7 +361,7 @@ func handlePaymentsList(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("payments list", json, format, transform)
 }
 
-func handlePaymentsRetrieveLineItems(_ context.Context, cmd *cli.Command) error {
+func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
@@ -373,7 +373,7 @@ func handlePaymentsRetrieveLineItems(_ context.Context, cmd *cli.Command) error 
 	}
 	var res []byte
 	_, err := cc.client.Payments.GetLineItems(
-		context.TODO(),
+		ctx,
 		cmd.Value("payment-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

@@ -35,7 +35,7 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleInvoicesPaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("payment-id") && len(unusedArgs) > 0 {
@@ -47,7 +47,7 @@ func handleInvoicesPaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("payment-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -62,7 +62,7 @@ func handleInvoicesPaymentsRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("invoices:payments retrieve", json, format, transform)
 }
 
-func handleInvoicesPaymentsRetrieveRefund(_ context.Context, cmd *cli.Command) error {
+func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("refund-id") && len(unusedArgs) > 0 {
@@ -74,7 +74,7 @@ func handleInvoicesPaymentsRetrieveRefund(_ context.Context, cmd *cli.Command) e
 	}
 	var res []byte
 	_, err := cc.client.Invoices.Payments.GetRefund(
-		context.TODO(),
+		ctx,
 		cmd.Value("refund-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),

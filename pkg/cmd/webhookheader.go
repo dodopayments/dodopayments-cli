@@ -36,7 +36,7 @@ var webhooksHeadersUpdate = cli.Command{
 	HideHelpCommand: true,
 }
 
-func handleWebhooksHeadersRetrieve(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
@@ -48,7 +48,7 @@ func handleWebhooksHeadersRetrieve(_ context.Context, cmd *cli.Command) error {
 	}
 	var res []byte
 	_, err := cc.client.Webhooks.Headers.Get(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		option.WithMiddleware(cc.AsMiddleware()),
 		option.WithResponseBodyInto(&res),
@@ -63,7 +63,7 @@ func handleWebhooksHeadersRetrieve(_ context.Context, cmd *cli.Command) error {
 	return ShowJSON("webhooks:headers retrieve", json, format, transform)
 }
 
-func handleWebhooksHeadersUpdate(_ context.Context, cmd *cli.Command) error {
+func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
@@ -75,7 +75,7 @@ func handleWebhooksHeadersUpdate(_ context.Context, cmd *cli.Command) error {
 	}
 	params := dodopayments.WebhookHeaderUpdateParams{}
 	return cc.client.Webhooks.Headers.Update(
-		context.TODO(),
+		ctx,
 		cmd.Value("webhook-id").(string),
 		params,
 		option.WithMiddleware(cc.AsMiddleware()),
