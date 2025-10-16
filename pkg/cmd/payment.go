@@ -151,6 +151,15 @@ var paymentsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
+			Name:  "force-3ds",
+			Usage: "Override merchant default 3DS behaviour for this payment",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "force_3ds",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
 			Name:  "payment-link",
 			Usage: "Whether to generate a payment link. Defaults to false if not specified.",
 			Config: jsonflag.JSONConfig{

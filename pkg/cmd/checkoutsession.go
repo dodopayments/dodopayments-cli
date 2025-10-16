@@ -169,6 +169,14 @@ var checkoutSessionsCreate = cli.Command{
 				Path: "customer.phone_number",
 			},
 		},
+		&jsonflag.JSONStringFlag{
+			Name:  "customization.force_language",
+			Usage: "Force the checkout interface to render in a specific language (e.g. `en`, `es`)",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Body,
+				Path: "customization.force_language",
+			},
+		},
 		&jsonflag.JSONBoolFlag{
 			Name:  "customization.show_on_demand_tag",
 			Usage: "Show on demand tag\n\nDefault is true",
@@ -244,6 +252,15 @@ var checkoutSessionsCreate = cli.Command{
 			Config: jsonflag.JSONConfig{
 				Kind:     jsonflag.Body,
 				Path:     "feature_flags.always_create_new_customer",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name:  "force-3ds",
+			Usage: "Override merchant default 3DS behaviour for this session",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "force_3ds",
 				SetValue: true,
 			},
 		},
