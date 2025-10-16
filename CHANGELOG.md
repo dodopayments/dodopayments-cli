@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.55.0 (2025-10-16)
+
+Full Changelog: [v1.54.0...v1.55.0](https://github.com/dodopayments/dodopayments-cli/compare/v1.54.0...v1.55.0)
+
+### Features
+
+* **api:** updated openapi spec to v1.55.0 ([f08040b](https://github.com/dodopayments/dodopayments-cli/commit/f08040b4c1872f0ce7992ac334c6ed6bd0822a88))
+* arguments now have defaults and descriptions ([d25f0b3](https://github.com/dodopayments/dodopayments-cli/commit/d25f0b3023e4a4ba06ee652d7b3dae3f9be0cccd))
+
+
+### Bug Fixes
+
+* pass through context parameter correctly ([3c02e4d](https://github.com/dodopayments/dodopayments-cli/commit/3c02e4d684f6bb9f35211be1e610bf2f8c95d26a))
+
+
+### Chores
+
+* **internal:** codegen related update ([0b971d2](https://github.com/dodopayments/dodopayments-cli/commit/0b971d2ae0220cb121fb3702b46826a2d173de55))
+* **internal:** codegen related update ([df5f77a](https://github.com/dodopayments/dodopayments-cli/commit/df5f77a9e5516ed535fb57ec053781e3dcc5242f))
+
 ## 1.54.0 (2025-10-07)
 
 Full Changelog: [v1.53.7...v1.54.0](https://github.com/dodopayments/dodopayments-cli/compare/v1.53.7...v1.54.0)
