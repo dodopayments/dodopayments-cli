@@ -159,6 +159,15 @@ var subscriptionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
+			Name:  "force-3ds",
+			Usage: "Override merchant default 3DS behaviour for this subscription",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "force_3ds",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
 			Name:  "on-demand.mandate_only",
 			Usage: "If set as True, does not perform any charge and only authorizes payment method details for future use.",
 			Config: jsonflag.JSONConfig{
