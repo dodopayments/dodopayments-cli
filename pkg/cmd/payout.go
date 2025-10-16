@@ -17,6 +17,22 @@ var payoutsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
+		&jsonflag.JSONDatetimeFlag{
+			Name:  "created-at-gte",
+			Usage: "Get payouts created after this time (inclusive)",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Query,
+				Path: "created_at_gte",
+			},
+		},
+		&jsonflag.JSONDatetimeFlag{
+			Name:  "created-at-lte",
+			Usage: "Get payouts created before this time (inclusive)",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Query,
+				Path: "created_at_lte",
+			},
+		},
 		&jsonflag.JSONIntFlag{
 			Name:  "page-number",
 			Usage: "Page number default is 0",
