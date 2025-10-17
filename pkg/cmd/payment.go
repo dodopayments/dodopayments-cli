@@ -65,14 +65,16 @@ var paymentsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customer.email",
+			Name:  "customer.email",
+			Usage: "Email is required for creating a new customer",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "customer.email",
 			},
 		},
 		&jsonflag.JSONStringFlag{
-			Name: "customer.name",
+			Name:  "customer.name",
+			Usage: "Optional full name of the customer. If provided during session creation,\nit is persisted and becomes immutable for the session. If omitted here,\nit can be provided later via the confirm API.",
 			Config: jsonflag.JSONConfig{
 				Kind: jsonflag.Body,
 				Path: "customer.name",
