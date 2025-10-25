@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.55.8 (2025-10-25)
+
+Full Changelog: [v1.55.7...v1.55.8](https://github.com/dodopayments/dodopayments-cli/compare/v1.55.7...v1.55.8)
+
+### Bug Fixes
+
+* fix builds for non-public Go repos ([a768b8e](https://github.com/dodopayments/dodopayments-cli/commit/a768b8e638910f2b4e5bd04af87cfe5242b58f1b))
+* remove some bootstrapping logic ([efeec41](https://github.com/dodopayments/dodopayments-cli/commit/efeec413ca127340a6eeb6144f7899b0e0b9c9f5))
+
 ## 1.55.7 (2025-10-18)
 
 Full Changelog: [v1.55.0...v1.55.7](https://github.com/dodopayments/dodopayments-cli/compare/v1.55.0...v1.55.7)
