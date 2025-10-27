@@ -338,6 +338,18 @@ var checkoutSessionsCreate = cli.Command{
 	HideHelpCommand: true,
 }
 
+var checkoutSessionsRetrieve = cli.Command{
+	Name:  "retrieve",
+	Usage: "Perform retrieve operation",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name: "id",
+		},
+	},
+	Action:          handleCheckoutSessionsRetrieve,
+	HideHelpCommand: true,
+}
+
 func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
@@ -360,4 +372,31 @@ func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON("checkout-sessions create", json, format, transform)
+}
+
+func handleCheckoutSessionsRetrieve(ctx context.Context, cmd *cli.Command) error {
+	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
+		cmd.Set("id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+	var res []byte
+	_, err := cc.client.CheckoutSessions.Get(
+		ctx,
+		cmd.Value("id").(string),
+		option.WithMiddleware(cc.AsMiddleware()),
+		option.WithResponseBodyInto(&res),
+	)
+	if err != nil {
+		return err
+	}
+
+	json := gjson.Parse(string(res))
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON("checkout-sessions retrieve", json, format, transform)
 }

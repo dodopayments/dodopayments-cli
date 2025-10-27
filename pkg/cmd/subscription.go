@@ -326,6 +326,13 @@ var subscriptionsUpdate = cli.Command{
 				SetValue: true,
 			},
 		},
+		&jsonflag.JSONStringFlag{
+			Name: "customer-name",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Body,
+				Path: "customer_name",
+			},
+		},
 		&jsonflag.JSONDatetimeFlag{
 			Name: "disable-on-demand.next_billing_date",
 			Config: jsonflag.JSONConfig{
