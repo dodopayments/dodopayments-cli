@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.3.6
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/term v0.2.1
-	github.com/dodopayments/dodopayments-go v1.55.7
+	github.com/dodopayments/dodopayments-go v1.56.0
 	github.com/itchyny/json2yaml v0.1.4
 	github.com/muesli/reflow v0.3.0
 	github.com/tidwall/gjson v1.18.0
@@ -34,6 +34,7 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/standard-webhooks/standard-webhooks/libraries v0.0.0-20250711233419-a173a6c0125c // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sync v0.15.0 // indirect
