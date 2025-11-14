@@ -18,6 +18,14 @@ var productsCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&jsonflag.JSONStringFlag{
+			Name:  "name",
+			Usage: "Name of the product",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Body,
+				Path: "name",
+			},
+		},
+		&jsonflag.JSONStringFlag{
 			Name:  "price.currency",
 			Usage: "The currency in which the payment is made.",
 			Config: jsonflag.JSONConfig{
@@ -274,14 +282,6 @@ var productsCreate = cli.Command{
 				Kind:     jsonflag.Body,
 				Path:     "license_key_enabled",
 				SetValue: true,
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "name",
-			Usage: "Optional name of the product",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
 			},
 		},
 	},

@@ -222,6 +222,62 @@ var checkoutSessionsCreate = cli.Command{
 			},
 		},
 		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_city",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_city",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_country",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_country",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_email",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_email",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_name",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_name",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_state",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_state",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_street",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_street",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
+			Name: "feature-flags.allow_customer_editing_zipcode",
+			Config: jsonflag.JSONConfig{
+				Kind:     jsonflag.Body,
+				Path:     "feature_flags.allow_customer_editing_zipcode",
+				SetValue: true,
+			},
+		},
+		&jsonflag.JSONBoolFlag{
 			Name:  "feature-flags.allow_discount_code",
 			Usage: "If the customer is allowed to apply discount code, set it to true.\n\nDefault is true",
 			Config: jsonflag.JSONConfig{

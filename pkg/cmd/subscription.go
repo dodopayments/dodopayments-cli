@@ -607,6 +607,39 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 	HideHelpCommand: true,
 }
 
+var subscriptionsUpdatePaymentMethod = cli.Command{
+	Name:  "update-payment-method",
+	Usage: "Perform update-payment-method operation",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name: "subscription-id",
+		},
+		&jsonflag.JSONStringFlag{
+			Name: "type",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Body,
+				Path: "type",
+			},
+		},
+		&jsonflag.JSONStringFlag{
+			Name: "return-url",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Body,
+				Path: "return_url",
+			},
+		},
+		&jsonflag.JSONStringFlag{
+			Name: "payment-method-id",
+			Config: jsonflag.JSONConfig{
+				Kind: jsonflag.Body,
+				Path: "payment_method_id",
+			},
+		},
+	},
+	Action:          handleSubscriptionsUpdatePaymentMethod,
+	HideHelpCommand: true,
+}
+
 func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
@@ -786,4 +819,33 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON("subscriptions retrieve-usage-history", json, format, transform)
+}
+
+func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Command) error {
+	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+	params := dodopayments.SubscriptionUpdatePaymentMethodParams{}
+	var res []byte
+	_, err := cc.client.Subscriptions.UpdatePaymentMethod(
+		ctx,
+		cmd.Value("subscription-id").(string),
+		params,
+		option.WithMiddleware(cc.AsMiddleware()),
+		option.WithResponseBodyInto(&res),
+	)
+	if err != nil {
+		return err
+	}
+
+	json := gjson.Parse(string(res))
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON("subscriptions update-payment-method", json, format, transform)
 }
