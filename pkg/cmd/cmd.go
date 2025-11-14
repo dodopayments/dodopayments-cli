@@ -99,6 +99,7 @@ func init() {
 					&subscriptionsList,
 					&subscriptionsCharge,
 					&subscriptionsRetrieveUsageHistory,
+					&subscriptionsUpdatePaymentMethod,
 				},
 			},
 			{
@@ -135,6 +136,7 @@ func init() {
 					&customersRetrieve,
 					&customersUpdate,
 					&customersList,
+					&customersRetrievePaymentMethods,
 				},
 			},
 			{

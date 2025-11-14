@@ -114,6 +114,18 @@ var customersList = cli.Command{
 	HideHelpCommand: true,
 }
 
+var customersRetrievePaymentMethods = cli.Command{
+	Name:  "retrieve-payment-methods",
+	Usage: "Perform retrieve-payment-methods operation",
+	Flags: []cli.Flag{
+		&cli.StringFlag{
+			Name: "customer-id",
+		},
+	},
+	Action:          handleCustomersRetrievePaymentMethods,
+	HideHelpCommand: true,
+}
+
 func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	cc := getAPICommandContext(cmd)
 	unusedArgs := cmd.Args().Slice()
@@ -216,4 +228,31 @@ func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON("customers list", json, format, transform)
+}
+
+func handleCustomersRetrievePaymentMethods(ctx context.Context, cmd *cli.Command) error {
+	cc := getAPICommandContext(cmd)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
+		cmd.Set("customer-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+	var res []byte
+	_, err := cc.client.Customers.GetPaymentMethods(
+		ctx,
+		cmd.Value("customer-id").(string),
+		option.WithMiddleware(cc.AsMiddleware()),
+		option.WithResponseBodyInto(&res),
+	)
+	if err != nil {
+		return err
+	}
+
+	json := gjson.Parse(string(res))
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON("customers retrieve-payment-methods", json, format, transform)
 }
