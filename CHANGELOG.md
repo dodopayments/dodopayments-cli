@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.60.5 (2025-11-17)
+
+Full Changelog: [v1.60.0...v1.60.5](https://github.com/dodopayments/dodopayments-cli/compare/v1.60.0...v1.60.5)
+
+### Chores
+
+* **internal:** codegen related update ([930d499](https://github.com/dodopayments/dodopayments-cli/commit/930d499a929a0aa4728e4a297d9de50db7e0e9e9))
+
 ## 1.60.0 (2025-11-14)
 
 Full Changelog: [v1.56.5...v1.60.0](https://github.com/dodopayments/dodopayments-cli/compare/v1.56.5...v1.60.0)
