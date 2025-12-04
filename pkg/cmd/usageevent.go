@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,7 +18,7 @@ var usageEventsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Fetch detailed information about a single event using its unique event ID. This\nendpoint is useful for:",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "event-id",
 		},
 	},
@@ -29,60 +30,53 @@ var usageEventsList = cli.Command{
 	Name:  "list",
 	Usage: "Fetch events from your account with powerful filtering capabilities. This\nendpoint is ideal for:",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "customer-id",
 			Usage: "Filter events by customer ID",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "customer_id",
+			Config: requestflag.RequestConfig{
+				QueryPath: "customer_id",
 			},
 		},
-		&jsonflag.JSONDatetimeFlag{
+		&requestflag.DateTimeFlag{
 			Name:  "end",
 			Usage: "Filter events created before this timestamp",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "end",
+			Config: requestflag.RequestConfig{
+				QueryPath: "end",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "event-name",
 			Usage: "Filter events by event name. If both event_name and meter_id are provided, they must match the meter's configured event_name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "event_name",
+			Config: requestflag.RequestConfig{
+				QueryPath: "event_name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "meter-id",
 			Usage: "Filter events by meter ID. When provided, only events that match the meter's event_name and filter criteria will be returned",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "meter_id",
+			Config: requestflag.RequestConfig{
+				QueryPath: "meter_id",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-number",
 			Usage: "Page number (0-based, default: 0)",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-size",
 			Usage: "Number of events to return per page (default: 10)",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
-		&jsonflag.JSONDatetimeFlag{
+		&requestflag.DateTimeFlag{
 			Name:  "start",
 			Usage: "Filter events created after this timestamp",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "start",
+			Config: requestflag.RequestConfig{
+				QueryPath: "start",
 			},
 		},
 	},
@@ -94,45 +88,11 @@ var usageEventsIngest = cli.Command{
 	Name:  "ingest",
 	Usage: "This endpoint allows you to ingest custom events that can be used for:",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
-			Name:  "events.customer_id",
+		&requestflag.YAMLSliceFlag{
+			Name:  "event",
 			Usage: "List of events to be pushed",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "events.#.customer_id",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "events.event_id",
-			Usage: "List of events to be pushed",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "events.#.event_id",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "events.event_name",
-			Usage: "List of events to be pushed",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "events.#.event_name",
-			},
-		},
-		&jsonflag.JSONDatetimeFlag{
-			Name:  "events.timestamp",
-			Usage: "List of events to be pushed",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "events.#.timestamp",
-			},
-		},
-		&jsonflag.JSONAnyFlag{
-			Name:  "+event",
-			Usage: "List of events to be pushed",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "events.-1",
-				SetValue: map[string]interface{}{},
+			Config: requestflag.RequestConfig{
+				BodyPath: "events",
 			},
 		},
 	},
@@ -141,7 +101,7 @@ var usageEventsIngest = cli.Command{
 }
 
 func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("event-id") && len(unusedArgs) > 0 {
 		cmd.Set("event-id", unusedArgs[0])
@@ -150,12 +110,21 @@ func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.UsageEvents.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.UsageEvents.Get(
 		ctx,
-		cmd.Value("event-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "event-id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -168,18 +137,28 @@ func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.UsageEventListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.UsageEvents.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.UsageEvents.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -192,18 +171,28 @@ func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleUsageEventsIngest(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.UsageEventIngestParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.UsageEvents.Ingest(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.UsageEvents.Ingest(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err

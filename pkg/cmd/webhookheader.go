@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -16,7 +18,7 @@ var webhooksHeadersRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Get a webhook by id",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "webhook-id",
 		},
 	},
@@ -28,8 +30,15 @@ var webhooksHeadersUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Patch a webhook by id",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "webhook-id",
+		},
+		&requestflag.YAMLFlag{
+			Name:  "headers",
+			Usage: "Object of header-value pair to update or add",
+			Config: requestflag.RequestConfig{
+				BodyPath: "headers",
+			},
 		},
 	},
 	Action:          handleWebhooksHeadersUpdate,
@@ -37,7 +46,7 @@ var webhooksHeadersUpdate = cli.Command{
 }
 
 func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
 		cmd.Set("webhook-id", unusedArgs[0])
@@ -46,12 +55,21 @@ func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error 
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Webhooks.Headers.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Webhooks.Headers.Get(
 		ctx,
-		cmd.Value("webhook-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -64,7 +82,7 @@ func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error 
 }
 
 func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
 		cmd.Set("webhook-id", unusedArgs[0])
@@ -74,10 +92,20 @@ func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.WebhookHeaderUpdateParams{}
-	return cc.client.Webhooks.Headers.Update(
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+	return client.Webhooks.Headers.Update(
 		ctx,
-		cmd.Value("webhook-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
+		options...,
 	)
 }

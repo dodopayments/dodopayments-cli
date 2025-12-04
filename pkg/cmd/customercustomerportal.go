@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,16 +18,14 @@ var customersCustomerPortalCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "customer-id",
 		},
-		&jsonflag.JSONBoolFlag{
+		&requestflag.BoolFlag{
 			Name:  "send-email",
 			Usage: "If true, will send link to user.",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Query,
-				Path:     "send_email",
-				SetValue: true,
+			Config: requestflag.RequestConfig{
+				QueryPath: "send_email",
 			},
 		},
 	},
@@ -35,7 +34,7 @@ var customersCustomerPortalCreate = cli.Command{
 }
 
 func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
 		cmd.Set("customer-id", unusedArgs[0])
@@ -45,13 +44,23 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.CustomerCustomerPortalNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.CustomerPortal.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.CustomerPortal.New(
 		ctx,
-		cmd.Value("customer-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "customer-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err

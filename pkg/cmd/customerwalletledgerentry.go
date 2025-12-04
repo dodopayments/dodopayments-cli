@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,45 +18,39 @@ var customersWalletsLedgerEntriesCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "customer-id",
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name: "amount",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "amount",
+			Config: requestflag.RequestConfig{
+				BodyPath: "amount",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "currency",
-			Usage: "Currency of the wallet to adjust",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "currency",
+		&requestflag.StringFlag{
+			Name: "currency",
+			Config: requestflag.RequestConfig{
+				BodyPath: "currency",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "entry-type",
 			Usage: "Type of ledger entry - credit or debit",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "entry_type",
+			Config: requestflag.RequestConfig{
+				BodyPath: "entry_type",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "idempotency-key",
 			Usage: "Optional idempotency key to prevent duplicate entries",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "idempotency_key",
+			Config: requestflag.RequestConfig{
+				BodyPath: "idempotency_key",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "reason",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "reason",
+			Config: requestflag.RequestConfig{
+				BodyPath: "reason",
 			},
 		},
 	},
@@ -67,29 +62,25 @@ var customersWalletsLedgerEntriesList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "customer-id",
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "currency",
-			Usage: "Optional currency filter",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "currency",
+		&requestflag.StringFlag{
+			Name: "currency",
+			Config: requestflag.RequestConfig{
+				QueryPath: "currency",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name: "page-number",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name: "page-size",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
 	},
@@ -98,7 +89,7 @@ var customersWalletsLedgerEntriesList = cli.Command{
 }
 
 func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
 		cmd.Set("customer-id", unusedArgs[0])
@@ -108,13 +99,23 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.Wallets.LedgerEntries.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.Wallets.LedgerEntries.New(
 		ctx,
-		cmd.Value("customer-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "customer-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -127,7 +128,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 }
 
 func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
 		cmd.Set("customer-id", unusedArgs[0])
@@ -137,13 +138,23 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.Wallets.LedgerEntries.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.Wallets.LedgerEntries.List(
 		ctx,
-		cmd.Value("customer-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "customer-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err

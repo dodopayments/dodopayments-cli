@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,39 +18,34 @@ var brandsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "description",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "description",
+			Config: requestflag.RequestConfig{
+				BodyPath: "description",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "statement-descriptor",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "statement_descriptor",
+			Config: requestflag.RequestConfig{
+				BodyPath: "statement_descriptor",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "support-email",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "support_email",
+			Config: requestflag.RequestConfig{
+				BodyPath: "support_email",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "url",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "url",
+			Config: requestflag.RequestConfig{
+				BodyPath: "url",
 			},
 		},
 	},
@@ -61,7 +57,7 @@ var brandsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Thin handler just calls `get_brand` and wraps in `Json(...)`",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -73,36 +69,32 @@ var brandsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "image-id",
 			Usage: "The UUID you got back from the presigned‐upload call",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "image_id",
+			Config: requestflag.RequestConfig{
+				BodyPath: "image_id",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "statement-descriptor",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "statement_descriptor",
+			Config: requestflag.RequestConfig{
+				BodyPath: "statement_descriptor",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "support-email",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "support_email",
+			Config: requestflag.RequestConfig{
+				BodyPath: "support_email",
 			},
 		},
 	},
@@ -122,7 +114,7 @@ var brandsUpdateImages = cli.Command{
 	Name:  "update-images",
 	Usage: "Perform update-images operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -131,18 +123,28 @@ var brandsUpdateImages = cli.Command{
 }
 
 func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.BrandNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Brands.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Brands.New(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -155,7 +157,7 @@ func handleBrandsCreate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -164,12 +166,21 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Brands.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Brands.Get(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -182,7 +193,7 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -192,13 +203,23 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.BrandUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Brands.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Brands.Update(
 		ctx,
-		cmd.Value("id").(string),
+		requestflag.CommandRequestValue[string](cmd, "id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -211,17 +232,23 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
-	var res []byte
-	_, err := cc.client.Brands.List(
-		ctx,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
 	)
+	if err != nil {
+		return err
+	}
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Brands.List(ctx, options...)
 	if err != nil {
 		return err
 	}
@@ -233,7 +260,7 @@ func handleBrandsList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -242,12 +269,21 @@ func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Brands.UpdateImages(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Brands.UpdateImages(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 	if err != nil {
 		return err

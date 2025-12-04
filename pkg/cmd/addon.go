@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,44 +18,38 @@ var addonsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
-			Name:  "currency",
-			Usage: "The currency of the Addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "currency",
+		&requestflag.StringFlag{
+			Name: "currency",
+			Config: requestflag.RequestConfig{
+				BodyPath: "currency",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "name",
 			Usage: "Name of the Addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "price",
 			Usage: "Amount of the addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "price",
+			Config: requestflag.RequestConfig{
+				BodyPath: "price",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "tax-category",
-			Usage: "Tax category applied to this Addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "tax_category",
+			Usage: "Represents the different categories of taxation applicable to various products and services.",
+			Config: requestflag.RequestConfig{
+				BodyPath: "tax_category",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "description",
 			Usage: "Optional description of the Addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "description",
+			Config: requestflag.RequestConfig{
+				BodyPath: "description",
 			},
 		},
 	},
@@ -66,7 +61,7 @@ var addonsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -78,55 +73,48 @@ var addonsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "currency",
-			Usage: "The currency of the Addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "currency",
+		&requestflag.StringFlag{
+			Name: "currency",
+			Config: requestflag.RequestConfig{
+				BodyPath: "currency",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "description",
 			Usage: "Description of the Addon, optional and must be at most 1000 characters.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "description",
+			Config: requestflag.RequestConfig{
+				BodyPath: "description",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "image-id",
 			Usage: "Addon image id after its uploaded to S3",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "image_id",
+			Config: requestflag.RequestConfig{
+				BodyPath: "image_id",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "name",
 			Usage: "Name of the Addon, optional and must be at most 100 characters.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "price",
 			Usage: "Amount of the addon",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "price",
+			Config: requestflag.RequestConfig{
+				BodyPath: "price",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "tax-category",
-			Usage: "Tax category of the Addon.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "tax_category",
+			Usage: "Represents the different categories of taxation applicable to various products and services.",
+			Config: requestflag.RequestConfig{
+				BodyPath: "tax_category",
 			},
 		},
 	},
@@ -138,20 +126,18 @@ var addonsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-number",
 			Usage: "Page number default is 0",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-size",
 			Usage: "Page size default is 10 max is 100",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
 	},
@@ -163,7 +149,7 @@ var addonsUpdateImages = cli.Command{
 	Name:  "update-images",
 	Usage: "Perform update-images operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -172,18 +158,28 @@ var addonsUpdateImages = cli.Command{
 }
 
 func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.AddonNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Addons.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Addons.New(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -196,7 +192,7 @@ func handleAddonsCreate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -205,12 +201,21 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Addons.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Addons.Get(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -223,7 +228,7 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -233,13 +238,23 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.AddonUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Addons.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Addons.Update(
 		ctx,
-		cmd.Value("id").(string),
+		requestflag.CommandRequestValue[string](cmd, "id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -252,18 +267,28 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.AddonListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Addons.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Addons.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -276,7 +301,7 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -285,12 +310,21 @@ func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Addons.UpdateImages(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Addons.UpdateImages(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 	if err != nil {
 		return err

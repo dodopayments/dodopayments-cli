@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,15 +18,13 @@ var productsImagesUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
-		&jsonflag.JSONBoolFlag{
+		&requestflag.BoolFlag{
 			Name: "force-update",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Query,
-				Path:     "force_update",
-				SetValue: true,
+			Config: requestflag.RequestConfig{
+				QueryPath: "force_update",
 			},
 		},
 	},
@@ -34,7 +33,7 @@ var productsImagesUpdate = cli.Command{
 }
 
 func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -44,13 +43,23 @@ func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.ProductImageUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Products.Images.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Products.Images.Update(
 		ctx,
-		cmd.Value("id").(string),
+		requestflag.CommandRequestValue[string](cmd, "id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err

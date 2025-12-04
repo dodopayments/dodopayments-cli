@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,7 +18,7 @@ var licenseKeyInstancesRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -29,14 +30,13 @@ var licenseKeyInstancesUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
 	},
@@ -48,28 +48,25 @@ var licenseKeyInstancesList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "license-key-id",
 			Usage: "Filter by license key ID",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "license_key_id",
+			Config: requestflag.RequestConfig{
+				QueryPath: "license_key_id",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-number",
 			Usage: "Page number default is 0",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-size",
 			Usage: "Page size default is 10 max is 100",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
 	},
@@ -78,7 +75,7 @@ var licenseKeyInstancesList = cli.Command{
 }
 
 func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -87,12 +84,21 @@ func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) er
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.LicenseKeyInstances.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.LicenseKeyInstances.Get(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -105,7 +111,7 @@ func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) er
 }
 
 func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -115,13 +121,23 @@ func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) erro
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.LicenseKeyInstanceUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.LicenseKeyInstances.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.LicenseKeyInstances.Update(
 		ctx,
-		cmd.Value("id").(string),
+		requestflag.CommandRequestValue[string](cmd, "id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -134,18 +150,28 @@ func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) erro
 }
 
 func handleLicenseKeyInstancesList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.LicenseKeyInstanceListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.LicenseKeyInstances.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.LicenseKeyInstances.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err

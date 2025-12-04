@@ -6,6 +6,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
 	"github.com/urfave/cli/v3"
@@ -20,17 +22,23 @@ var miscListSupportedCountries = cli.Command{
 }
 
 func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
-	var res []byte
-	_, err := cc.client.Misc.ListSupportedCountries(
-		ctx,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
 	)
+	if err != nil {
+		return err
+	}
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Misc.ListSupportedCountries(ctx, options...)
 	if err != nil {
 		return err
 	}

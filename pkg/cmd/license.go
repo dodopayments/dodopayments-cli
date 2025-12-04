@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,18 +18,16 @@ var licensesActivate = cli.Command{
 	Name:  "activate",
 	Usage: "Perform activate operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "license-key",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "license_key",
+			Config: requestflag.RequestConfig{
+				BodyPath: "license_key",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
 	},
@@ -40,18 +39,16 @@ var licensesDeactivate = cli.Command{
 	Name:  "deactivate",
 	Usage: "Perform deactivate operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "license-key",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "license_key",
+			Config: requestflag.RequestConfig{
+				BodyPath: "license_key",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "license-key-instance-id",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "license_key_instance_id",
+			Config: requestflag.RequestConfig{
+				BodyPath: "license_key_instance_id",
 			},
 		},
 	},
@@ -63,18 +60,16 @@ var licensesValidate = cli.Command{
 	Name:  "validate",
 	Usage: "Perform validate operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "license-key",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "license_key",
+			Config: requestflag.RequestConfig{
+				BodyPath: "license_key",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "license-key-instance-id",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "license_key_instance_id",
+			Config: requestflag.RequestConfig{
+				BodyPath: "license_key_instance_id",
 			},
 		},
 	},
@@ -83,18 +78,28 @@ var licensesValidate = cli.Command{
 }
 
 func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.LicenseActivateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Licenses.Activate(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Licenses.Activate(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -107,32 +112,52 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.LicenseDeactivateParams{}
-	return cc.client.Licenses.Deactivate(
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+	return client.Licenses.Deactivate(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
+		options...,
 	)
 }
 
 func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.LicenseValidateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Licenses.Validate(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Licenses.Validate(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
