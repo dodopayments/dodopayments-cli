@@ -34,8 +34,7 @@ dodopayments [resource] [command] [flags]
 
 ```sh
 dodopayments checkout-sessions create \
-  --product-cart.product_id product_id \
-  --product-cart.quantity 0
+  --product-cart '{product_id: product_id, quantity: 0}'
 ```
 
 For details about specific commands, use the `--help` flag.

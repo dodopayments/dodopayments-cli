@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,75 +18,58 @@ var discountsCreate = cli.Command{
 	Name:  "create",
 	Usage: "POST /discounts If `code` is omitted or empty, a random 16-char uppercase code\nis generated.",
 	Flags: []cli.Flag{
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "amount",
 			Usage: "The discount amount.\n\n- If `discount_type` is **not** `percentage`, `amount` is in **USD cents**. For example, `100` means `$1.00`.\n  Only USD is allowed.\n- If `discount_type` **is** `percentage`, `amount` is in **basis points**. For example, `540` means `5.4%`.\n\nMust be at least 1.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "amount",
+			Config: requestflag.RequestConfig{
+				BodyPath: "amount",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "type",
-			Usage: "The discount type (e.g. `percentage`, `flat`, or `flat_per_unit`).",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "type",
+		&requestflag.StringFlag{
+			Name: "type",
+			Config: requestflag.RequestConfig{
+				BodyPath: "type",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "code",
 			Usage: "Optionally supply a code (will be uppercased).\n- Must be at least 3 characters if provided.\n- If omitted, a random 16-character code is generated.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "code",
+			Config: requestflag.RequestConfig{
+				BodyPath: "code",
 			},
 		},
-		&jsonflag.JSONDatetimeFlag{
+		&requestflag.DateTimeFlag{
 			Name:  "expires-at",
 			Usage: "When the discount expires, if ever.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "expires_at",
+			Config: requestflag.RequestConfig{
+				BodyPath: "expires_at",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringSliceFlag{
 			Name:  "restricted-to",
 			Usage: "List of product IDs to restrict usage (if any).",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "restricted_to.#",
+			Config: requestflag.RequestConfig{
+				BodyPath: "restricted_to",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "+restricted-to",
-			Usage: "List of product IDs to restrict usage (if any).",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "restricted_to.-1",
-			},
-		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "subscription-cycles",
 			Usage: "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "subscription_cycles",
+			Config: requestflag.RequestConfig{
+				BodyPath: "subscription_cycles",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "usage-limit",
 			Usage: "How many times this discount can be used (if any).\nMust be >= 1 if provided.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "usage_limit",
+			Config: requestflag.RequestConfig{
+				BodyPath: "usage_limit",
 			},
 		},
 	},
@@ -97,7 +81,7 @@ var discountsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "GET /discounts/{discount_id}",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "discount-id",
 		},
 	},
@@ -109,76 +93,59 @@ var discountsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "PATCH /discounts/{discount_id}",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "discount-id",
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "amount",
 			Usage: "If present, update the discount amount:\n- If `discount_type` is `percentage`, this represents **basis points** (e.g., `540` = `5.4%`).\n- Otherwise, this represents **USD cents** (e.g., `100` = `$1.00`).\n\nMust be at least 1 if provided.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "amount",
+			Config: requestflag.RequestConfig{
+				BodyPath: "amount",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "code",
 			Usage: "If present, update the discount code (uppercase).",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "code",
+			Config: requestflag.RequestConfig{
+				BodyPath: "code",
 			},
 		},
-		&jsonflag.JSONDatetimeFlag{
+		&requestflag.DateTimeFlag{
 			Name: "expires-at",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "expires_at",
+			Config: requestflag.RequestConfig{
+				BodyPath: "expires_at",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringSliceFlag{
 			Name:  "restricted-to",
 			Usage: "If present, replaces all restricted product IDs with this new set.\nTo remove all restrictions, send empty array",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "restricted_to.#",
+			Config: requestflag.RequestConfig{
+				BodyPath: "restricted_to",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "+restricted-to",
-			Usage: "If present, replaces all restricted product IDs with this new set.\nTo remove all restrictions, send empty array",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "restricted_to.-1",
-			},
-		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "subscription-cycles",
 			Usage: "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "subscription_cycles",
+			Config: requestflag.RequestConfig{
+				BodyPath: "subscription_cycles",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "type",
-			Usage: "If present, update the discount type.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "type",
+		&requestflag.StringFlag{
+			Name: "type",
+			Config: requestflag.RequestConfig{
+				BodyPath: "type",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name: "usage-limit",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "usage_limit",
+			Config: requestflag.RequestConfig{
+				BodyPath: "usage_limit",
 			},
 		},
 	},
@@ -190,20 +157,18 @@ var discountsList = cli.Command{
 	Name:  "list",
 	Usage: "GET /discounts",
 	Flags: []cli.Flag{
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-number",
 			Usage: "Page number (default = 0).",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-size",
 			Usage: "Page size (default = 10, max = 100).",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
 	},
@@ -215,7 +180,7 @@ var discountsDelete = cli.Command{
 	Name:  "delete",
 	Usage: "DELETE /discounts/{discount_id}",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "discount-id",
 		},
 	},
@@ -224,18 +189,28 @@ var discountsDelete = cli.Command{
 }
 
 func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.DiscountNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Discounts.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Discounts.New(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -248,7 +223,7 @@ func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
 		cmd.Set("discount-id", unusedArgs[0])
@@ -257,12 +232,21 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Discounts.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Discounts.Get(
 		ctx,
-		cmd.Value("discount-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "discount-id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -275,7 +259,7 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
 		cmd.Set("discount-id", unusedArgs[0])
@@ -285,13 +269,23 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.DiscountUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Discounts.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Discounts.Update(
 		ctx,
-		cmd.Value("discount-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "discount-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -304,18 +298,28 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.DiscountListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Discounts.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Discounts.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -328,7 +332,7 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
 		cmd.Set("discount-id", unusedArgs[0])
@@ -337,9 +341,18 @@ func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
-	return cc.client.Discounts.Delete(
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+	return client.Discounts.Delete(
 		ctx,
-		cmd.Value("discount-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
+		requestflag.CommandRequestValue[string](cmd, "discount-id"),
+		options...,
 	)
 }

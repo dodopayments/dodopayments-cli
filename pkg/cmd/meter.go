@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,216 +18,45 @@ var metersCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
-			Name:  "aggregation.type",
-			Usage: "Aggregation type for the meter",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "aggregation.type",
+		&requestflag.YAMLFlag{
+			Name: "aggregation",
+			Config: requestflag.RequestConfig{
+				BodyPath: "aggregation",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "aggregation.key",
-			Usage: "Required when type is not COUNT",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "aggregation.key",
-			},
-		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "event-name",
 			Usage: "Event name to track",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "event_name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "event_name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "measurement-unit",
 			Usage: "measurement unit",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "measurement_unit",
+			Config: requestflag.RequestConfig{
+				BodyPath: "measurement_unit",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "name",
 			Usage: "Name of the meter",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "description",
 			Usage: "Optional description of the meter",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "description",
+			Config: requestflag.RequestConfig{
+				BodyPath: "description",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.key",
-			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.key",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.operator",
-			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.operator",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.value",
-			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.value",
-			},
-		},
-		&jsonflag.JSONAnyFlag{
-			Name:  "filter.+clause",
-			Usage: "Direct filter conditions - array of condition objects with key, operator, and value",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "filter.clauses.-1",
-				SetValue: map[string]interface{}{},
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.key",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.key",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.operator",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.operator",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.value",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.value",
-			},
-		},
-		&jsonflag.JSONAnyFlag{
-			Name:  "filter.clauses.+clause",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "filter.clauses.#.clauses.-1",
-				SetValue: map[string]interface{}{},
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.key",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.key",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.operator",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.operator",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.value",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.value",
-			},
-		},
-		&jsonflag.JSONAnyFlag{
-			Name:  "filter.clauses.clauses.+clause",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "filter.clauses.#.clauses.#.clauses.-1",
-				SetValue: map[string]interface{}{},
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.clauses.key",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.clauses.#.key",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.clauses.operator",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.clauses.#.operator",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.clauses.value",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.clauses.#.value",
-			},
-		},
-		&jsonflag.JSONAnyFlag{
-			Name:  "filter.clauses.clauses.clauses.+clause",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "filter.clauses.#.clauses.#.clauses.#.clauses.-1",
-				SetValue: map[string]interface{}{},
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.clauses.conjunction",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.clauses.#.conjunction",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.clauses.conjunction",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.clauses.#.conjunction",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.clauses.conjunction",
-			Usage: "Nested filters - supports up to 3 levels deep",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.clauses.#.conjunction",
-			},
-		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter.conjunction",
-			Usage: "Logical conjunction to apply between clauses (and/or)",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter.conjunction",
+		&requestflag.YAMLFlag{
+			Name:  "filter",
+			Usage: "A filter structure that combines multiple conditions with logical conjunctions (AND/OR).\n\nSupports up to 3 levels of nesting to create complex filter expressions.\nEach filter has a conjunction (and/or) and clauses that can be either direct conditions or nested filters.",
+			Config: requestflag.RequestConfig{
+				BodyPath: "filter",
 			},
 		},
 	},
@@ -238,7 +68,7 @@ var metersRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -250,29 +80,25 @@ var metersList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONBoolFlag{
+		&requestflag.BoolFlag{
 			Name:  "archived",
 			Usage: "List archived meters",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Query,
-				Path:     "archived",
-				SetValue: true,
+			Config: requestflag.RequestConfig{
+				QueryPath: "archived",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-number",
 			Usage: "Page number default is 0",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-size",
 			Usage: "Page size default is 10 max is 100",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
 	},
@@ -284,7 +110,7 @@ var metersArchive = cli.Command{
 	Name:  "archive",
 	Usage: "Perform archive operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -296,7 +122,7 @@ var metersUnarchive = cli.Command{
 	Name:  "unarchive",
 	Usage: "Perform unarchive operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "id",
 		},
 	},
@@ -305,18 +131,28 @@ var metersUnarchive = cli.Command{
 }
 
 func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.MeterNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Meters.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Meters.New(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -329,7 +165,7 @@ func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -338,12 +174,21 @@ func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Meters.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Meters.Get(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -356,18 +201,28 @@ func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleMetersList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.MeterListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Meters.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Meters.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -380,7 +235,7 @@ func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -389,15 +244,24 @@ func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
-	return cc.client.Meters.Archive(
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+	return client.Meters.Archive(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 }
 
 func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
 		cmd.Set("id", unusedArgs[0])
@@ -406,9 +270,18 @@ func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
-	return cc.client.Meters.Unarchive(
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+	return client.Meters.Unarchive(
 		ctx,
-		cmd.Value("id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
+		requestflag.CommandRequestValue[string](cmd, "id"),
+		options...,
 	)
 }

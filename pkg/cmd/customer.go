@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,25 +18,29 @@ var customersCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "email",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "email",
+			Config: requestflag.RequestConfig{
+				BodyPath: "email",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.YAMLFlag{
+			Name:  "metadata",
+			Usage: "Additional metadata for the customer",
+			Config: requestflag.RequestConfig{
+				BodyPath: "metadata",
+			},
+		},
+		&requestflag.StringFlag{
 			Name: "phone-number",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "phone_number",
+			Config: requestflag.RequestConfig{
+				BodyPath: "phone_number",
 			},
 		},
 	},
@@ -47,7 +52,7 @@ var customersRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "customer-id",
 		},
 	},
@@ -59,21 +64,26 @@ var customersUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "customer-id",
 		},
-		&jsonflag.JSONStringFlag{
-			Name: "name",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "name",
+		&requestflag.YAMLFlag{
+			Name:  "metadata",
+			Usage: "Additional metadata for the customer",
+			Config: requestflag.RequestConfig{
+				BodyPath: "metadata",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
+			Name: "name",
+			Config: requestflag.RequestConfig{
+				BodyPath: "name",
+			},
+		},
+		&requestflag.StringFlag{
 			Name: "phone-number",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "phone_number",
+			Config: requestflag.RequestConfig{
+				BodyPath: "phone_number",
 			},
 		},
 	},
@@ -85,28 +95,25 @@ var customersList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "email",
 			Usage: "Filter by customer email",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "email",
+			Config: requestflag.RequestConfig{
+				QueryPath: "email",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-number",
 			Usage: "Page number default is 0",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_number",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_number",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "page-size",
 			Usage: "Page size default is 10 max is 100",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "page_size",
+			Config: requestflag.RequestConfig{
+				QueryPath: "page_size",
 			},
 		},
 	},
@@ -118,7 +125,7 @@ var customersRetrievePaymentMethods = cli.Command{
 	Name:  "retrieve-payment-methods",
 	Usage: "Perform retrieve-payment-methods operation",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "customer-id",
 		},
 	},
@@ -127,18 +134,28 @@ var customersRetrievePaymentMethods = cli.Command{
 }
 
 func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.CustomerNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.New(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -151,7 +168,7 @@ func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
 		cmd.Set("customer-id", unusedArgs[0])
@@ -160,12 +177,21 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.Get(
 		ctx,
-		cmd.Value("customer-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "customer-id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -178,7 +204,7 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
 		cmd.Set("customer-id", unusedArgs[0])
@@ -188,13 +214,23 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.CustomerUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.Update(
 		ctx,
-		cmd.Value("customer-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "customer-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -207,18 +243,28 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.CustomerListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -231,7 +277,7 @@ func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleCustomersRetrievePaymentMethods(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("customer-id") && len(unusedArgs) > 0 {
 		cmd.Set("customer-id", unusedArgs[0])
@@ -240,12 +286,21 @@ func handleCustomersRetrievePaymentMethods(ctx context.Context, cmd *cli.Command
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Customers.GetPaymentMethods(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Customers.GetPaymentMethods(
 		ctx,
-		cmd.Value("customer-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "customer-id"),
+		options...,
 	)
 	if err != nil {
 		return err

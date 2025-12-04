@@ -6,7 +6,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonflag"
+	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go"
 	"github.com/dodopayments/dodopayments-go/option"
 	"github.com/tidwall/gjson"
@@ -17,59 +18,58 @@ var webhooksCreate = cli.Command{
 	Name:  "create",
 	Usage: "Create a new webhook",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "url",
 			Usage: "Url of the webhook",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "url",
+			Config: requestflag.RequestConfig{
+				BodyPath: "url",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name: "description",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "description",
+			Config: requestflag.RequestConfig{
+				BodyPath: "description",
 			},
 		},
-		&jsonflag.JSONBoolFlag{
+		&requestflag.BoolFlag{
 			Name:  "disabled",
 			Usage: "Create the webhook in a disabled state.\n\nDefault is false",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "disabled",
-				SetValue: true,
+			Config: requestflag.RequestConfig{
+				BodyPath: "disabled",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter-types",
+		&requestflag.StringSliceFlag{
+			Name:  "filter-type",
 			Usage: "Filter events to the webhook.\n\nWebhook event will only be sent for events in the list.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter_types.#",
+			Config: requestflag.RequestConfig{
+				BodyPath: "filter_types",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "+filter-type",
-			Usage: "Filter events to the webhook.\n\nWebhook event will only be sent for events in the list.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter_types.-1",
+		&requestflag.YAMLFlag{
+			Name:  "headers",
+			Usage: "Custom headers to be passed",
+			Config: requestflag.RequestConfig{
+				BodyPath: "headers",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "idempotency-key",
 			Usage: "The request's idempotency key",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "idempotency_key",
+			Config: requestflag.RequestConfig{
+				BodyPath: "idempotency_key",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.YAMLFlag{
+			Name:  "metadata",
+			Usage: "Metadata to be passed to the webhook\nDefaut is {}",
+			Config: requestflag.RequestConfig{
+				BodyPath: "metadata",
+			},
+		},
+		&requestflag.IntFlag{
 			Name: "rate-limit",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "rate_limit",
+			Config: requestflag.RequestConfig{
+				BodyPath: "rate_limit",
 			},
 		},
 	},
@@ -81,7 +81,7 @@ var webhooksRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Get a webhook by id",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "webhook-id",
 		},
 	},
@@ -93,56 +93,49 @@ var webhooksUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Patch a webhook by id",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "webhook-id",
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "description",
 			Usage: "Description of the webhook",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "description",
+			Config: requestflag.RequestConfig{
+				BodyPath: "description",
 			},
 		},
-		&jsonflag.JSONBoolFlag{
+		&requestflag.BoolFlag{
 			Name:  "disabled",
 			Usage: "To Disable the endpoint, set it to true.",
-			Config: jsonflag.JSONConfig{
-				Kind:     jsonflag.Body,
-				Path:     "disabled",
-				SetValue: true,
+			Config: requestflag.RequestConfig{
+				BodyPath: "disabled",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "filter-types",
+		&requestflag.StringSliceFlag{
+			Name:  "filter-type",
 			Usage: "Filter events to the endpoint.\n\nWebhook event will only be sent for events in the list.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter_types.#",
+			Config: requestflag.RequestConfig{
+				BodyPath: "filter_types",
 			},
 		},
-		&jsonflag.JSONStringFlag{
-			Name:  "+filter-type",
-			Usage: "Filter events to the endpoint.\n\nWebhook event will only be sent for events in the list.",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "filter_types.-1",
+		&requestflag.YAMLFlag{
+			Name:  "metadata",
+			Usage: "Metadata",
+			Config: requestflag.RequestConfig{
+				BodyPath: "metadata",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "rate-limit",
 			Usage: "Rate limit",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "rate_limit",
+			Config: requestflag.RequestConfig{
+				BodyPath: "rate_limit",
 			},
 		},
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "url",
 			Usage: "Url endpoint",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Body,
-				Path: "url",
+			Config: requestflag.RequestConfig{
+				BodyPath: "url",
 			},
 		},
 	},
@@ -154,20 +147,18 @@ var webhooksList = cli.Command{
 	Name:  "list",
 	Usage: "List all webhooks",
 	Flags: []cli.Flag{
-		&jsonflag.JSONStringFlag{
+		&requestflag.StringFlag{
 			Name:  "iterator",
 			Usage: "The iterator returned from a prior invocation",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "iterator",
+			Config: requestflag.RequestConfig{
+				QueryPath: "iterator",
 			},
 		},
-		&jsonflag.JSONIntFlag{
+		&requestflag.IntFlag{
 			Name:  "limit",
 			Usage: "Limit the number of returned items",
-			Config: jsonflag.JSONConfig{
-				Kind: jsonflag.Query,
-				Path: "limit",
+			Config: requestflag.RequestConfig{
+				QueryPath: "limit",
 			},
 		},
 	},
@@ -179,7 +170,7 @@ var webhooksDelete = cli.Command{
 	Name:  "delete",
 	Usage: "Delete a webhook by id",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "webhook-id",
 		},
 	},
@@ -191,7 +182,7 @@ var webhooksRetrieveSecret = cli.Command{
 	Name:  "retrieve-secret",
 	Usage: "Get webhook secret by id",
 	Flags: []cli.Flag{
-		&cli.StringFlag{
+		&requestflag.StringFlag{
 			Name: "webhook-id",
 		},
 	},
@@ -200,18 +191,28 @@ var webhooksRetrieveSecret = cli.Command{
 }
 
 func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.WebhookNewParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Webhooks.New(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Webhooks.New(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -224,7 +225,7 @@ func handleWebhooksCreate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
 		cmd.Set("webhook-id", unusedArgs[0])
@@ -233,12 +234,21 @@ func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Webhooks.Get(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Webhooks.Get(
 		ctx,
-		cmd.Value("webhook-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -251,7 +261,7 @@ func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
 		cmd.Set("webhook-id", unusedArgs[0])
@@ -261,13 +271,23 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.WebhookUpdateParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Webhooks.Update(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Webhooks.Update(
 		ctx,
-		cmd.Value("webhook-id").(string),
+		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -280,18 +300,28 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
 	params := dodopayments.WebhookListParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Webhooks.List(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Webhooks.List(
 		ctx,
 		params,
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		options...,
 	)
 	if err != nil {
 		return err
@@ -304,7 +334,7 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 }
 
 func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
 		cmd.Set("webhook-id", unusedArgs[0])
@@ -313,15 +343,24 @@ func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
-	return cc.client.Webhooks.Delete(
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+	return client.Webhooks.Delete(
 		ctx,
-		cmd.Value("webhook-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
+		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
+		options...,
 	)
 }
 
 func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
-	cc := getAPICommandContext(cmd)
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
 	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
 		cmd.Set("webhook-id", unusedArgs[0])
@@ -330,12 +369,21 @@ func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
 	var res []byte
-	_, err := cc.client.Webhooks.GetSecret(
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Webhooks.GetSecret(
 		ctx,
-		cmd.Value("webhook-id").(string),
-		option.WithMiddleware(cc.AsMiddleware()),
-		option.WithResponseBodyInto(&res),
+		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
+		options...,
 	)
 	if err != nil {
 		return err
