@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -45,19 +46,16 @@ func handleCustomersWalletsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.Wallets.List(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
-		options...,
-	)
+	_, err = client.Customers.Wallets.List(ctx, requestflag.CommandRequestValue[string](cmd, "customer-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers:wallets list", json, format, transform)
+	return ShowJSON(os.Stdout, "customers:wallets list", obj, format, transform)
 }

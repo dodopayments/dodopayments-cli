@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -435,6 +436,7 @@ var subscriptionsUpdatePaymentMethod = cli.Command{
 func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -449,21 +451,18 @@ func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Subscriptions.New(
-		ctx,
-		params,
-		options...,
-	)
+	_, err = client.Subscriptions.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions create", json, format, transform)
+	return ShowJSON(os.Stdout, "subscriptions create", obj, format, transform)
 }
 
 func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -485,21 +484,18 @@ func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Subscriptions.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
-		options...,
-	)
+	_, err = client.Subscriptions.Get(ctx, requestflag.CommandRequestValue[string](cmd, "subscription-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "subscriptions retrieve", obj, format, transform)
 }
 
 func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -523,6 +519,7 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.Update(
@@ -535,15 +532,16 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions update", json, format, transform)
+	return ShowJSON(os.Stdout, "subscriptions update", obj, format, transform)
 }
 
 func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -558,21 +556,31 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Subscriptions.List(
-		ctx,
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions list", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Subscriptions.List(ctx, params, options...)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "subscriptions list", obj, format, transform)
+	} else {
+		iter := client.Subscriptions.ListAutoPaging(ctx, params, options...)
+		return streamOutput("subscriptions list", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "subscriptions list", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }
 
 func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error {
@@ -596,6 +604,7 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 	if err != nil {
 		return err
 	}
+
 	return client.Subscriptions.ChangePlan(
 		ctx,
 		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
@@ -625,6 +634,7 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.Charge(
@@ -637,10 +647,10 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions charge", json, format, transform)
+	return ShowJSON(os.Stdout, "subscriptions charge", obj, format, transform)
 }
 
 func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Command) error {
@@ -664,22 +674,41 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Subscriptions.GetUsageHistory(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions retrieve-usage-history", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Subscriptions.GetUsageHistory(
+			ctx,
+			requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+			params,
+			options...,
+		)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "subscriptions retrieve-usage-history", obj, format, transform)
+	} else {
+		iter := client.Subscriptions.GetUsageHistoryAutoPaging(
+			ctx,
+			requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+			params,
+			options...,
+		)
+		return streamOutput("subscriptions retrieve-usage-history", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "subscriptions retrieve-usage-history", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }
 
 func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Command) error {
@@ -703,6 +732,7 @@ func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Comman
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.UpdatePaymentMethod(
@@ -715,8 +745,8 @@ func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Comman
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("subscriptions update-payment-method", json, format, transform)
+	return ShowJSON(os.Stdout, "subscriptions update-payment-method", obj, format, transform)
 }

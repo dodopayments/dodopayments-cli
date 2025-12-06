@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -57,21 +58,18 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Invoices.Payments.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "payment-id"),
-		options...,
-	)
+	_, err = client.Invoices.Payments.Get(ctx, requestflag.CommandRequestValue[string](cmd, "payment-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("invoices:payments retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "invoices:payments retrieve", obj, format, transform)
 }
 
 func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command) error {
@@ -93,19 +91,16 @@ func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command)
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Invoices.Payments.GetRefund(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "refund-id"),
-		options...,
-	)
+	_, err = client.Invoices.Payments.GetRefund(ctx, requestflag.CommandRequestValue[string](cmd, "refund-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("invoices:payments retrieve-refund", json, format, transform)
+	return ShowJSON(os.Stdout, "invoices:payments retrieve-refund", obj, format, transform)
 }

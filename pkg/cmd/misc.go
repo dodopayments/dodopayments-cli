@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-go"
@@ -24,6 +25,7 @@ var miscListSupportedCountries = cli.Command{
 func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -36,6 +38,7 @@ func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) err
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Misc.ListSupportedCountries(ctx, options...)
@@ -43,8 +46,8 @@ func handleMiscListSupportedCountries(ctx context.Context, cmd *cli.Command) err
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("misc list-supported-countries", json, format, transform)
+	return ShowJSON(os.Stdout, "misc list-supported-countries", obj, format, transform)
 }

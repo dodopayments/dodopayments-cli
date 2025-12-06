@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -191,6 +192,7 @@ var discountsDelete = cli.Command{
 func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -205,21 +207,18 @@ func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Discounts.New(
-		ctx,
-		params,
-		options...,
-	)
+	_, err = client.Discounts.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("discounts create", json, format, transform)
+	return ShowJSON(os.Stdout, "discounts create", obj, format, transform)
 }
 
 func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -241,21 +240,18 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Discounts.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "discount-id"),
-		options...,
-	)
+	_, err = client.Discounts.Get(ctx, requestflag.CommandRequestValue[string](cmd, "discount-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("discounts retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "discounts retrieve", obj, format, transform)
 }
 
 func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -279,6 +275,7 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Discounts.Update(
@@ -291,15 +288,16 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("discounts update", json, format, transform)
+	return ShowJSON(os.Stdout, "discounts update", obj, format, transform)
 }
 
 func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -314,21 +312,31 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Discounts.List(
-		ctx,
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("discounts list", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Discounts.List(ctx, params, options...)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "discounts list", obj, format, transform)
+	} else {
+		iter := client.Discounts.ListAutoPaging(ctx, params, options...)
+		return streamOutput("discounts list", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "discounts list", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }
 
 func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
@@ -350,9 +358,6 @@ func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	return client.Discounts.Delete(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "discount-id"),
-		options...,
-	)
+
+	return client.Discounts.Delete(ctx, requestflag.CommandRequestValue[string](cmd, "discount-id"), options...)
 }
