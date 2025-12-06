@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -130,6 +131,7 @@ var checkoutSessionsRetrieve = cli.Command{
 func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -144,21 +146,18 @@ func handleCheckoutSessionsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.CheckoutSessions.New(
-		ctx,
-		params,
-		options...,
-	)
+	_, err = client.CheckoutSessions.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("checkout-sessions create", json, format, transform)
+	return ShowJSON(os.Stdout, "checkout-sessions create", obj, format, transform)
 }
 
 func handleCheckoutSessionsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -180,19 +179,16 @@ func handleCheckoutSessionsRetrieve(ctx context.Context, cmd *cli.Command) error
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.CheckoutSessions.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
-		options...,
-	)
+	_, err = client.CheckoutSessions.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("checkout-sessions retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "checkout-sessions retrieve", obj, format, transform)
 }

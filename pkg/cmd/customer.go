@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -136,6 +137,7 @@ var customersRetrievePaymentMethods = cli.Command{
 func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -150,21 +152,18 @@ func handleCustomersCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.New(
-		ctx,
-		params,
-		options...,
-	)
+	_, err = client.Customers.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers create", json, format, transform)
+	return ShowJSON(os.Stdout, "customers create", obj, format, transform)
 }
 
 func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -186,21 +185,18 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
-		options...,
-	)
+	_, err = client.Customers.Get(ctx, requestflag.CommandRequestValue[string](cmd, "customer-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "customers retrieve", obj, format, transform)
 }
 
 func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -224,6 +220,7 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Customers.Update(
@@ -236,15 +233,16 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers update", json, format, transform)
+	return ShowJSON(os.Stdout, "customers update", obj, format, transform)
 }
 
 func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -259,21 +257,31 @@ func handleCustomersList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.List(
-		ctx,
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers list", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Customers.List(ctx, params, options...)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "customers list", obj, format, transform)
+	} else {
+		iter := client.Customers.ListAutoPaging(ctx, params, options...)
+		return streamOutput("customers list", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "customers list", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }
 
 func handleCustomersRetrievePaymentMethods(ctx context.Context, cmd *cli.Command) error {
@@ -295,19 +303,16 @@ func handleCustomersRetrievePaymentMethods(ctx context.Context, cmd *cli.Command
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.GetPaymentMethods(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
-		options...,
-	)
+	_, err = client.Customers.GetPaymentMethods(ctx, requestflag.CommandRequestValue[string](cmd, "customer-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers retrieve-payment-methods", json, format, transform)
+	return ShowJSON(os.Stdout, "customers retrieve-payment-methods", obj, format, transform)
 }

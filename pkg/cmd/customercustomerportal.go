@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -54,6 +55,7 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Customers.CustomerPortal.New(
@@ -66,8 +68,8 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers:customer-portal create", json, format, transform)
+	return ShowJSON(os.Stdout, "customers:customer-portal create", obj, format, transform)
 }

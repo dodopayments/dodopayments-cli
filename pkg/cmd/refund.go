@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -117,6 +118,7 @@ var refundsList = cli.Command{
 func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -131,21 +133,18 @@ func handleRefundsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Refunds.New(
-		ctx,
-		params,
-		options...,
-	)
+	_, err = client.Refunds.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("refunds create", json, format, transform)
+	return ShowJSON(os.Stdout, "refunds create", obj, format, transform)
 }
 
 func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -167,26 +166,24 @@ func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Refunds.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "refund-id"),
-		options...,
-	)
+	_, err = client.Refunds.Get(ctx, requestflag.CommandRequestValue[string](cmd, "refund-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("refunds retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "refunds retrieve", obj, format, transform)
 }
 
 func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -201,19 +198,29 @@ func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Refunds.List(
-		ctx,
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("refunds list", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Refunds.List(ctx, params, options...)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "refunds list", obj, format, transform)
+	} else {
+		iter := client.Refunds.ListAutoPaging(ctx, params, options...)
+		return streamOutput("refunds list", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "refunds list", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }

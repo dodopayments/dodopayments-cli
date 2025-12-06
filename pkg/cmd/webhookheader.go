@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -64,21 +65,18 @@ func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error 
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Headers.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
-		options...,
-	)
+	_, err = client.Webhooks.Headers.Get(ctx, requestflag.CommandRequestValue[string](cmd, "webhook-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("webhooks:headers retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "webhooks:headers retrieve", obj, format, transform)
 }
 
 func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
@@ -102,6 +100,7 @@ func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	return client.Webhooks.Headers.Update(
 		ctx,
 		requestflag.CommandRequestValue[string](cmd, "webhook-id"),

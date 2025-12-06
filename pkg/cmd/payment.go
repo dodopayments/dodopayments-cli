@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -196,6 +197,7 @@ var paymentsRetrieveLineItems = cli.Command{
 func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -210,21 +212,18 @@ func handlePaymentsCreate(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Payments.New(
-		ctx,
-		params,
-		options...,
-	)
+	_, err = client.Payments.New(ctx, params, options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("payments create", json, format, transform)
+	return ShowJSON(os.Stdout, "payments create", obj, format, transform)
 }
 
 func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
@@ -246,26 +245,24 @@ func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Payments.Get(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "payment-id"),
-		options...,
-	)
+	_, err = client.Payments.Get(ctx, requestflag.CommandRequestValue[string](cmd, "payment-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("payments retrieve", json, format, transform)
+	return ShowJSON(os.Stdout, "payments retrieve", obj, format, transform)
 }
 
 func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
+
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
@@ -280,21 +277,31 @@ func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Payments.List(
-		ctx,
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("payments list", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Payments.List(ctx, params, options...)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "payments list", obj, format, transform)
+	} else {
+		iter := client.Payments.ListAutoPaging(ctx, params, options...)
+		return streamOutput("payments list", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "payments list", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }
 
 func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) error {
@@ -316,19 +323,16 @@ func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) erro
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Payments.GetLineItems(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "payment-id"),
-		options...,
-	)
+	_, err = client.Payments.GetLineItems(ctx, requestflag.CommandRequestValue[string](cmd, "payment-id"), options...)
 	if err != nil {
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("payments retrieve-line-items", json, format, transform)
+	return ShowJSON(os.Stdout, "payments retrieve-line-items", obj, format, transform)
 }

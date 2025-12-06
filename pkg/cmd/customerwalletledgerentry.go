@@ -5,6 +5,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
@@ -109,6 +110,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 	if err != nil {
 		return err
 	}
+
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Customers.Wallets.LedgerEntries.New(
@@ -121,10 +123,10 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 		return err
 	}
 
-	json := gjson.Parse(string(res))
+	obj := gjson.ParseBytes(res)
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers:wallets:ledger-entries create", json, format, transform)
+	return ShowJSON(os.Stdout, "customers:wallets:ledger-entries create", obj, format, transform)
 }
 
 func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Command) error {
@@ -148,20 +150,39 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 	if err != nil {
 		return err
 	}
-	var res []byte
-	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.Wallets.LedgerEntries.List(
-		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
-		params,
-		options...,
-	)
-	if err != nil {
-		return err
-	}
 
-	json := gjson.Parse(string(res))
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
-	return ShowJSON("customers:wallets:ledger-entries list", json, format, transform)
+	if format == "raw" {
+		var res []byte
+		options = append(options, option.WithResponseBodyInto(&res))
+		_, err = client.Customers.Wallets.LedgerEntries.List(
+			ctx,
+			requestflag.CommandRequestValue[string](cmd, "customer-id"),
+			params,
+			options...,
+		)
+		if err != nil {
+			return err
+		}
+		obj := gjson.ParseBytes(res)
+		return ShowJSON(os.Stdout, "customers:wallets:ledger-entries list", obj, format, transform)
+	} else {
+		iter := client.Customers.Wallets.LedgerEntries.ListAutoPaging(
+			ctx,
+			requestflag.CommandRequestValue[string](cmd, "customer-id"),
+			params,
+			options...,
+		)
+		return streamOutput("customers:wallets:ledger-entries list", func(w *os.File) error {
+			for iter.Next() {
+				item := iter.Current()
+				obj := gjson.Parse(item.JSON.RawJSON())
+				if err := ShowJSON(w, "customers:wallets:ledger-entries list", obj, format, transform); err != nil {
+					return err
+				}
+			}
+			return iter.Err()
+		})
+	}
 }
