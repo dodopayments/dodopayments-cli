@@ -98,6 +98,7 @@ func init() {
 					&subscriptionsUpdate,
 					&subscriptionsList,
 					&subscriptionsCharge,
+					&subscriptionsPreviewChangePlan,
 					&subscriptionsRetrieveUsageHistory,
 					&subscriptionsUpdatePaymentMethod,
 				},

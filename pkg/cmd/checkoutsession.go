@@ -91,6 +91,13 @@ var checkoutSessionsCreate = cli.Command{
 				BodyPath: "metadata",
 			},
 		},
+		&requestflag.BoolFlag{
+			Name:  "minimal-address",
+			Usage: "If true, only zipcode is required when confirm is true; other address fields remain optional",
+			Config: requestflag.RequestConfig{
+				BodyPath: "minimal_address",
+			},
+		},
 		&requestflag.StringFlag{
 			Name:  "return-url",
 			Usage: "The url to redirect after payment failure or success.",
