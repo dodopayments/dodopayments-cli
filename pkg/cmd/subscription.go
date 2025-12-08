@@ -356,6 +356,46 @@ var subscriptionsCharge = cli.Command{
 	HideHelpCommand: true,
 }
 
+var subscriptionsPreviewChangePlan = cli.Command{
+	Name:  "preview-change-plan",
+	Usage: "Perform preview-change-plan operation",
+	Flags: []cli.Flag{
+		&requestflag.StringFlag{
+			Name: "subscription-id",
+		},
+		&requestflag.StringFlag{
+			Name:  "product-id",
+			Usage: "Unique identifier of the product to subscribe to",
+			Config: requestflag.RequestConfig{
+				BodyPath: "product_id",
+			},
+		},
+		&requestflag.StringFlag{
+			Name:  "proration-billing-mode",
+			Usage: "Proration Billing Mode",
+			Config: requestflag.RequestConfig{
+				BodyPath: "proration_billing_mode",
+			},
+		},
+		&requestflag.IntFlag{
+			Name:  "quantity",
+			Usage: "Number of units to subscribe for. Must be at least 1.",
+			Config: requestflag.RequestConfig{
+				BodyPath: "quantity",
+			},
+		},
+		&requestflag.YAMLSliceFlag{
+			Name:  "addon",
+			Usage: "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
+			Config: requestflag.RequestConfig{
+				BodyPath: "addons",
+			},
+		},
+	},
+	Action:          handleSubscriptionsPreviewChangePlan,
+	HideHelpCommand: true,
+}
+
 var subscriptionsRetrieveUsageHistory = cli.Command{
 	Name:  "retrieve-usage-history",
 	Usage: "Get detailed usage history for a subscription that includes usage-based billing\n(metered components). This endpoint provides insights into customer usage\npatterns and billing calculations over time.",
@@ -651,6 +691,46 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "subscriptions charge", obj, format, transform)
+}
+
+func handleSubscriptionsPreviewChangePlan(ctx context.Context, cmd *cli.Command) error {
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
+		cmd.Set("subscription-id", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+	params := dodopayments.SubscriptionPreviewChangePlanParams{}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		ApplicationJSON,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Subscriptions.PreviewChangePlan(
+		ctx,
+		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+		params,
+		options...,
+	)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "subscriptions preview-change-plan", obj, format, transform)
 }
 
 func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Command) error {
