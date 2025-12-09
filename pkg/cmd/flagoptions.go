@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"log"
 	"mime/multipart"
 	"os"
 
 	"github.com/dodopayments/dodopayments-cli/internal/apiform"
 	"github.com/dodopayments/dodopayments-cli/internal/apiquery"
+	"github.com/dodopayments/dodopayments-cli/internal/debugmiddleware"
 	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 	"github.com/dodopayments/dodopayments-go/option"
 
@@ -30,7 +32,7 @@ func flagOptions(
 ) ([]option.RequestOption, error) {
 	var options []option.RequestOption
 	if cmd.Bool("debug") {
-		options = append(options, debugMiddlewareOption)
+		options = append(options, option.WithMiddleware(debugmiddleware.DebugMiddleware(log.Default())))
 	}
 
 	queries := make(map[string]any)
