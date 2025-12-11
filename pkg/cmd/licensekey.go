@@ -19,7 +19,7 @@ var licenseKeysRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -31,29 +31,23 @@ var licenseKeysUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.IntFlag{
-			Name:  "activations-limit",
-			Usage: "The updated activation limit for the license key.\nUse `null` to remove the limit, or omit this field to leave it unchanged.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "activations_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "activations-limit",
+			Usage:    "The updated activation limit for the license key.\nUse `null` to remove the limit, or omit this field to leave it unchanged.",
+			BodyPath: "activations_limit",
 		},
-		&requestflag.BoolFlag{
-			Name:  "disabled",
-			Usage: "Indicates whether the license key should be disabled.\nA value of `true` disables the key, while `false` enables it. Omit this field to leave it unchanged.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "disabled",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "disabled",
+			Usage:    "Indicates whether the license key should be disabled.\nA value of `true` disables the key, while `false` enables it. Omit this field to leave it unchanged.",
+			BodyPath: "disabled",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "expires-at",
-			Usage: "The updated expiration timestamp for the license key in UTC.\nUse `null` to remove the expiration date, or omit this field to leave it unchanged.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "expires_at",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:     "expires-at",
+			Usage:    "The updated expiration timestamp for the license key in UTC.\nUse `null` to remove the expiration date, or omit this field to leave it unchanged.",
+			BodyPath: "expires_at",
 		},
 	},
 	Action:          handleLicenseKeysUpdate,
@@ -64,40 +58,30 @@ var licenseKeysList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "customer-id",
-			Usage: "Filter by customer ID",
-			Config: requestflag.RequestConfig{
-				QueryPath: "customer_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "customer-id",
+			Usage:     "Filter by customer ID",
+			QueryPath: "customer_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
-		&requestflag.StringFlag{
-			Name:  "product-id",
-			Usage: "Filter by product ID",
-			Config: requestflag.RequestConfig{
-				QueryPath: "product_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "product-id",
+			Usage:     "Filter by product ID",
+			QueryPath: "product_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "status",
-			Usage: "Filter by license key status",
-			Config: requestflag.RequestConfig{
-				QueryPath: "status",
-			},
+		&requestflag.Flag[string]{
+			Name:      "status",
+			Usage:     "Filter by license key status",
+			QueryPath: "status",
 		},
 	},
 	Action:          handleLicenseKeysList,
@@ -126,7 +110,7 @@ func handleLicenseKeysRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.LicenseKeys.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.LicenseKeys.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -163,7 +147,7 @@ func handleLicenseKeysUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.LicenseKeys.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

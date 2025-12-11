@@ -19,40 +19,30 @@ var customersWalletsLedgerEntriesCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
-		&requestflag.IntFlag{
-			Name: "amount",
-			Config: requestflag.RequestConfig{
-				BodyPath: "amount",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "amount",
+			BodyPath: "amount",
 		},
-		&requestflag.StringFlag{
-			Name: "currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "currency",
+			BodyPath: "currency",
 		},
-		&requestflag.StringFlag{
-			Name:  "entry-type",
-			Usage: "Type of ledger entry - credit or debit",
-			Config: requestflag.RequestConfig{
-				BodyPath: "entry_type",
-			},
+		&requestflag.Flag[string]{
+			Name:     "entry-type",
+			Usage:    "Type of ledger entry - credit or debit",
+			BodyPath: "entry_type",
 		},
-		&requestflag.StringFlag{
-			Name:  "idempotency-key",
-			Usage: "Optional idempotency key to prevent duplicate entries",
-			Config: requestflag.RequestConfig{
-				BodyPath: "idempotency_key",
-			},
+		&requestflag.Flag[string]{
+			Name:     "idempotency-key",
+			Usage:    "Optional idempotency key to prevent duplicate entries",
+			BodyPath: "idempotency_key",
 		},
-		&requestflag.StringFlag{
-			Name: "reason",
-			Config: requestflag.RequestConfig{
-				BodyPath: "reason",
-			},
+		&requestflag.Flag[string]{
+			Name:     "reason",
+			BodyPath: "reason",
 		},
 	},
 	Action:          handleCustomersWalletsLedgerEntriesCreate,
@@ -63,26 +53,20 @@ var customersWalletsLedgerEntriesList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
-		&requestflag.StringFlag{
-			Name: "currency",
-			Config: requestflag.RequestConfig{
-				QueryPath: "currency",
-			},
+		&requestflag.Flag[string]{
+			Name:      "currency",
+			QueryPath: "currency",
 		},
-		&requestflag.IntFlag{
-			Name: "page-number",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name: "page-size",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleCustomersWalletsLedgerEntriesList,
@@ -115,7 +99,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Customers.Wallets.LedgerEntries.New(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
+		cmd.Value("customer-id").(string),
 		params,
 		options...,
 	)
@@ -158,7 +142,7 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 		options = append(options, option.WithResponseBodyInto(&res))
 		_, err = client.Customers.Wallets.LedgerEntries.List(
 			ctx,
-			requestflag.CommandRequestValue[string](cmd, "customer-id"),
+			cmd.Value("customer-id").(string),
 			params,
 			options...,
 		)
@@ -170,7 +154,7 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 	} else {
 		iter := client.Customers.Wallets.LedgerEntries.ListAutoPaging(
 			ctx,
-			requestflag.CommandRequestValue[string](cmd, "customer-id"),
+			cmd.Value("customer-id").(string),
 			params,
 			options...,
 		)

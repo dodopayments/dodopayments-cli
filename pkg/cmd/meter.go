@@ -19,46 +19,34 @@ var metersCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.YAMLFlag{
-			Name: "aggregation",
-			Config: requestflag.RequestConfig{
-				BodyPath: "aggregation",
-			},
+		&requestflag.Flag[any]{
+			Name:     "aggregation",
+			BodyPath: "aggregation",
 		},
-		&requestflag.StringFlag{
-			Name:  "event-name",
-			Usage: "Event name to track",
-			Config: requestflag.RequestConfig{
-				BodyPath: "event_name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "event-name",
+			Usage:    "Event name to track",
+			BodyPath: "event_name",
 		},
-		&requestflag.StringFlag{
-			Name:  "measurement-unit",
-			Usage: "measurement unit",
-			Config: requestflag.RequestConfig{
-				BodyPath: "measurement_unit",
-			},
+		&requestflag.Flag[string]{
+			Name:     "measurement-unit",
+			Usage:    "measurement unit",
+			BodyPath: "measurement_unit",
 		},
-		&requestflag.StringFlag{
-			Name:  "name",
-			Usage: "Name of the meter",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			Usage:    "Name of the meter",
+			BodyPath: "name",
 		},
-		&requestflag.StringFlag{
-			Name:  "description",
-			Usage: "Optional description of the meter",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			Usage:    "Optional description of the meter",
+			BodyPath: "description",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "filter",
-			Usage: "A filter structure that combines multiple conditions with logical conjunctions (AND/OR).\n\nSupports up to 3 levels of nesting to create complex filter expressions.\nEach filter has a conjunction (and/or) and clauses that can be either direct conditions or nested filters.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "filter",
-			},
+		&requestflag.Flag[any]{
+			Name:     "filter",
+			Usage:    "A filter structure that combines multiple conditions with logical conjunctions (AND/OR).\n\nSupports up to 3 levels of nesting to create complex filter expressions.\nEach filter has a conjunction (and/or) and clauses that can be either direct conditions or nested filters.",
+			BodyPath: "filter",
 		},
 	},
 	Action:          handleMetersCreate,
@@ -69,7 +57,7 @@ var metersRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -81,26 +69,20 @@ var metersList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.BoolFlag{
-			Name:  "archived",
-			Usage: "List archived meters",
-			Config: requestflag.RequestConfig{
-				QueryPath: "archived",
-			},
+		&requestflag.Flag[bool]{
+			Name:      "archived",
+			Usage:     "List archived meters",
+			QueryPath: "archived",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleMetersList,
@@ -111,7 +93,7 @@ var metersArchive = cli.Command{
 	Name:  "archive",
 	Usage: "Perform archive operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -123,7 +105,7 @@ var metersUnarchive = cli.Command{
 	Name:  "unarchive",
 	Usage: "Perform unarchive operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -185,7 +167,7 @@ func handleMetersRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Meters.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.Meters.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -261,7 +243,7 @@ func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Meters.Archive(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	return client.Meters.Archive(ctx, cmd.Value("id").(string), options...)
 }
 
 func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
@@ -284,5 +266,5 @@ func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Meters.Unarchive(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	return client.Meters.Unarchive(ctx, cmd.Value("id").(string), options...)
 }

@@ -19,7 +19,7 @@ var customersWalletsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
 	},
@@ -49,7 +49,7 @@ func handleCustomersWalletsList(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.Wallets.List(ctx, requestflag.CommandRequestValue[string](cmd, "customer-id"), options...)
+	_, err = client.Customers.Wallets.List(ctx, cmd.Value("customer-id").(string), options...)
 	if err != nil {
 		return err
 	}

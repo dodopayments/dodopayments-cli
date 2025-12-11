@@ -19,7 +19,7 @@ var invoicesPaymentsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "payment-id",
 		},
 	},
@@ -31,7 +31,7 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 	Name:  "retrieve-refund",
 	Usage: "Perform retrieve-refund operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "refund-id",
 		},
 	},
@@ -61,7 +61,7 @@ func handleInvoicesPaymentsRetrieve(ctx context.Context, cmd *cli.Command) error
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Invoices.Payments.Get(ctx, requestflag.CommandRequestValue[string](cmd, "payment-id"), options...)
+	_, err = client.Invoices.Payments.Get(ctx, cmd.Value("payment-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func handleInvoicesPaymentsRetrieveRefund(ctx context.Context, cmd *cli.Command)
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Invoices.Payments.GetRefund(ctx, requestflag.CommandRequestValue[string](cmd, "refund-id"), options...)
+	_, err = client.Invoices.Payments.GetRefund(ctx, cmd.Value("refund-id").(string), options...)
 	if err != nil {
 		return err
 	}

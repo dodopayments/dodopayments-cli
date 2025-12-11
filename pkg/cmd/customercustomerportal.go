@@ -19,15 +19,13 @@ var customersCustomerPortalCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
-		&requestflag.BoolFlag{
-			Name:  "send-email",
-			Usage: "If true, will send link to user.",
-			Config: requestflag.RequestConfig{
-				QueryPath: "send_email",
-			},
+		&requestflag.Flag[bool]{
+			Name:      "send-email",
+			Usage:     "If true, will send link to user.",
+			QueryPath: "send_email",
 		},
 	},
 	Action:          handleCustomersCustomerPortalCreate,
@@ -60,7 +58,7 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Customers.CustomerPortal.New(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
+		cmd.Value("customer-id").(string),
 		params,
 		options...,
 	)

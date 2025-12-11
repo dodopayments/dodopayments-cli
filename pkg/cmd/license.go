@@ -19,17 +19,13 @@ var licensesActivate = cli.Command{
 	Name:  "activate",
 	Usage: "Perform activate operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name: "license-key",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key",
+			BodyPath: "license_key",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
 	},
 	Action:          handleLicensesActivate,
@@ -40,17 +36,13 @@ var licensesDeactivate = cli.Command{
 	Name:  "deactivate",
 	Usage: "Perform deactivate operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name: "license-key",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key",
+			BodyPath: "license_key",
 		},
-		&requestflag.StringFlag{
-			Name: "license-key-instance-id",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_instance_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key-instance-id",
+			BodyPath: "license_key_instance_id",
 		},
 	},
 	Action:          handleLicensesDeactivate,
@@ -61,17 +53,13 @@ var licensesValidate = cli.Command{
 	Name:  "validate",
 	Usage: "Perform validate operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name: "license-key",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key",
+			BodyPath: "license_key",
 		},
-		&requestflag.StringFlag{
-			Name: "license-key-instance-id",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_instance_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key-instance-id",
+			BodyPath: "license_key_instance_id",
 		},
 	},
 	Action:          handleLicensesValidate,

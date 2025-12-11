@@ -19,14 +19,12 @@ var productsImagesUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.BoolFlag{
-			Name: "force-update",
-			Config: requestflag.RequestConfig{
-				QueryPath: "force_update",
-			},
+		&requestflag.Flag[bool]{
+			Name:      "force-update",
+			QueryPath: "force_update",
 		},
 	},
 	Action:          handleProductsImagesUpdate,
@@ -59,7 +57,7 @@ func handleProductsImagesUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Products.Images.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

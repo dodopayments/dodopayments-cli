@@ -19,113 +19,81 @@ var subscriptionsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.YAMLFlag{
-			Name: "billing",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing",
-			},
+		&requestflag.Flag[any]{
+			Name:     "billing",
+			BodyPath: "billing",
 		},
-		&requestflag.YAMLFlag{
-			Name: "customer",
-			Config: requestflag.RequestConfig{
-				BodyPath: "customer",
-			},
+		&requestflag.Flag[any]{
+			Name:     "customer",
+			BodyPath: "customer",
 		},
-		&requestflag.StringFlag{
-			Name:  "product-id",
-			Usage: "Unique identifier of the product to subscribe to",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "product-id",
+			Usage:    "Unique identifier of the product to subscribe to",
+			BodyPath: "product_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "quantity",
-			Usage: "Number of units to subscribe for. Must be at least 1.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "quantity",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "quantity",
+			Usage:    "Number of units to subscribe for. Must be at least 1.",
+			BodyPath: "quantity",
 		},
-		&requestflag.YAMLSliceFlag{
-			Name:  "addon",
-			Usage: "Attach addons to this subscription",
-			Config: requestflag.RequestConfig{
-				BodyPath: "addons",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "addon",
+			Usage:    "Attach addons to this subscription",
+			BodyPath: "addons",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "allowed-payment-method-type",
-			Usage: "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
-			Config: requestflag.RequestConfig{
-				BodyPath: "allowed_payment_method_types",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "allowed-payment-method-type",
+			Usage:    "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
+			BodyPath: "allowed_payment_method_types",
 		},
-		&requestflag.StringFlag{
-			Name: "billing-currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing_currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "billing-currency",
+			BodyPath: "billing_currency",
 		},
-		&requestflag.StringFlag{
-			Name:  "discount-code",
-			Usage: "Discount Code to apply to the subscription",
-			Config: requestflag.RequestConfig{
-				BodyPath: "discount_code",
-			},
+		&requestflag.Flag[string]{
+			Name:     "discount-code",
+			Usage:    "Discount Code to apply to the subscription",
+			BodyPath: "discount_code",
 		},
-		&requestflag.BoolFlag{
-			Name:  "force-3ds",
-			Usage: "Override merchant default 3DS behaviour for this subscription",
-			Config: requestflag.RequestConfig{
-				BodyPath: "force_3ds",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "force-3ds",
+			Usage:    "Override merchant default 3DS behaviour for this subscription",
+			BodyPath: "force_3ds",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata for the subscription\nDefaults to empty if not specified",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata for the subscription\nDefaults to empty if not specified",
+			BodyPath: "metadata",
 		},
-		&requestflag.YAMLFlag{
-			Name: "on-demand",
-			Config: requestflag.RequestConfig{
-				BodyPath: "on_demand",
-			},
+		&requestflag.Flag[any]{
+			Name:     "on-demand",
+			BodyPath: "on_demand",
 		},
-		&requestflag.BoolFlag{
-			Name:  "payment-link",
-			Usage: "If true, generates a payment link.\nDefaults to false if not specified.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "payment_link",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "payment-link",
+			Usage:    "If true, generates a payment link.\nDefaults to false if not specified.",
+			BodyPath: "payment_link",
 		},
-		&requestflag.StringFlag{
-			Name:  "return-url",
-			Usage: "Optional URL to redirect after successful subscription creation",
-			Config: requestflag.RequestConfig{
-				BodyPath: "return_url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "return-url",
+			Usage:    "Optional URL to redirect after successful subscription creation",
+			BodyPath: "return_url",
 		},
-		&requestflag.BoolFlag{
-			Name:  "show-saved-payment-methods",
-			Usage: "Display saved payment methods of a returning customer\nFalse by default",
-			Config: requestflag.RequestConfig{
-				BodyPath: "show_saved_payment_methods",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "show-saved-payment-methods",
+			Usage:    "Display saved payment methods of a returning customer\nFalse by default",
+			BodyPath: "show_saved_payment_methods",
 		},
-		&requestflag.StringFlag{
-			Name:  "tax-id",
-			Usage: "Tax ID in case the payment is B2B. If tax id validation fails the payment creation will fail",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-id",
+			Usage:    "Tax ID in case the payment is B2B. If tax id validation fails the payment creation will fail",
+			BodyPath: "tax_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "trial-period-days",
-			Usage: "Optional trial period in days\nIf specified, this value overrides the trial period set in the product's price\nMust be between 0 and 10000 days",
-			Config: requestflag.RequestConfig{
-				BodyPath: "trial_period_days",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "trial-period-days",
+			Usage:    "Optional trial period in days\nIf specified, this value overrides the trial period set in the product's price\nMust be between 0 and 10000 days",
+			BodyPath: "trial_period_days",
 		},
 	},
 	Action:          handleSubscriptionsCreate,
@@ -136,7 +104,7 @@ var subscriptionsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
 	},
@@ -148,57 +116,41 @@ var subscriptionsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.YAMLFlag{
-			Name: "billing",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing",
-			},
+		&requestflag.Flag[any]{
+			Name:     "billing",
+			BodyPath: "billing",
 		},
-		&requestflag.BoolFlag{
-			Name:  "cancel-at-next-billing-date",
-			Usage: "When set, the subscription will remain active until the end of billing period",
-			Config: requestflag.RequestConfig{
-				BodyPath: "cancel_at_next_billing_date",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "cancel-at-next-billing-date",
+			Usage:    "When set, the subscription will remain active until the end of billing period",
+			BodyPath: "cancel_at_next_billing_date",
 		},
-		&requestflag.StringFlag{
-			Name: "customer-name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "customer_name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "customer-name",
+			BodyPath: "customer_name",
 		},
-		&requestflag.YAMLFlag{
-			Name: "disable-on-demand",
-			Config: requestflag.RequestConfig{
-				BodyPath: "disable_on_demand",
-			},
+		&requestflag.Flag[any]{
+			Name:     "disable-on-demand",
+			BodyPath: "disable_on_demand",
 		},
-		&requestflag.YAMLFlag{
-			Name: "metadata",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			BodyPath: "metadata",
 		},
-		&requestflag.DateTimeFlag{
-			Name: "next-billing-date",
-			Config: requestflag.RequestConfig{
-				BodyPath: "next_billing_date",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:     "next-billing-date",
+			BodyPath: "next_billing_date",
 		},
-		&requestflag.StringFlag{
-			Name: "status",
-			Config: requestflag.RequestConfig{
-				BodyPath: "status",
-			},
+		&requestflag.Flag[string]{
+			Name:     "status",
+			BodyPath: "status",
 		},
-		&requestflag.StringFlag{
-			Name: "tax-id",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-id",
+			BodyPath: "tax_id",
 		},
 	},
 	Action:          handleSubscriptionsUpdate,
@@ -209,54 +161,40 @@ var subscriptionsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "brand-id",
-			Usage: "filter by Brand id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "brand_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "brand-id",
+			Usage:     "filter by Brand id",
+			QueryPath: "brand_id",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-gte",
-			Usage: "Get events after this created time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_gte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-gte",
+			Usage:     "Get events after this created time",
+			QueryPath: "created_at_gte",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-lte",
-			Usage: "Get events created before this time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_lte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-lte",
+			Usage:     "Get events created before this time",
+			QueryPath: "created_at_lte",
 		},
-		&requestflag.StringFlag{
-			Name:  "customer-id",
-			Usage: "Filter by customer id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "customer_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "customer-id",
+			Usage:     "Filter by customer id",
+			QueryPath: "customer_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
-		&requestflag.StringFlag{
-			Name:  "status",
-			Usage: "Filter by status",
-			Config: requestflag.RequestConfig{
-				QueryPath: "status",
-			},
+		&requestflag.Flag[string]{
+			Name:      "status",
+			Usage:     "Filter by status",
+			QueryPath: "status",
 		},
 	},
 	Action:          handleSubscriptionsList,
@@ -267,36 +205,28 @@ var subscriptionsChangePlan = cli.Command{
 	Name:  "change-plan",
 	Usage: "Perform change-plan operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.StringFlag{
-			Name:  "product-id",
-			Usage: "Unique identifier of the product to subscribe to",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "product-id",
+			Usage:    "Unique identifier of the product to subscribe to",
+			BodyPath: "product_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "proration-billing-mode",
-			Usage: "Proration Billing Mode",
-			Config: requestflag.RequestConfig{
-				BodyPath: "proration_billing_mode",
-			},
+		&requestflag.Flag[string]{
+			Name:     "proration-billing-mode",
+			Usage:    "Proration Billing Mode",
+			BodyPath: "proration_billing_mode",
 		},
-		&requestflag.IntFlag{
-			Name:  "quantity",
-			Usage: "Number of units to subscribe for. Must be at least 1.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "quantity",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "quantity",
+			Usage:    "Number of units to subscribe for. Must be at least 1.",
+			BodyPath: "quantity",
 		},
-		&requestflag.YAMLSliceFlag{
-			Name:  "addon",
-			Usage: "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
-			Config: requestflag.RequestConfig{
-				BodyPath: "addons",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "addon",
+			Usage:    "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
+			BodyPath: "addons",
 		},
 	},
 	Action:          handleSubscriptionsChangePlan,
@@ -307,49 +237,37 @@ var subscriptionsCharge = cli.Command{
 	Name:  "charge",
 	Usage: "Perform charge operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.IntFlag{
-			Name:  "product-price",
-			Usage: "The product price. Represented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_price",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "product-price",
+			Usage:    "The product price. Represented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
+			BodyPath: "product_price",
 		},
-		&requestflag.BoolFlag{
-			Name:  "adaptive-currency-fees-inclusive",
-			Usage: "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "adaptive_currency_fees_inclusive",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "adaptive-currency-fees-inclusive",
+			Usage:    "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
+			BodyPath: "adaptive_currency_fees_inclusive",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "customer-balance-config",
-			Usage: "Specify how customer balance is used for the payment",
-			Config: requestflag.RequestConfig{
-				BodyPath: "customer_balance_config",
-			},
+		&requestflag.Flag[any]{
+			Name:     "customer-balance-config",
+			Usage:    "Specify how customer balance is used for the payment",
+			BodyPath: "customer_balance_config",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Metadata for the payment. If not passed, the metadata of the subscription will be taken",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Metadata for the payment. If not passed, the metadata of the subscription will be taken",
+			BodyPath: "metadata",
 		},
-		&requestflag.StringFlag{
-			Name: "product-currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "product-currency",
+			BodyPath: "product_currency",
 		},
-		&requestflag.StringFlag{
-			Name:  "product-description",
-			Usage: "Optional product description override for billing and line items.\nIf not specified, the stored description of the product will be used.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "product-description",
+			Usage:    "Optional product description override for billing and line items.\nIf not specified, the stored description of the product will be used.",
+			BodyPath: "product_description",
 		},
 	},
 	Action:          handleSubscriptionsCharge,
@@ -360,36 +278,28 @@ var subscriptionsPreviewChangePlan = cli.Command{
 	Name:  "preview-change-plan",
 	Usage: "Perform preview-change-plan operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.StringFlag{
-			Name:  "product-id",
-			Usage: "Unique identifier of the product to subscribe to",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "product-id",
+			Usage:    "Unique identifier of the product to subscribe to",
+			BodyPath: "product_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "proration-billing-mode",
-			Usage: "Proration Billing Mode",
-			Config: requestflag.RequestConfig{
-				BodyPath: "proration_billing_mode",
-			},
+		&requestflag.Flag[string]{
+			Name:     "proration-billing-mode",
+			Usage:    "Proration Billing Mode",
+			BodyPath: "proration_billing_mode",
 		},
-		&requestflag.IntFlag{
-			Name:  "quantity",
-			Usage: "Number of units to subscribe for. Must be at least 1.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "quantity",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "quantity",
+			Usage:    "Number of units to subscribe for. Must be at least 1.",
+			BodyPath: "quantity",
 		},
-		&requestflag.YAMLSliceFlag{
-			Name:  "addon",
-			Usage: "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
-			Config: requestflag.RequestConfig{
-				BodyPath: "addons",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "addon",
+			Usage:    "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
+			BodyPath: "addons",
 		},
 	},
 	Action:          handleSubscriptionsPreviewChangePlan,
@@ -400,43 +310,33 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 	Name:  "retrieve-usage-history",
 	Usage: "Get detailed usage history for a subscription that includes usage-based billing\n(metered components). This endpoint provides insights into customer usage\npatterns and billing calculations over time.",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "end-date",
-			Usage: "Filter by end date (inclusive)",
-			Config: requestflag.RequestConfig{
-				QueryPath: "end_date",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "end-date",
+			Usage:     "Filter by end date (inclusive)",
+			QueryPath: "end_date",
 		},
-		&requestflag.StringFlag{
-			Name:  "meter-id",
-			Usage: "Filter by specific meter ID",
-			Config: requestflag.RequestConfig{
-				QueryPath: "meter_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "meter-id",
+			Usage:     "Filter by specific meter ID",
+			QueryPath: "meter_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number (default: 0)",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number (default: 0)",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size (default: 10, max: 100)",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size (default: 10, max: 100)",
+			QueryPath: "page_size",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "start-date",
-			Usage: "Filter by start date (inclusive)",
-			Config: requestflag.RequestConfig{
-				QueryPath: "start_date",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "start-date",
+			Usage:     "Filter by start date (inclusive)",
+			QueryPath: "start_date",
 		},
 	},
 	Action:          handleSubscriptionsRetrieveUsageHistory,
@@ -447,26 +347,20 @@ var subscriptionsUpdatePaymentMethod = cli.Command{
 	Name:  "update-payment-method",
 	Usage: "Perform update-payment-method operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.StringFlag{
-			Name: "type",
-			Config: requestflag.RequestConfig{
-				BodyPath: "type",
-			},
+		&requestflag.Flag[string]{
+			Name:     "type",
+			BodyPath: "type",
 		},
-		&requestflag.StringFlag{
-			Name: "return-url",
-			Config: requestflag.RequestConfig{
-				BodyPath: "return_url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "return-url",
+			BodyPath: "return_url",
 		},
-		&requestflag.StringFlag{
-			Name: "payment-method-id",
-			Config: requestflag.RequestConfig{
-				BodyPath: "payment_method_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "payment-method-id",
+			BodyPath: "payment_method_id",
 		},
 	},
 	Action:          handleSubscriptionsUpdatePaymentMethod,
@@ -527,7 +421,7 @@ func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Subscriptions.Get(ctx, requestflag.CommandRequestValue[string](cmd, "subscription-id"), options...)
+	_, err = client.Subscriptions.Get(ctx, cmd.Value("subscription-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -564,7 +458,7 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+		cmd.Value("subscription-id").(string),
 		params,
 		options...,
 	)
@@ -647,7 +541,7 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 
 	return client.Subscriptions.ChangePlan(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+		cmd.Value("subscription-id").(string),
 		params,
 		options...,
 	)
@@ -679,7 +573,7 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.Charge(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+		cmd.Value("subscription-id").(string),
 		params,
 		options...,
 	)
@@ -719,7 +613,7 @@ func handleSubscriptionsPreviewChangePlan(ctx context.Context, cmd *cli.Command)
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.PreviewChangePlan(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+		cmd.Value("subscription-id").(string),
 		params,
 		options...,
 	)
@@ -762,7 +656,7 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 		options = append(options, option.WithResponseBodyInto(&res))
 		_, err = client.Subscriptions.GetUsageHistory(
 			ctx,
-			requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+			cmd.Value("subscription-id").(string),
 			params,
 			options...,
 		)
@@ -774,7 +668,7 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 	} else {
 		iter := client.Subscriptions.GetUsageHistoryAutoPaging(
 			ctx,
-			requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+			cmd.Value("subscription-id").(string),
 			params,
 			options...,
 		)
@@ -817,7 +711,7 @@ func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Comman
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Subscriptions.UpdatePaymentMethod(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "subscription-id"),
+		cmd.Value("subscription-id").(string),
 		params,
 		options...,
 	)

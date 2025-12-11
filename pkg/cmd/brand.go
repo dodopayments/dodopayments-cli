@@ -19,35 +19,25 @@ var brandsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name: "description",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			BodyPath: "description",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
-		&requestflag.StringFlag{
-			Name: "statement-descriptor",
-			Config: requestflag.RequestConfig{
-				BodyPath: "statement_descriptor",
-			},
+		&requestflag.Flag[string]{
+			Name:     "statement-descriptor",
+			BodyPath: "statement_descriptor",
 		},
-		&requestflag.StringFlag{
-			Name: "support-email",
-			Config: requestflag.RequestConfig{
-				BodyPath: "support_email",
-			},
+		&requestflag.Flag[string]{
+			Name:     "support-email",
+			BodyPath: "support_email",
 		},
-		&requestflag.StringFlag{
-			Name: "url",
-			Config: requestflag.RequestConfig{
-				BodyPath: "url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "url",
+			BodyPath: "url",
 		},
 	},
 	Action:          handleBrandsCreate,
@@ -58,7 +48,7 @@ var brandsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Thin handler just calls `get_brand` and wraps in `Json(...)`",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -70,33 +60,25 @@ var brandsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.StringFlag{
-			Name:  "image-id",
-			Usage: "The UUID you got back from the presigned‐upload call",
-			Config: requestflag.RequestConfig{
-				BodyPath: "image_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "image-id",
+			Usage:    "The UUID you got back from the presigned‐upload call",
+			BodyPath: "image_id",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
-		&requestflag.StringFlag{
-			Name: "statement-descriptor",
-			Config: requestflag.RequestConfig{
-				BodyPath: "statement_descriptor",
-			},
+		&requestflag.Flag[string]{
+			Name:     "statement-descriptor",
+			BodyPath: "statement_descriptor",
 		},
-		&requestflag.StringFlag{
-			Name: "support-email",
-			Config: requestflag.RequestConfig{
-				BodyPath: "support_email",
-			},
+		&requestflag.Flag[string]{
+			Name:     "support-email",
+			BodyPath: "support_email",
 		},
 	},
 	Action:          handleBrandsUpdate,
@@ -115,7 +97,7 @@ var brandsUpdateImages = cli.Command{
 	Name:  "update-images",
 	Usage: "Perform update-images operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -177,7 +159,7 @@ func handleBrandsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Brands.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.Brands.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -214,7 +196,7 @@ func handleBrandsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Brands.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)
@@ -280,7 +262,7 @@ func handleBrandsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Brands.UpdateImages(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.Brands.UpdateImages(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}

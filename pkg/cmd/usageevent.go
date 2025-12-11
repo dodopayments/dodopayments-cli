@@ -19,7 +19,7 @@ var usageEventsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Fetch detailed information about a single event using its unique event ID. This\nendpoint is useful for:",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "event-id",
 		},
 	},
@@ -31,54 +31,40 @@ var usageEventsList = cli.Command{
 	Name:  "list",
 	Usage: "Fetch events from your account with powerful filtering capabilities. This\nendpoint is ideal for:",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "customer-id",
-			Usage: "Filter events by customer ID",
-			Config: requestflag.RequestConfig{
-				QueryPath: "customer_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "customer-id",
+			Usage:     "Filter events by customer ID",
+			QueryPath: "customer_id",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "end",
-			Usage: "Filter events created before this timestamp",
-			Config: requestflag.RequestConfig{
-				QueryPath: "end",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "end",
+			Usage:     "Filter events created before this timestamp",
+			QueryPath: "end",
 		},
-		&requestflag.StringFlag{
-			Name:  "event-name",
-			Usage: "Filter events by event name. If both event_name and meter_id are provided, they must match the meter's configured event_name",
-			Config: requestflag.RequestConfig{
-				QueryPath: "event_name",
-			},
+		&requestflag.Flag[string]{
+			Name:      "event-name",
+			Usage:     "Filter events by event name. If both event_name and meter_id are provided, they must match the meter's configured event_name",
+			QueryPath: "event_name",
 		},
-		&requestflag.StringFlag{
-			Name:  "meter-id",
-			Usage: "Filter events by meter ID. When provided, only events that match the meter's event_name and filter criteria will be returned",
-			Config: requestflag.RequestConfig{
-				QueryPath: "meter_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "meter-id",
+			Usage:     "Filter events by meter ID. When provided, only events that match the meter's event_name and filter criteria will be returned",
+			QueryPath: "meter_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number (0-based, default: 0)",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number (0-based, default: 0)",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Number of events to return per page (default: 10)",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Number of events to return per page (default: 10)",
+			QueryPath: "page_size",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "start",
-			Usage: "Filter events created after this timestamp",
-			Config: requestflag.RequestConfig{
-				QueryPath: "start",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "start",
+			Usage:     "Filter events created after this timestamp",
+			QueryPath: "start",
 		},
 	},
 	Action:          handleUsageEventsList,
@@ -89,12 +75,10 @@ var usageEventsIngest = cli.Command{
 	Name:  "ingest",
 	Usage: "This endpoint allows you to ingest custom events that can be used for:",
 	Flags: []cli.Flag{
-		&requestflag.YAMLSliceFlag{
-			Name:  "event",
-			Usage: "List of events to be pushed",
-			Config: requestflag.RequestConfig{
-				BodyPath: "events",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "event",
+			Usage:    "List of events to be pushed",
+			BodyPath: "events",
 		},
 	},
 	Action:          handleUsageEventsIngest,
@@ -123,7 +107,7 @@ func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.UsageEvents.Get(ctx, requestflag.CommandRequestValue[string](cmd, "event-id"), options...)
+	_, err = client.UsageEvents.Get(ctx, cmd.Value("event-id").(string), options...)
 	if err != nil {
 		return err
 	}
