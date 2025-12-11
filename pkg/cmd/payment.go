@@ -19,86 +19,62 @@ var paymentsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.YAMLFlag{
-			Name: "billing",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing",
-			},
+		&requestflag.Flag[any]{
+			Name:     "billing",
+			BodyPath: "billing",
 		},
-		&requestflag.YAMLFlag{
-			Name: "customer",
-			Config: requestflag.RequestConfig{
-				BodyPath: "customer",
-			},
+		&requestflag.Flag[any]{
+			Name:     "customer",
+			BodyPath: "customer",
 		},
-		&requestflag.YAMLSliceFlag{
-			Name:  "product-cart",
-			Usage: "List of products in the cart. Must contain at least 1 and at most 100 items.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_cart",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "product-cart",
+			Usage:    "List of products in the cart. Must contain at least 1 and at most 100 items.",
+			BodyPath: "product_cart",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "allowed-payment-method-type",
-			Usage: "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
-			Config: requestflag.RequestConfig{
-				BodyPath: "allowed_payment_method_types",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "allowed-payment-method-type",
+			Usage:    "List of payment methods allowed during checkout.\n\nCustomers will **never** see payment methods that are **not** in this list.\nHowever, adding a method here **does not guarantee** customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).",
+			BodyPath: "allowed_payment_method_types",
 		},
-		&requestflag.StringFlag{
-			Name: "billing-currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing_currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "billing-currency",
+			BodyPath: "billing_currency",
 		},
-		&requestflag.StringFlag{
-			Name:  "discount-code",
-			Usage: "Discount Code to apply to the transaction",
-			Config: requestflag.RequestConfig{
-				BodyPath: "discount_code",
-			},
+		&requestflag.Flag[string]{
+			Name:     "discount-code",
+			Usage:    "Discount Code to apply to the transaction",
+			BodyPath: "discount_code",
 		},
-		&requestflag.BoolFlag{
-			Name:  "force-3ds",
-			Usage: "Override merchant default 3DS behaviour for this payment",
-			Config: requestflag.RequestConfig{
-				BodyPath: "force_3ds",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "force-3ds",
+			Usage:    "Override merchant default 3DS behaviour for this payment",
+			BodyPath: "force_3ds",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata associated with the payment.\nDefaults to empty if not provided.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata associated with the payment.\nDefaults to empty if not provided.",
+			BodyPath: "metadata",
 		},
-		&requestflag.BoolFlag{
-			Name:  "payment-link",
-			Usage: "Whether to generate a payment link. Defaults to false if not specified.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "payment_link",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "payment-link",
+			Usage:    "Whether to generate a payment link. Defaults to false if not specified.",
+			BodyPath: "payment_link",
 		},
-		&requestflag.StringFlag{
-			Name:  "return-url",
-			Usage: "Optional URL to redirect the customer after payment.\nMust be a valid URL if provided.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "return_url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "return-url",
+			Usage:    "Optional URL to redirect the customer after payment.\nMust be a valid URL if provided.",
+			BodyPath: "return_url",
 		},
-		&requestflag.BoolFlag{
-			Name:  "show-saved-payment-methods",
-			Usage: "Display saved payment methods of a returning customer\nFalse by default",
-			Config: requestflag.RequestConfig{
-				BodyPath: "show_saved_payment_methods",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "show-saved-payment-methods",
+			Usage:    "Display saved payment methods of a returning customer\nFalse by default",
+			BodyPath: "show_saved_payment_methods",
 		},
-		&requestflag.StringFlag{
-			Name:  "tax-id",
-			Usage: "Tax ID in case the payment is B2B. If tax id validation fails the payment creation will fail",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-id",
+			Usage:    "Tax ID in case the payment is B2B. If tax id validation fails the payment creation will fail",
+			BodyPath: "tax_id",
 		},
 	},
 	Action:          handlePaymentsCreate,
@@ -109,7 +85,7 @@ var paymentsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "payment-id",
 		},
 	},
@@ -121,61 +97,45 @@ var paymentsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "brand-id",
-			Usage: "filter by Brand id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "brand_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "brand-id",
+			Usage:     "filter by Brand id",
+			QueryPath: "brand_id",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-gte",
-			Usage: "Get events after this created time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_gte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-gte",
+			Usage:     "Get events after this created time",
+			QueryPath: "created_at_gte",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-lte",
-			Usage: "Get events created before this time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_lte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-lte",
+			Usage:     "Get events created before this time",
+			QueryPath: "created_at_lte",
 		},
-		&requestflag.StringFlag{
-			Name:  "customer-id",
-			Usage: "Filter by customer id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "customer_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "customer-id",
+			Usage:     "Filter by customer id",
+			QueryPath: "customer_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
-		&requestflag.StringFlag{
-			Name:  "status",
-			Usage: "Filter by status",
-			Config: requestflag.RequestConfig{
-				QueryPath: "status",
-			},
+		&requestflag.Flag[string]{
+			Name:      "status",
+			Usage:     "Filter by status",
+			QueryPath: "status",
 		},
-		&requestflag.StringFlag{
-			Name:  "subscription-id",
-			Usage: "Filter by subscription id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "subscription_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "subscription-id",
+			Usage:     "Filter by subscription id",
+			QueryPath: "subscription_id",
 		},
 	},
 	Action:          handlePaymentsList,
@@ -186,7 +146,7 @@ var paymentsRetrieveLineItems = cli.Command{
 	Name:  "retrieve-line-items",
 	Usage: "Perform retrieve-line-items operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "payment-id",
 		},
 	},
@@ -248,7 +208,7 @@ func handlePaymentsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Payments.Get(ctx, requestflag.CommandRequestValue[string](cmd, "payment-id"), options...)
+	_, err = client.Payments.Get(ctx, cmd.Value("payment-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -326,7 +286,7 @@ func handlePaymentsRetrieveLineItems(ctx context.Context, cmd *cli.Command) erro
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Payments.GetLineItems(ctx, requestflag.CommandRequestValue[string](cmd, "payment-id"), options...)
+	_, err = client.Payments.GetLineItems(ctx, cmd.Value("payment-id").(string), options...)
 	if err != nil {
 		return err
 	}

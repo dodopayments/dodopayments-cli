@@ -19,88 +19,64 @@ var productsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "name",
-			Usage: "Name of the product",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			Usage:    "Name of the product",
+			BodyPath: "name",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "price",
-			Usage: "One-time price details.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "price",
-			},
+		&requestflag.Flag[any]{
+			Name:     "price",
+			Usage:    "One-time price details.",
+			BodyPath: "price",
 		},
-		&requestflag.StringFlag{
-			Name:  "tax-category",
-			Usage: "Represents the different categories of taxation applicable to various products and services.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_category",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-category",
+			Usage:    "Represents the different categories of taxation applicable to various products and services.",
+			BodyPath: "tax_category",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "addon",
-			Usage: "Addons available for subscription product",
-			Config: requestflag.RequestConfig{
-				BodyPath: "addons",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "addon",
+			Usage:    "Addons available for subscription product",
+			BodyPath: "addons",
 		},
-		&requestflag.StringFlag{
-			Name:  "brand-id",
-			Usage: "Brand id for the product, if not provided will default to primary brand",
-			Config: requestflag.RequestConfig{
-				BodyPath: "brand_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "brand-id",
+			Usage:    "Brand id for the product, if not provided will default to primary brand",
+			BodyPath: "brand_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "description",
-			Usage: "Optional description of the product",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			Usage:    "Optional description of the product",
+			BodyPath: "description",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "digital-product-delivery",
-			Usage: "Choose how you would like you digital product delivered",
-			Config: requestflag.RequestConfig{
-				BodyPath: "digital_product_delivery",
-			},
+		&requestflag.Flag[any]{
+			Name:     "digital-product-delivery",
+			Usage:    "Choose how you would like you digital product delivered",
+			BodyPath: "digital_product_delivery",
 		},
-		&requestflag.StringFlag{
-			Name:  "license-key-activation-message",
-			Usage: "Optional message displayed during license key activation",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_activation_message",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key-activation-message",
+			Usage:    "Optional message displayed during license key activation",
+			BodyPath: "license_key_activation_message",
 		},
-		&requestflag.IntFlag{
-			Name:  "license-key-activations-limit",
-			Usage: "The number of times the license key can be activated.\nMust be 0 or greater",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_activations_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "license-key-activations-limit",
+			Usage:    "The number of times the license key can be activated.\nMust be 0 or greater",
+			BodyPath: "license_key_activations_limit",
 		},
-		&requestflag.YAMLFlag{
-			Name: "license-key-duration",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_duration",
-			},
+		&requestflag.Flag[any]{
+			Name:     "license-key-duration",
+			BodyPath: "license_key_duration",
 		},
-		&requestflag.BoolFlag{
-			Name:  "license-key-enabled",
-			Usage: "When true, generates and sends a license key to your customer.\nDefaults to false",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_enabled",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "license-key-enabled",
+			Usage:    "When true, generates and sends a license key to your customer.\nDefaults to false",
+			BodyPath: "license_key_enabled",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata for the product",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata for the product",
+			BodyPath: "metadata",
 		},
 	},
 	Action:          handleProductsCreate,
@@ -111,7 +87,7 @@ var productsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -123,97 +99,71 @@ var productsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "addon",
-			Usage: "Available Addons for subscription products",
-			Config: requestflag.RequestConfig{
-				BodyPath: "addons",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "addon",
+			Usage:    "Available Addons for subscription products",
+			BodyPath: "addons",
 		},
-		&requestflag.StringFlag{
-			Name: "brand-id",
-			Config: requestflag.RequestConfig{
-				BodyPath: "brand_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "brand-id",
+			BodyPath: "brand_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "description",
-			Usage: "Description of the product, optional and must be at most 1000 characters.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			Usage:    "Description of the product, optional and must be at most 1000 characters.",
+			BodyPath: "description",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "digital-product-delivery",
-			Usage: "Choose how you would like you digital product delivered",
-			Config: requestflag.RequestConfig{
-				BodyPath: "digital_product_delivery",
-			},
+		&requestflag.Flag[any]{
+			Name:     "digital-product-delivery",
+			Usage:    "Choose how you would like you digital product delivered",
+			BodyPath: "digital_product_delivery",
 		},
-		&requestflag.StringFlag{
-			Name:  "image-id",
-			Usage: "Product image id after its uploaded to S3",
-			Config: requestflag.RequestConfig{
-				BodyPath: "image_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "image-id",
+			Usage:    "Product image id after its uploaded to S3",
+			BodyPath: "image_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "license-key-activation-message",
-			Usage: "Message sent to the customer upon license key activation.\n\nOnly applicable if `license_key_enabled` is `true`. This message contains instructions for\nactivating the license key.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_activation_message",
-			},
+		&requestflag.Flag[string]{
+			Name:     "license-key-activation-message",
+			Usage:    "Message sent to the customer upon license key activation.\n\nOnly applicable if `license_key_enabled` is `true`. This message contains instructions for\nactivating the license key.",
+			BodyPath: "license_key_activation_message",
 		},
-		&requestflag.IntFlag{
-			Name:  "license-key-activations-limit",
-			Usage: "Limit for the number of activations for the license key.\n\nOnly applicable if `license_key_enabled` is `true`. Represents the maximum number of times\nthe license key can be activated.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_activations_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "license-key-activations-limit",
+			Usage:    "Limit for the number of activations for the license key.\n\nOnly applicable if `license_key_enabled` is `true`. Represents the maximum number of times\nthe license key can be activated.",
+			BodyPath: "license_key_activations_limit",
 		},
-		&requestflag.YAMLFlag{
-			Name: "license-key-duration",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_duration",
-			},
+		&requestflag.Flag[any]{
+			Name:     "license-key-duration",
+			BodyPath: "license_key_duration",
 		},
-		&requestflag.BoolFlag{
-			Name:  "license-key-enabled",
-			Usage: "Whether the product requires a license key.\n\nIf `true`, additional fields related to license key (duration, activations limit, activation message)\nbecome applicable.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "license_key_enabled",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "license-key-enabled",
+			Usage:    "Whether the product requires a license key.\n\nIf `true`, additional fields related to license key (duration, activations limit, activation message)\nbecome applicable.",
+			BodyPath: "license_key_enabled",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata for the product",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata for the product",
+			BodyPath: "metadata",
 		},
-		&requestflag.StringFlag{
-			Name:  "name",
-			Usage: "Name of the product, optional and must be at most 100 characters.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			Usage:    "Name of the product, optional and must be at most 100 characters.",
+			BodyPath: "name",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "price",
-			Usage: "One-time price details.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "price",
-			},
+		&requestflag.Flag[any]{
+			Name:     "price",
+			Usage:    "One-time price details.",
+			BodyPath: "price",
 		},
-		&requestflag.StringFlag{
-			Name:  "tax-category",
-			Usage: "Represents the different categories of taxation applicable to various products and services.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_category",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-category",
+			Usage:    "Represents the different categories of taxation applicable to various products and services.",
+			BodyPath: "tax_category",
 		},
 	},
 	Action:          handleProductsUpdate,
@@ -224,40 +174,30 @@ var productsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.BoolFlag{
-			Name:  "archived",
-			Usage: "List archived products",
-			Config: requestflag.RequestConfig{
-				QueryPath: "archived",
-			},
+		&requestflag.Flag[bool]{
+			Name:      "archived",
+			Usage:     "List archived products",
+			QueryPath: "archived",
 		},
-		&requestflag.StringFlag{
-			Name:  "brand-id",
-			Usage: "filter by Brand id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "brand_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "brand-id",
+			Usage:     "filter by Brand id",
+			QueryPath: "brand_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
-		&requestflag.BoolFlag{
-			Name:  "recurring",
-			Usage: "Filter products by pricing type:\n- `true`: Show only recurring pricing products (e.g. subscriptions)\n- `false`: Show only one-time price products\n- `null` or absent: Show both types of products",
-			Config: requestflag.RequestConfig{
-				QueryPath: "recurring",
-			},
+		&requestflag.Flag[bool]{
+			Name:      "recurring",
+			Usage:     "Filter products by pricing type:\n- `true`: Show only recurring pricing products (e.g. subscriptions)\n- `false`: Show only one-time price products\n- `null` or absent: Show both types of products",
+			QueryPath: "recurring",
 		},
 	},
 	Action:          handleProductsList,
@@ -268,7 +208,7 @@ var productsArchive = cli.Command{
 	Name:  "archive",
 	Usage: "Perform archive operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -280,7 +220,7 @@ var productsUnarchive = cli.Command{
 	Name:  "unarchive",
 	Usage: "Perform unarchive operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -292,14 +232,12 @@ var productsUpdateFiles = cli.Command{
 	Name:  "update-files",
 	Usage: "Perform update-files operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.StringFlag{
-			Name: "file-name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "file_name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "file-name",
+			BodyPath: "file_name",
 		},
 	},
 	Action:          handleProductsUpdateFiles,
@@ -360,7 +298,7 @@ func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Products.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.Products.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -395,7 +333,7 @@ func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	return client.Products.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)
@@ -466,7 +404,7 @@ func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Products.Archive(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	return client.Products.Archive(ctx, cmd.Value("id").(string), options...)
 }
 
 func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
@@ -489,7 +427,7 @@ func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Products.Unarchive(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	return client.Products.Unarchive(ctx, cmd.Value("id").(string), options...)
 }
 
 func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
@@ -518,7 +456,7 @@ func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Products.UpdateFiles(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

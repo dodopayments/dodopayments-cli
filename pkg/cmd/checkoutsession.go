@@ -19,104 +19,74 @@ var checkoutSessionsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.YAMLSliceFlag{
-			Name: "product-cart",
-			Config: requestflag.RequestConfig{
-				BodyPath: "product_cart",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "product-cart",
+			BodyPath: "product_cart",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "allowed-payment-method-type",
-			Usage: "Customers will never see payment methods that are not in this list.\nHowever, adding a method here does not guarantee customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).\n\nDisclaimar: Always provide 'credit' and 'debit' as a fallback.\nIf all payment methods are unavailable, checkout session will fail.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "allowed_payment_method_types",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "allowed-payment-method-type",
+			Usage:    "Customers will never see payment methods that are not in this list.\nHowever, adding a method here does not guarantee customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).\n\nDisclaimar: Always provide 'credit' and 'debit' as a fallback.\nIf all payment methods are unavailable, checkout session will fail.",
+			BodyPath: "allowed_payment_method_types",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "billing-address",
-			Usage: "Billing address information for the session",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing_address",
-			},
+		&requestflag.Flag[any]{
+			Name:     "billing-address",
+			Usage:    "Billing address information for the session",
+			BodyPath: "billing_address",
 		},
-		&requestflag.StringFlag{
-			Name: "billing-currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "billing_currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "billing-currency",
+			BodyPath: "billing_currency",
 		},
-		&requestflag.BoolFlag{
-			Name:  "confirm",
-			Usage: "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "confirm",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "confirm",
+			Usage:    "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
+			BodyPath: "confirm",
 		},
-		&requestflag.YAMLFlag{
-			Name: "customer",
-			Config: requestflag.RequestConfig{
-				BodyPath: "customer",
-			},
+		&requestflag.Flag[any]{
+			Name:     "customer",
+			BodyPath: "customer",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "customization",
-			Usage: "Customization for the checkout session page",
-			Config: requestflag.RequestConfig{
-				BodyPath: "customization",
-			},
+		&requestflag.Flag[any]{
+			Name:     "customization",
+			Usage:    "Customization for the checkout session page",
+			BodyPath: "customization",
 		},
-		&requestflag.StringFlag{
-			Name: "discount-code",
-			Config: requestflag.RequestConfig{
-				BodyPath: "discount_code",
-			},
+		&requestflag.Flag[string]{
+			Name:     "discount-code",
+			BodyPath: "discount_code",
 		},
-		&requestflag.YAMLFlag{
-			Name: "feature-flags",
-			Config: requestflag.RequestConfig{
-				BodyPath: "feature_flags",
-			},
+		&requestflag.Flag[any]{
+			Name:     "feature-flags",
+			BodyPath: "feature_flags",
 		},
-		&requestflag.BoolFlag{
-			Name:  "force-3ds",
-			Usage: "Override merchant default 3DS behaviour for this session",
-			Config: requestflag.RequestConfig{
-				BodyPath: "force_3ds",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "force-3ds",
+			Usage:    "Override merchant default 3DS behaviour for this session",
+			BodyPath: "force_3ds",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata associated with the payment. Defaults to empty if not provided.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata associated with the payment. Defaults to empty if not provided.",
+			BodyPath: "metadata",
 		},
-		&requestflag.BoolFlag{
-			Name:  "minimal-address",
-			Usage: "If true, only zipcode is required when confirm is true; other address fields remain optional",
-			Config: requestflag.RequestConfig{
-				BodyPath: "minimal_address",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "minimal-address",
+			Usage:    "If true, only zipcode is required when confirm is true; other address fields remain optional",
+			BodyPath: "minimal_address",
 		},
-		&requestflag.StringFlag{
-			Name:  "return-url",
-			Usage: "The url to redirect after payment failure or success.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "return_url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "return-url",
+			Usage:    "The url to redirect after payment failure or success.",
+			BodyPath: "return_url",
 		},
-		&requestflag.BoolFlag{
-			Name:  "show-saved-payment-methods",
-			Usage: "Display saved payment methods of a returning customer False by default",
-			Config: requestflag.RequestConfig{
-				BodyPath: "show_saved_payment_methods",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "show-saved-payment-methods",
+			Usage:    "Display saved payment methods of a returning customer False by default",
+			BodyPath: "show_saved_payment_methods",
 		},
-		&requestflag.YAMLFlag{
-			Name: "subscription-data",
-			Config: requestflag.RequestConfig{
-				BodyPath: "subscription_data",
-			},
+		&requestflag.Flag[any]{
+			Name:     "subscription-data",
+			BodyPath: "subscription_data",
 		},
 	},
 	Action:          handleCheckoutSessionsCreate,
@@ -127,7 +97,7 @@ var checkoutSessionsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -189,7 +159,7 @@ func handleCheckoutSessionsRetrieve(ctx context.Context, cmd *cli.Command) error
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.CheckoutSessions.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.CheckoutSessions.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}

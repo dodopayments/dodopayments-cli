@@ -19,33 +19,25 @@ var refundsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "payment-id",
-			Usage: "The unique identifier of the payment to be refunded.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "payment_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "payment-id",
+			Usage:    "The unique identifier of the payment to be refunded.",
+			BodyPath: "payment_id",
 		},
-		&requestflag.YAMLSliceFlag{
-			Name:  "item",
-			Usage: "Partially Refund an Individual Item",
-			Config: requestflag.RequestConfig{
-				BodyPath: "items",
-			},
+		&requestflag.Flag[[]any]{
+			Name:     "item",
+			Usage:    "Partially Refund an Individual Item",
+			BodyPath: "items",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata associated with the refund.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata associated with the refund.",
+			BodyPath: "metadata",
 		},
-		&requestflag.StringFlag{
-			Name:  "reason",
-			Usage: "The reason for the refund, if any. Maximum length is 3000 characters. Optional.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "reason",
-			},
+		&requestflag.Flag[string]{
+			Name:     "reason",
+			Usage:    "The reason for the refund, if any. Maximum length is 3000 characters. Optional.",
+			BodyPath: "reason",
 		},
 	},
 	Action:          handleRefundsCreate,
@@ -56,7 +48,7 @@ var refundsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "refund-id",
 		},
 	},
@@ -68,47 +60,35 @@ var refundsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-gte",
-			Usage: "Get events after this created time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_gte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-gte",
+			Usage:     "Get events after this created time",
+			QueryPath: "created_at_gte",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-lte",
-			Usage: "Get events created before this time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_lte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-lte",
+			Usage:     "Get events created before this time",
+			QueryPath: "created_at_lte",
 		},
-		&requestflag.StringFlag{
-			Name:  "customer-id",
-			Usage: "Filter by customer_id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "customer_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "customer-id",
+			Usage:     "Filter by customer_id",
+			QueryPath: "customer_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
-		&requestflag.StringFlag{
-			Name:  "status",
-			Usage: "Filter by status",
-			Config: requestflag.RequestConfig{
-				QueryPath: "status",
-			},
+		&requestflag.Flag[string]{
+			Name:      "status",
+			Usage:     "Filter by status",
+			QueryPath: "status",
 		},
 	},
 	Action:          handleRefundsList,
@@ -169,7 +149,7 @@ func handleRefundsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Refunds.Get(ctx, requestflag.CommandRequestValue[string](cmd, "refund-id"), options...)
+	_, err = client.Refunds.Get(ctx, cmd.Value("refund-id").(string), options...)
 	if err != nil {
 		return err
 	}

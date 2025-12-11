@@ -19,39 +19,29 @@ var addonsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name: "currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "currency",
+			BodyPath: "currency",
 		},
-		&requestflag.StringFlag{
-			Name:  "name",
-			Usage: "Name of the Addon",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			Usage:    "Name of the Addon",
+			BodyPath: "name",
 		},
-		&requestflag.IntFlag{
-			Name:  "price",
-			Usage: "Amount of the addon",
-			Config: requestflag.RequestConfig{
-				BodyPath: "price",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "price",
+			Usage:    "Amount of the addon",
+			BodyPath: "price",
 		},
-		&requestflag.StringFlag{
-			Name:  "tax-category",
-			Usage: "Represents the different categories of taxation applicable to various products and services.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_category",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-category",
+			Usage:    "Represents the different categories of taxation applicable to various products and services.",
+			BodyPath: "tax_category",
 		},
-		&requestflag.StringFlag{
-			Name:  "description",
-			Usage: "Optional description of the Addon",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			Usage:    "Optional description of the Addon",
+			BodyPath: "description",
 		},
 	},
 	Action:          handleAddonsCreate,
@@ -62,7 +52,7 @@ var addonsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -74,49 +64,37 @@ var addonsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.StringFlag{
-			Name: "currency",
-			Config: requestflag.RequestConfig{
-				BodyPath: "currency",
-			},
+		&requestflag.Flag[string]{
+			Name:     "currency",
+			BodyPath: "currency",
 		},
-		&requestflag.StringFlag{
-			Name:  "description",
-			Usage: "Description of the Addon, optional and must be at most 1000 characters.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			Usage:    "Description of the Addon, optional and must be at most 1000 characters.",
+			BodyPath: "description",
 		},
-		&requestflag.StringFlag{
-			Name:  "image-id",
-			Usage: "Addon image id after its uploaded to S3",
-			Config: requestflag.RequestConfig{
-				BodyPath: "image_id",
-			},
+		&requestflag.Flag[string]{
+			Name:     "image-id",
+			Usage:    "Addon image id after its uploaded to S3",
+			BodyPath: "image_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "name",
-			Usage: "Name of the Addon, optional and must be at most 100 characters.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			Usage:    "Name of the Addon, optional and must be at most 100 characters.",
+			BodyPath: "name",
 		},
-		&requestflag.IntFlag{
-			Name:  "price",
-			Usage: "Amount of the addon",
-			Config: requestflag.RequestConfig{
-				BodyPath: "price",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "price",
+			Usage:    "Amount of the addon",
+			BodyPath: "price",
 		},
-		&requestflag.StringFlag{
-			Name:  "tax-category",
-			Usage: "Represents the different categories of taxation applicable to various products and services.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "tax_category",
-			},
+		&requestflag.Flag[string]{
+			Name:     "tax-category",
+			Usage:    "Represents the different categories of taxation applicable to various products and services.",
+			BodyPath: "tax_category",
 		},
 	},
 	Action:          handleAddonsUpdate,
@@ -127,19 +105,15 @@ var addonsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleAddonsList,
@@ -150,7 +124,7 @@ var addonsUpdateImages = cli.Command{
 	Name:  "update-images",
 	Usage: "Perform update-images operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -212,7 +186,7 @@ func handleAddonsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Addons.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.Addons.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -249,7 +223,7 @@ func handleAddonsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Addons.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)
@@ -330,7 +304,7 @@ func handleAddonsUpdateImages(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Addons.UpdateImages(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.Addons.UpdateImages(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}

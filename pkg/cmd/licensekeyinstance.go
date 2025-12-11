@@ -19,7 +19,7 @@ var licenseKeyInstancesRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
 	},
@@ -31,14 +31,12 @@ var licenseKeyInstancesUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "id",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
 	},
 	Action:          handleLicenseKeyInstancesUpdate,
@@ -49,26 +47,20 @@ var licenseKeyInstancesList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "license-key-id",
-			Usage: "Filter by license key ID",
-			Config: requestflag.RequestConfig{
-				QueryPath: "license_key_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "license-key-id",
+			Usage:     "Filter by license key ID",
+			QueryPath: "license_key_id",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleLicenseKeyInstancesList,
@@ -97,7 +89,7 @@ func handleLicenseKeyInstancesRetrieve(ctx context.Context, cmd *cli.Command) er
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.LicenseKeyInstances.Get(ctx, requestflag.CommandRequestValue[string](cmd, "id"), options...)
+	_, err = client.LicenseKeyInstances.Get(ctx, cmd.Value("id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -134,7 +126,7 @@ func handleLicenseKeyInstancesUpdate(ctx context.Context, cmd *cli.Command) erro
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.LicenseKeyInstances.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "id"),
+		cmd.Value("id").(string),
 		params,
 		options...,
 	)

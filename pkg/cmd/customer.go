@@ -19,30 +19,22 @@ var customersCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name: "email",
-			Config: requestflag.RequestConfig{
-				BodyPath: "email",
-			},
+		&requestflag.Flag[string]{
+			Name:     "email",
+			BodyPath: "email",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata for the customer",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata for the customer",
+			BodyPath: "metadata",
 		},
-		&requestflag.StringFlag{
-			Name: "phone-number",
-			Config: requestflag.RequestConfig{
-				BodyPath: "phone_number",
-			},
+		&requestflag.Flag[string]{
+			Name:     "phone-number",
+			BodyPath: "phone_number",
 		},
 	},
 	Action:          handleCustomersCreate,
@@ -53,7 +45,7 @@ var customersRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
 	},
@@ -65,27 +57,21 @@ var customersUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Additional metadata for the customer",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Additional metadata for the customer",
+			BodyPath: "metadata",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
-		&requestflag.StringFlag{
-			Name: "phone-number",
-			Config: requestflag.RequestConfig{
-				BodyPath: "phone_number",
-			},
+		&requestflag.Flag[string]{
+			Name:     "phone-number",
+			BodyPath: "phone_number",
 		},
 	},
 	Action:          handleCustomersUpdate,
@@ -96,26 +82,20 @@ var customersList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "email",
-			Usage: "Filter by customer email",
-			Config: requestflag.RequestConfig{
-				QueryPath: "email",
-			},
+		&requestflag.Flag[string]{
+			Name:      "email",
+			Usage:     "Filter by customer email",
+			QueryPath: "email",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleCustomersList,
@@ -126,7 +106,7 @@ var customersRetrievePaymentMethods = cli.Command{
 	Name:  "retrieve-payment-methods",
 	Usage: "Perform retrieve-payment-methods operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
 	},
@@ -188,7 +168,7 @@ func handleCustomersRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.Get(ctx, requestflag.CommandRequestValue[string](cmd, "customer-id"), options...)
+	_, err = client.Customers.Get(ctx, cmd.Value("customer-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -225,7 +205,7 @@ func handleCustomersUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Customers.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "customer-id"),
+		cmd.Value("customer-id").(string),
 		params,
 		options...,
 	)
@@ -306,7 +286,7 @@ func handleCustomersRetrievePaymentMethods(ctx context.Context, cmd *cli.Command
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Customers.GetPaymentMethods(ctx, requestflag.CommandRequestValue[string](cmd, "customer-id"), options...)
+	_, err = client.Customers.GetPaymentMethods(ctx, cmd.Value("customer-id").(string), options...)
 	if err != nil {
 		return err
 	}

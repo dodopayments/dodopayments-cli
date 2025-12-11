@@ -19,7 +19,7 @@ var disputesRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "dispute-id",
 		},
 	},
@@ -31,54 +31,40 @@ var disputesList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-gte",
-			Usage: "Get events after this created time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_gte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-gte",
+			Usage:     "Get events after this created time",
+			QueryPath: "created_at_gte",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "created-at-lte",
-			Usage: "Get events created before this time",
-			Config: requestflag.RequestConfig{
-				QueryPath: "created_at_lte",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:      "created-at-lte",
+			Usage:     "Get events created before this time",
+			QueryPath: "created_at_lte",
 		},
-		&requestflag.StringFlag{
-			Name:  "customer-id",
-			Usage: "Filter by customer_id",
-			Config: requestflag.RequestConfig{
-				QueryPath: "customer_id",
-			},
+		&requestflag.Flag[string]{
+			Name:      "customer-id",
+			Usage:     "Filter by customer_id",
+			QueryPath: "customer_id",
 		},
-		&requestflag.StringFlag{
-			Name:  "dispute-stage",
-			Usage: "Filter by dispute stage",
-			Config: requestflag.RequestConfig{
-				QueryPath: "dispute_stage",
-			},
+		&requestflag.Flag[string]{
+			Name:      "dispute-stage",
+			Usage:     "Filter by dispute stage",
+			QueryPath: "dispute_stage",
 		},
-		&requestflag.StringFlag{
-			Name:  "dispute-status",
-			Usage: "Filter by dispute status",
-			Config: requestflag.RequestConfig{
-				QueryPath: "dispute_status",
-			},
+		&requestflag.Flag[string]{
+			Name:      "dispute-status",
+			Usage:     "Filter by dispute status",
+			QueryPath: "dispute_status",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number default is 0",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number default is 0",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size default is 10 max is 100",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size default is 10 max is 100",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleDisputesList,
@@ -107,7 +93,7 @@ func handleDisputesRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Disputes.Get(ctx, requestflag.CommandRequestValue[string](cmd, "dispute-id"), options...)
+	_, err = client.Disputes.Get(ctx, cmd.Value("dispute-id").(string), options...)
 	if err != nil {
 		return err
 	}

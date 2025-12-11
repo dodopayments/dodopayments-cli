@@ -19,7 +19,7 @@ var webhooksHeadersRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Get a webhook by id",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "webhook-id",
 		},
 	},
@@ -31,15 +31,13 @@ var webhooksHeadersUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Patch a webhook by id",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "webhook-id",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "headers",
-			Usage: "Object of header-value pair to update or add",
-			Config: requestflag.RequestConfig{
-				BodyPath: "headers",
-			},
+		&requestflag.Flag[any]{
+			Name:     "headers",
+			Usage:    "Object of header-value pair to update or add",
+			BodyPath: "headers",
 		},
 	},
 	Action:          handleWebhooksHeadersUpdate,
@@ -68,7 +66,7 @@ func handleWebhooksHeadersRetrieve(ctx context.Context, cmd *cli.Command) error 
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Headers.Get(ctx, requestflag.CommandRequestValue[string](cmd, "webhook-id"), options...)
+	_, err = client.Webhooks.Headers.Get(ctx, cmd.Value("webhook-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -103,7 +101,7 @@ func handleWebhooksHeadersUpdate(ctx context.Context, cmd *cli.Command) error {
 
 	return client.Webhooks.Headers.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
+		cmd.Value("webhook-id").(string),
 		params,
 		options...,
 	)

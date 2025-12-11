@@ -19,59 +19,43 @@ var webhooksCreate = cli.Command{
 	Name:  "create",
 	Usage: "Create a new webhook",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "url",
-			Usage: "Url of the webhook",
-			Config: requestflag.RequestConfig{
-				BodyPath: "url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "url",
+			Usage:    "Url of the webhook",
+			BodyPath: "url",
 		},
-		&requestflag.StringFlag{
-			Name: "description",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			BodyPath: "description",
 		},
-		&requestflag.BoolFlag{
-			Name:  "disabled",
-			Usage: "Create the webhook in a disabled state.\n\nDefault is false",
-			Config: requestflag.RequestConfig{
-				BodyPath: "disabled",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "disabled",
+			Usage:    "Create the webhook in a disabled state.\n\nDefault is false",
+			BodyPath: "disabled",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "filter-type",
-			Usage: "Filter events to the webhook.\n\nWebhook event will only be sent for events in the list.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "filter_types",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "filter-type",
+			Usage:    "Filter events to the webhook.\n\nWebhook event will only be sent for events in the list.",
+			BodyPath: "filter_types",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "headers",
-			Usage: "Custom headers to be passed",
-			Config: requestflag.RequestConfig{
-				BodyPath: "headers",
-			},
+		&requestflag.Flag[any]{
+			Name:     "headers",
+			Usage:    "Custom headers to be passed",
+			BodyPath: "headers",
 		},
-		&requestflag.StringFlag{
-			Name:  "idempotency-key",
-			Usage: "The request's idempotency key",
-			Config: requestflag.RequestConfig{
-				BodyPath: "idempotency_key",
-			},
+		&requestflag.Flag[string]{
+			Name:     "idempotency-key",
+			Usage:    "The request's idempotency key",
+			BodyPath: "idempotency_key",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Metadata to be passed to the webhook\nDefaut is {}",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Metadata to be passed to the webhook\nDefaut is {}",
+			BodyPath: "metadata",
 		},
-		&requestflag.IntFlag{
-			Name: "rate-limit",
-			Config: requestflag.RequestConfig{
-				BodyPath: "rate_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "rate-limit",
+			BodyPath: "rate_limit",
 		},
 	},
 	Action:          handleWebhooksCreate,
@@ -82,7 +66,7 @@ var webhooksRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "Get a webhook by id",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "webhook-id",
 		},
 	},
@@ -94,50 +78,38 @@ var webhooksUpdate = cli.Command{
 	Name:  "update",
 	Usage: "Patch a webhook by id",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "webhook-id",
 		},
-		&requestflag.StringFlag{
-			Name:  "description",
-			Usage: "Description of the webhook",
-			Config: requestflag.RequestConfig{
-				BodyPath: "description",
-			},
+		&requestflag.Flag[string]{
+			Name:     "description",
+			Usage:    "Description of the webhook",
+			BodyPath: "description",
 		},
-		&requestflag.BoolFlag{
-			Name:  "disabled",
-			Usage: "To Disable the endpoint, set it to true.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "disabled",
-			},
+		&requestflag.Flag[bool]{
+			Name:     "disabled",
+			Usage:    "To Disable the endpoint, set it to true.",
+			BodyPath: "disabled",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "filter-type",
-			Usage: "Filter events to the endpoint.\n\nWebhook event will only be sent for events in the list.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "filter_types",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "filter-type",
+			Usage:    "Filter events to the endpoint.\n\nWebhook event will only be sent for events in the list.",
+			BodyPath: "filter_types",
 		},
-		&requestflag.YAMLFlag{
-			Name:  "metadata",
-			Usage: "Metadata",
-			Config: requestflag.RequestConfig{
-				BodyPath: "metadata",
-			},
+		&requestflag.Flag[any]{
+			Name:     "metadata",
+			Usage:    "Metadata",
+			BodyPath: "metadata",
 		},
-		&requestflag.IntFlag{
-			Name:  "rate-limit",
-			Usage: "Rate limit",
-			Config: requestflag.RequestConfig{
-				BodyPath: "rate_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "rate-limit",
+			Usage:    "Rate limit",
+			BodyPath: "rate_limit",
 		},
-		&requestflag.StringFlag{
-			Name:  "url",
-			Usage: "Url endpoint",
-			Config: requestflag.RequestConfig{
-				BodyPath: "url",
-			},
+		&requestflag.Flag[string]{
+			Name:     "url",
+			Usage:    "Url endpoint",
+			BodyPath: "url",
 		},
 	},
 	Action:          handleWebhooksUpdate,
@@ -148,19 +120,15 @@ var webhooksList = cli.Command{
 	Name:  "list",
 	Usage: "List all webhooks",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
-			Name:  "iterator",
-			Usage: "The iterator returned from a prior invocation",
-			Config: requestflag.RequestConfig{
-				QueryPath: "iterator",
-			},
+		&requestflag.Flag[string]{
+			Name:      "iterator",
+			Usage:     "The iterator returned from a prior invocation",
+			QueryPath: "iterator",
 		},
-		&requestflag.IntFlag{
-			Name:  "limit",
-			Usage: "Limit the number of returned items",
-			Config: requestflag.RequestConfig{
-				QueryPath: "limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "limit",
+			Usage:     "Limit the number of returned items",
+			QueryPath: "limit",
 		},
 	},
 	Action:          handleWebhooksList,
@@ -171,7 +139,7 @@ var webhooksDelete = cli.Command{
 	Name:  "delete",
 	Usage: "Delete a webhook by id",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "webhook-id",
 		},
 	},
@@ -183,7 +151,7 @@ var webhooksRetrieveSecret = cli.Command{
 	Name:  "retrieve-secret",
 	Usage: "Get webhook secret by id",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "webhook-id",
 		},
 	},
@@ -245,7 +213,7 @@ func handleWebhooksRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.Get(ctx, requestflag.CommandRequestValue[string](cmd, "webhook-id"), options...)
+	_, err = client.Webhooks.Get(ctx, cmd.Value("webhook-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -282,7 +250,7 @@ func handleWebhooksUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Webhooks.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "webhook-id"),
+		cmd.Value("webhook-id").(string),
 		params,
 		options...,
 	)
@@ -361,7 +329,7 @@ func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Webhooks.Delete(ctx, requestflag.CommandRequestValue[string](cmd, "webhook-id"), options...)
+	return client.Webhooks.Delete(ctx, cmd.Value("webhook-id").(string), options...)
 }
 
 func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
@@ -386,7 +354,7 @@ func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Webhooks.GetSecret(ctx, requestflag.CommandRequestValue[string](cmd, "webhook-id"), options...)
+	_, err = client.Webhooks.GetSecret(ctx, cmd.Value("webhook-id").(string), options...)
 	if err != nil {
 		return err
 	}

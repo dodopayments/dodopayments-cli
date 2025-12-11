@@ -19,59 +19,43 @@ var discountsCreate = cli.Command{
 	Name:  "create",
 	Usage: "POST /discounts If `code` is omitted or empty, a random 16-char uppercase code\nis generated.",
 	Flags: []cli.Flag{
-		&requestflag.IntFlag{
-			Name:  "amount",
-			Usage: "The discount amount.\n\n- If `discount_type` is **not** `percentage`, `amount` is in **USD cents**. For example, `100` means `$1.00`.\n  Only USD is allowed.\n- If `discount_type` **is** `percentage`, `amount` is in **basis points**. For example, `540` means `5.4%`.\n\nMust be at least 1.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "amount",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "amount",
+			Usage:    "The discount amount.\n\n- If `discount_type` is **not** `percentage`, `amount` is in **USD cents**. For example, `100` means `$1.00`.\n  Only USD is allowed.\n- If `discount_type` **is** `percentage`, `amount` is in **basis points**. For example, `540` means `5.4%`.\n\nMust be at least 1.",
+			BodyPath: "amount",
 		},
-		&requestflag.StringFlag{
-			Name: "type",
-			Config: requestflag.RequestConfig{
-				BodyPath: "type",
-			},
+		&requestflag.Flag[string]{
+			Name:     "type",
+			BodyPath: "type",
 		},
-		&requestflag.StringFlag{
-			Name:  "code",
-			Usage: "Optionally supply a code (will be uppercased).\n- Must be at least 3 characters if provided.\n- If omitted, a random 16-character code is generated.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "code",
-			},
+		&requestflag.Flag[string]{
+			Name:     "code",
+			Usage:    "Optionally supply a code (will be uppercased).\n- Must be at least 3 characters if provided.\n- If omitted, a random 16-character code is generated.",
+			BodyPath: "code",
 		},
-		&requestflag.DateTimeFlag{
-			Name:  "expires-at",
-			Usage: "When the discount expires, if ever.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "expires_at",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:     "expires-at",
+			Usage:    "When the discount expires, if ever.",
+			BodyPath: "expires_at",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "restricted-to",
-			Usage: "List of product IDs to restrict usage (if any).",
-			Config: requestflag.RequestConfig{
-				BodyPath: "restricted_to",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "restricted-to",
+			Usage:    "List of product IDs to restrict usage (if any).",
+			BodyPath: "restricted_to",
 		},
-		&requestflag.IntFlag{
-			Name:  "subscription-cycles",
-			Usage: "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "subscription_cycles",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "subscription-cycles",
+			Usage:    "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
+			BodyPath: "subscription_cycles",
 		},
-		&requestflag.IntFlag{
-			Name:  "usage-limit",
-			Usage: "How many times this discount can be used (if any).\nMust be >= 1 if provided.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "usage_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "usage-limit",
+			Usage:    "How many times this discount can be used (if any).\nMust be >= 1 if provided.",
+			BodyPath: "usage_limit",
 		},
 	},
 	Action:          handleDiscountsCreate,
@@ -82,7 +66,7 @@ var discountsRetrieve = cli.Command{
 	Name:  "retrieve",
 	Usage: "GET /discounts/{discount_id}",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "discount-id",
 		},
 	},
@@ -94,60 +78,44 @@ var discountsUpdate = cli.Command{
 	Name:  "update",
 	Usage: "PATCH /discounts/{discount_id}",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "discount-id",
 		},
-		&requestflag.IntFlag{
-			Name:  "amount",
-			Usage: "If present, update the discount amount:\n- If `discount_type` is `percentage`, this represents **basis points** (e.g., `540` = `5.4%`).\n- Otherwise, this represents **USD cents** (e.g., `100` = `$1.00`).\n\nMust be at least 1 if provided.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "amount",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "amount",
+			Usage:    "If present, update the discount amount:\n- If `discount_type` is `percentage`, this represents **basis points** (e.g., `540` = `5.4%`).\n- Otherwise, this represents **USD cents** (e.g., `100` = `$1.00`).\n\nMust be at least 1 if provided.",
+			BodyPath: "amount",
 		},
-		&requestflag.StringFlag{
-			Name:  "code",
-			Usage: "If present, update the discount code (uppercase).",
-			Config: requestflag.RequestConfig{
-				BodyPath: "code",
-			},
+		&requestflag.Flag[string]{
+			Name:     "code",
+			Usage:    "If present, update the discount code (uppercase).",
+			BodyPath: "code",
 		},
-		&requestflag.DateTimeFlag{
-			Name: "expires-at",
-			Config: requestflag.RequestConfig{
-				BodyPath: "expires_at",
-			},
+		&requestflag.Flag[requestflag.DateTimeValue]{
+			Name:     "expires-at",
+			BodyPath: "expires_at",
 		},
-		&requestflag.StringFlag{
-			Name: "name",
-			Config: requestflag.RequestConfig{
-				BodyPath: "name",
-			},
+		&requestflag.Flag[string]{
+			Name:     "name",
+			BodyPath: "name",
 		},
-		&requestflag.StringSliceFlag{
-			Name:  "restricted-to",
-			Usage: "If present, replaces all restricted product IDs with this new set.\nTo remove all restrictions, send empty array",
-			Config: requestflag.RequestConfig{
-				BodyPath: "restricted_to",
-			},
+		&requestflag.Flag[[]string]{
+			Name:     "restricted-to",
+			Usage:    "If present, replaces all restricted product IDs with this new set.\nTo remove all restrictions, send empty array",
+			BodyPath: "restricted_to",
 		},
-		&requestflag.IntFlag{
-			Name:  "subscription-cycles",
-			Usage: "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
-			Config: requestflag.RequestConfig{
-				BodyPath: "subscription_cycles",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "subscription-cycles",
+			Usage:    "Number of subscription billing cycles this discount is valid for.\nIf not provided, the discount will be applied indefinitely to\nall recurring payments related to the subscription.",
+			BodyPath: "subscription_cycles",
 		},
-		&requestflag.StringFlag{
-			Name: "type",
-			Config: requestflag.RequestConfig{
-				BodyPath: "type",
-			},
+		&requestflag.Flag[string]{
+			Name:     "type",
+			BodyPath: "type",
 		},
-		&requestflag.IntFlag{
-			Name: "usage-limit",
-			Config: requestflag.RequestConfig{
-				BodyPath: "usage_limit",
-			},
+		&requestflag.Flag[int64]{
+			Name:     "usage-limit",
+			BodyPath: "usage_limit",
 		},
 	},
 	Action:          handleDiscountsUpdate,
@@ -158,19 +126,15 @@ var discountsList = cli.Command{
 	Name:  "list",
 	Usage: "GET /discounts",
 	Flags: []cli.Flag{
-		&requestflag.IntFlag{
-			Name:  "page-number",
-			Usage: "Page number (default = 0).",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_number",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-number",
+			Usage:     "Page number (default = 0).",
+			QueryPath: "page_number",
 		},
-		&requestflag.IntFlag{
-			Name:  "page-size",
-			Usage: "Page size (default = 10, max = 100).",
-			Config: requestflag.RequestConfig{
-				QueryPath: "page_size",
-			},
+		&requestflag.Flag[int64]{
+			Name:      "page-size",
+			Usage:     "Page size (default = 10, max = 100).",
+			QueryPath: "page_size",
 		},
 	},
 	Action:          handleDiscountsList,
@@ -181,7 +145,7 @@ var discountsDelete = cli.Command{
 	Name:  "delete",
 	Usage: "DELETE /discounts/{discount_id}",
 	Flags: []cli.Flag{
-		&requestflag.StringFlag{
+		&requestflag.Flag[string]{
 			Name: "discount-id",
 		},
 	},
@@ -243,7 +207,7 @@ func handleDiscountsRetrieve(ctx context.Context, cmd *cli.Command) error {
 
 	var res []byte
 	options = append(options, option.WithResponseBodyInto(&res))
-	_, err = client.Discounts.Get(ctx, requestflag.CommandRequestValue[string](cmd, "discount-id"), options...)
+	_, err = client.Discounts.Get(ctx, cmd.Value("discount-id").(string), options...)
 	if err != nil {
 		return err
 	}
@@ -280,7 +244,7 @@ func handleDiscountsUpdate(ctx context.Context, cmd *cli.Command) error {
 	options = append(options, option.WithResponseBodyInto(&res))
 	_, err = client.Discounts.Update(
 		ctx,
-		requestflag.CommandRequestValue[string](cmd, "discount-id"),
+		cmd.Value("discount-id").(string),
 		params,
 		options...,
 	)
@@ -359,5 +323,5 @@ func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	return client.Discounts.Delete(ctx, requestflag.CommandRequestValue[string](cmd, "discount-id"), options...)
+	return client.Discounts.Delete(ctx, cmd.Value("discount-id").(string), options...)
 }
