@@ -70,6 +70,11 @@ var subscriptionsCreate = cli.Command{
 			Name:     "on-demand",
 			BodyPath: "on_demand",
 		},
+		&requestflag.Flag[[]any]{
+			Name:     "one-time-product-cart",
+			Usage:    "List of one time products that will be bundled with the first payment for this subscription",
+			BodyPath: "one_time_product_cart",
+		},
 		&requestflag.Flag[bool]{
 			Name:     "payment-link",
 			Usage:    "If true, generates a payment link.\nDefaults to false if not specified.",
