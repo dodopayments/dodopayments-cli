@@ -23,6 +23,7 @@ func init() {
 	Command = &cli.Command{
 		Name:    "dodopayments",
 		Usage:   "CLI for the Dodo Payments API",
+		Suggest: true,
 		Version: Version,
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
