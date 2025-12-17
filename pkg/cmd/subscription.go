@@ -379,6 +379,7 @@ func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionNewParams{}
 
 	options, err := flagOptions(
@@ -386,6 +387,7 @@ func handleSubscriptionsCreate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -414,11 +416,13 @@ func handleSubscriptionsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -447,6 +451,7 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionUpdateParams{}
 
 	options, err := flagOptions(
@@ -454,6 +459,7 @@ func handleSubscriptionsUpdate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -484,6 +490,7 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionListParams{}
 
 	options, err := flagOptions(
@@ -491,6 +498,7 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -532,6 +540,7 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionChangePlanParams{}
 
 	options, err := flagOptions(
@@ -539,6 +548,7 @@ func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error 
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -562,6 +572,7 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionChargeParams{}
 
 	options, err := flagOptions(
@@ -569,6 +580,7 @@ func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -602,6 +614,7 @@ func handleSubscriptionsPreviewChangePlan(ctx context.Context, cmd *cli.Command)
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionPreviewChangePlanParams{}
 
 	options, err := flagOptions(
@@ -609,6 +622,7 @@ func handleSubscriptionsPreviewChangePlan(ctx context.Context, cmd *cli.Command)
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -642,6 +656,7 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionGetUsageHistoryParams{}
 
 	options, err := flagOptions(
@@ -649,6 +664,7 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -700,6 +716,7 @@ func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Comman
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.SubscriptionUpdatePaymentMethodParams{}
 
 	options, err := flagOptions(
@@ -707,6 +724,7 @@ func handleSubscriptionsUpdatePaymentMethod(ctx context.Context, cmd *cli.Comman
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
