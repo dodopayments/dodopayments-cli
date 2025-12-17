@@ -83,6 +83,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.CustomerWalletLedgerEntryNewParams{}
 
 	options, err := flagOptions(
@@ -90,6 +91,7 @@ func handleCustomersWalletsLedgerEntriesCreate(ctx context.Context, cmd *cli.Com
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -123,6 +125,7 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.CustomerWalletLedgerEntryListParams{}
 
 	options, err := flagOptions(
@@ -130,6 +133,7 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err

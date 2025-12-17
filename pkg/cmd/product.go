@@ -251,6 +251,7 @@ func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.ProductNewParams{}
 
 	options, err := flagOptions(
@@ -258,6 +259,7 @@ func handleProductsCreate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -286,11 +288,13 @@ func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -319,6 +323,7 @@ func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.ProductUpdateParams{}
 
 	options, err := flagOptions(
@@ -326,6 +331,7 @@ func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -346,6 +352,7 @@ func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.ProductListParams{}
 
 	options, err := flagOptions(
@@ -353,6 +360,7 @@ func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -394,11 +402,13 @@ func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -417,11 +427,13 @@ func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	options, err := flagOptions(
 		cmd,
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
@@ -440,6 +452,7 @@ func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.ProductUpdateFilesParams{}
 
 	options, err := flagOptions(
@@ -447,6 +460,7 @@ func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err

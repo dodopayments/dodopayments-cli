@@ -73,6 +73,7 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.LicenseActivateParams{}
 
 	options, err := flagOptions(
@@ -80,6 +81,7 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -105,6 +107,7 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.LicenseDeactivateParams{}
 
 	options, err := flagOptions(
@@ -112,6 +115,7 @@ func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err
@@ -127,6 +131,7 @@ func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.LicenseValidateParams{}
 
 	options, err := flagOptions(
@@ -134,6 +139,7 @@ func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		ApplicationJSON,
+		false,
 	)
 	if err != nil {
 		return err

@@ -42,6 +42,7 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 	if len(unusedArgs) > 0 {
 		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
 	}
+
 	params := dodopayments.CustomerCustomerPortalNewParams{}
 
 	options, err := flagOptions(
@@ -49,6 +50,7 @@ func handleCustomersCustomerPortalCreate(ctx context.Context, cmd *cli.Command) 
 		apiquery.NestedQueryFormatBrackets,
 		apiquery.ArrayQueryFormatComma,
 		EmptyBody,
+		false,
 	)
 	if err != nil {
 		return err
