@@ -80,10 +80,20 @@ var subscriptionsCreate = cli.Command{
 			Usage:    "If true, generates a payment link.\nDefaults to false if not specified.",
 			BodyPath: "payment_link",
 		},
+		&requestflag.Flag[bool]{
+			Name:     "redirect-immediately",
+			Usage:    "If true, redirects the customer immediately after payment completion\nFalse by default",
+			BodyPath: "redirect_immediately",
+		},
 		&requestflag.Flag[string]{
 			Name:     "return-url",
 			Usage:    "Optional URL to redirect after successful subscription creation",
 			BodyPath: "return_url",
+		},
+		&requestflag.Flag[bool]{
+			Name:     "short-link",
+			Usage:    "If true, returns a shortened payment link.\nDefaults to false if not specified.",
+			BodyPath: "short_link",
 		},
 		&requestflag.Flag[bool]{
 			Name:     "show-saved-payment-methods",
