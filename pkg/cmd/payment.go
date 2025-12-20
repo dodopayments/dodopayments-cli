@@ -61,10 +61,20 @@ var paymentsCreate = cli.Command{
 			Usage:    "Whether to generate a payment link. Defaults to false if not specified.",
 			BodyPath: "payment_link",
 		},
+		&requestflag.Flag[bool]{
+			Name:     "redirect-immediately",
+			Usage:    "If true, redirects the customer immediately after payment completion\nFalse by default",
+			BodyPath: "redirect_immediately",
+		},
 		&requestflag.Flag[string]{
 			Name:     "return-url",
 			Usage:    "Optional URL to redirect the customer after payment.\nMust be a valid URL if provided.",
 			BodyPath: "return_url",
+		},
+		&requestflag.Flag[bool]{
+			Name:     "short-link",
+			Usage:    "If true, returns a shortened payment link.\nDefaults to false if not specified.",
+			BodyPath: "short_link",
 		},
 		&requestflag.Flag[bool]{
 			Name:     "show-saved-payment-methods",
