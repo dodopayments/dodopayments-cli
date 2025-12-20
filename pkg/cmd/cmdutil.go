@@ -12,7 +12,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/dodopayments/dodopayments-cli/pkg/jsonview"
+	"github.com/dodopayments/dodopayments-cli/internal/jsonview"
 	"github.com/dodopayments/dodopayments-go/option"
 
 	"github.com/itchyny/json2yaml"
@@ -46,7 +46,7 @@ func getDefaultRequestOptions(cmd *cli.Command) []option.RequestOption {
 		case "test_mode":
 			opts = append(opts, option.WithEnvironmentTestMode())
 		default:
-			log.Fatalf("Unknown environment: %s. Valid environments are: live_mode, test_mode", environment)
+			log.Fatalf("Unknown environment: %s. Valid environments are %s", environment, "live_mode, test_mode")
 		}
 	}
 

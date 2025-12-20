@@ -19,11 +19,11 @@ var subscriptionsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "billing",
 			BodyPath: "billing",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "customer",
 			BodyPath: "customer",
 		},
@@ -37,7 +37,7 @@ var subscriptionsCreate = cli.Command{
 			Usage:    "Number of units to subscribe for. Must be at least 1.",
 			BodyPath: "quantity",
 		},
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "addon",
 			Usage:    "Attach addons to this subscription",
 			BodyPath: "addons",
@@ -61,16 +61,16 @@ var subscriptionsCreate = cli.Command{
 			Usage:    "Override merchant default 3DS behaviour for this subscription",
 			BodyPath: "force_3ds",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the subscription\nDefaults to empty if not specified",
 			BodyPath: "metadata",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "on-demand",
 			BodyPath: "on_demand",
 		},
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "one-time-product-cart",
 			Usage:    "List of one time products that will be bundled with the first payment for this subscription",
 			BodyPath: "one_time_product_cart",
@@ -80,20 +80,10 @@ var subscriptionsCreate = cli.Command{
 			Usage:    "If true, generates a payment link.\nDefaults to false if not specified.",
 			BodyPath: "payment_link",
 		},
-		&requestflag.Flag[bool]{
-			Name:     "redirect-immediately",
-			Usage:    "If true, redirects the customer immediately after payment completion\nFalse by default",
-			BodyPath: "redirect_immediately",
-		},
 		&requestflag.Flag[string]{
 			Name:     "return-url",
 			Usage:    "Optional URL to redirect after successful subscription creation",
 			BodyPath: "return_url",
-		},
-		&requestflag.Flag[bool]{
-			Name:     "short-link",
-			Usage:    "If true, returns a shortened payment link.\nDefaults to false if not specified.",
-			BodyPath: "short_link",
 		},
 		&requestflag.Flag[bool]{
 			Name:     "show-saved-payment-methods",
@@ -134,7 +124,7 @@ var subscriptionsUpdate = cli.Command{
 		&requestflag.Flag[string]{
 			Name: "subscription-id",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "billing",
 			BodyPath: "billing",
 		},
@@ -147,11 +137,11 @@ var subscriptionsUpdate = cli.Command{
 			Name:     "customer-name",
 			BodyPath: "customer_name",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]requestflag.DateTimeValue]{
 			Name:     "disable-on-demand",
 			BodyPath: "disable_on_demand",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			BodyPath: "metadata",
 		},
@@ -238,7 +228,7 @@ var subscriptionsChangePlan = cli.Command{
 			Usage:    "Number of units to subscribe for. Must be at least 1.",
 			BodyPath: "quantity",
 		},
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "addon",
 			Usage:    "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
 			BodyPath: "addons",
@@ -265,12 +255,12 @@ var subscriptionsCharge = cli.Command{
 			Usage:    "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
 			BodyPath: "adaptive_currency_fees_inclusive",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]bool]{
 			Name:     "customer-balance-config",
 			Usage:    "Specify how customer balance is used for the payment",
 			BodyPath: "customer_balance_config",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Metadata for the payment. If not passed, the metadata of the subscription will be taken",
 			BodyPath: "metadata",
@@ -311,7 +301,7 @@ var subscriptionsPreviewChangePlan = cli.Command{
 			Usage:    "Number of units to subscribe for. Must be at least 1.",
 			BodyPath: "quantity",
 		},
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "addon",
 			Usage:    "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
 			BodyPath: "addons",

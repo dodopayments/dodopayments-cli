@@ -19,7 +19,7 @@ var checkoutSessionsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "product-cart",
 			BodyPath: "product_cart",
 		},
@@ -28,7 +28,7 @@ var checkoutSessionsCreate = cli.Command{
 			Usage:    "Customers will never see payment methods that are not in this list.\nHowever, adding a method here does not guarantee customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).\n\nDisclaimar: Always provide 'credit' and 'debit' as a fallback.\nIf all payment methods are unavailable, checkout session will fail.",
 			BodyPath: "allowed_payment_method_types",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "billing-address",
 			Usage:    "Billing address information for the session",
 			BodyPath: "billing_address",
@@ -42,11 +42,11 @@ var checkoutSessionsCreate = cli.Command{
 			Usage:    "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
 			BodyPath: "confirm",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "customer",
 			BodyPath: "customer",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "customization",
 			Usage:    "Customization for the checkout session page",
 			BodyPath: "customization",
@@ -55,7 +55,7 @@ var checkoutSessionsCreate = cli.Command{
 			Name:     "discount-code",
 			BodyPath: "discount_code",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]bool]{
 			Name:     "feature-flags",
 			BodyPath: "feature_flags",
 		},
@@ -64,7 +64,7 @@ var checkoutSessionsCreate = cli.Command{
 			Usage:    "Override merchant default 3DS behaviour for this session",
 			BodyPath: "force_3ds",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata associated with the payment. Defaults to empty if not provided.",
 			BodyPath: "metadata",
@@ -80,16 +80,11 @@ var checkoutSessionsCreate = cli.Command{
 			BodyPath: "return_url",
 		},
 		&requestflag.Flag[bool]{
-			Name:     "short-link",
-			Usage:    "If true, returns a shortened checkout URL.\nDefaults to false if not specified.",
-			BodyPath: "short_link",
-		},
-		&requestflag.Flag[bool]{
 			Name:     "show-saved-payment-methods",
 			Usage:    "Display saved payment methods of a returning customer False by default",
 			BodyPath: "show_saved_payment_methods",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "subscription-data",
 			BodyPath: "subscription_data",
 		},

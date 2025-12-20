@@ -75,7 +75,7 @@ var usageEventsIngest = cli.Command{
 	Name:  "ingest",
 	Usage: "This endpoint allows you to ingest custom events that can be used for:",
 	Flags: []cli.Flag{
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "event",
 			Usage:    "List of events to be pushed",
 			BodyPath: "events",

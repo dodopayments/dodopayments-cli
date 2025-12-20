@@ -27,7 +27,7 @@ var customersCreate = cli.Command{
 			Name:     "name",
 			BodyPath: "name",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the customer",
 			BodyPath: "metadata",
@@ -60,7 +60,7 @@ var customersUpdate = cli.Command{
 		&requestflag.Flag[string]{
 			Name: "customer-id",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the customer",
 			BodyPath: "metadata",
