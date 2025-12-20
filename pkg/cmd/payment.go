@@ -19,15 +19,15 @@ var paymentsCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "billing",
 			BodyPath: "billing",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "customer",
 			BodyPath: "customer",
 		},
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "product-cart",
 			Usage:    "List of products in the cart. Must contain at least 1 and at most 100 items.",
 			BodyPath: "product_cart",
@@ -51,7 +51,7 @@ var paymentsCreate = cli.Command{
 			Usage:    "Override merchant default 3DS behaviour for this payment",
 			BodyPath: "force_3ds",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata associated with the payment.\nDefaults to empty if not provided.",
 			BodyPath: "metadata",
@@ -61,20 +61,10 @@ var paymentsCreate = cli.Command{
 			Usage:    "Whether to generate a payment link. Defaults to false if not specified.",
 			BodyPath: "payment_link",
 		},
-		&requestflag.Flag[bool]{
-			Name:     "redirect-immediately",
-			Usage:    "If true, redirects the customer immediately after payment completion\nFalse by default",
-			BodyPath: "redirect_immediately",
-		},
 		&requestflag.Flag[string]{
 			Name:     "return-url",
 			Usage:    "Optional URL to redirect the customer after payment.\nMust be a valid URL if provided.",
 			BodyPath: "return_url",
-		},
-		&requestflag.Flag[bool]{
-			Name:     "short-link",
-			Usage:    "If true, returns a shortened payment link.\nDefaults to false if not specified.",
-			BodyPath: "short_link",
 		},
 		&requestflag.Flag[bool]{
 			Name:     "show-saved-payment-methods",

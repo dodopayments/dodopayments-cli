@@ -38,7 +38,7 @@ var webhooksCreate = cli.Command{
 			Usage:    "Filter events to the webhook.\n\nWebhook event will only be sent for events in the list.",
 			BodyPath: "filter_types",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "headers",
 			Usage:    "Custom headers to be passed",
 			BodyPath: "headers",
@@ -48,7 +48,7 @@ var webhooksCreate = cli.Command{
 			Usage:    "The request's idempotency key",
 			BodyPath: "idempotency_key",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Metadata to be passed to the webhook\nDefaut is {}",
 			BodyPath: "metadata",
@@ -96,7 +96,7 @@ var webhooksUpdate = cli.Command{
 			Usage:    "Filter events to the endpoint.\n\nWebhook event will only be sent for events in the list.",
 			BodyPath: "filter_types",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Metadata",
 			BodyPath: "metadata",

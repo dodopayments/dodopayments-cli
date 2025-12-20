@@ -24,7 +24,7 @@ var productsCreate = cli.Command{
 			Usage:    "Name of the product",
 			BodyPath: "name",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "price",
 			Usage:    "One-time price details.",
 			BodyPath: "price",
@@ -49,7 +49,7 @@ var productsCreate = cli.Command{
 			Usage:    "Optional description of the product",
 			BodyPath: "description",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "digital-product-delivery",
 			Usage:    "Choose how you would like you digital product delivered",
 			BodyPath: "digital_product_delivery",
@@ -64,7 +64,7 @@ var productsCreate = cli.Command{
 			Usage:    "The number of times the license key can be activated.\nMust be 0 or greater",
 			BodyPath: "license_key_activations_limit",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "license-key-duration",
 			BodyPath: "license_key_duration",
 		},
@@ -73,7 +73,7 @@ var productsCreate = cli.Command{
 			Usage:    "When true, generates and sends a license key to your customer.\nDefaults to false",
 			BodyPath: "license_key_enabled",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the product",
 			BodyPath: "metadata",
@@ -116,7 +116,7 @@ var productsUpdate = cli.Command{
 			Usage:    "Description of the product, optional and must be at most 1000 characters.",
 			BodyPath: "description",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "digital-product-delivery",
 			Usage:    "Choose how you would like you digital product delivered",
 			BodyPath: "digital_product_delivery",
@@ -136,7 +136,7 @@ var productsUpdate = cli.Command{
 			Usage:    "Limit for the number of activations for the license key.\n\nOnly applicable if `license_key_enabled` is `true`. Represents the maximum number of times\nthe license key can be activated.",
 			BodyPath: "license_key_activations_limit",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "license-key-duration",
 			BodyPath: "license_key_duration",
 		},
@@ -145,7 +145,7 @@ var productsUpdate = cli.Command{
 			Usage:    "Whether the product requires a license key.\n\nIf `true`, additional fields related to license key (duration, activations limit, activation message)\nbecome applicable.",
 			BodyPath: "license_key_enabled",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the product",
 			BodyPath: "metadata",
@@ -155,7 +155,7 @@ var productsUpdate = cli.Command{
 			Usage:    "Name of the product, optional and must be at most 100 characters.",
 			BodyPath: "name",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "price",
 			Usage:    "One-time price details.",
 			BodyPath: "price",

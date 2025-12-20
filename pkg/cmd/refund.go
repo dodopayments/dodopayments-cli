@@ -24,12 +24,12 @@ var refundsCreate = cli.Command{
 			Usage:    "The unique identifier of the payment to be refunded.",
 			BodyPath: "payment_id",
 		},
-		&requestflag.Flag[[]any]{
+		&requestflag.Flag[[]map[string]any]{
 			Name:     "item",
 			Usage:    "Partially Refund an Individual Item",
 			BodyPath: "items",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
 			Usage:    "Additional metadata associated with the refund.",
 			BodyPath: "metadata",

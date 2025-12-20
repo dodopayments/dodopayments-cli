@@ -19,7 +19,7 @@ var metersCreate = cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]string]{
 			Name:     "aggregation",
 			BodyPath: "aggregation",
 		},
@@ -43,7 +43,7 @@ var metersCreate = cli.Command{
 			Usage:    "Optional description of the meter",
 			BodyPath: "description",
 		},
-		&requestflag.Flag[any]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "filter",
 			Usage:    "A filter structure that combines multiple conditions with logical conjunctions (AND/OR).\n\nSupports up to 3 levels of nesting to create complex filter expressions.\nEach filter has a conjunction (and/or) and clauses that can be either direct conditions or nested filters.",
 			BodyPath: "filter",
