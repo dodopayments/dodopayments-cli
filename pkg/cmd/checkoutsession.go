@@ -80,6 +80,11 @@ var checkoutSessionsCreate = cli.Command{
 			BodyPath: "return_url",
 		},
 		&requestflag.Flag[bool]{
+			Name:     "short-link",
+			Usage:    "If true, returns a shortened checkout URL.\nDefaults to false if not specified.",
+			BodyPath: "short_link",
+		},
+		&requestflag.Flag[bool]{
 			Name:     "show-saved-payment-methods",
 			Usage:    "Display saved payment methods of a returning customer False by default",
 			BodyPath: "show_saved_payment_methods",
