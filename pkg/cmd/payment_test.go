@@ -21,6 +21,7 @@ func TestPaymentsCreate(t *testing.T) {
 		"--force-3ds",
 		"--metadata", "{foo: string}",
 		"--payment-link",
+		"--payment-method-id", "payment_method_id",
 		"--redirect-immediately",
 		"--return-url", "return_url",
 		"--short-link",

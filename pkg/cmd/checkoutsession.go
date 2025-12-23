@@ -75,6 +75,11 @@ var checkoutSessionsCreate = cli.Command{
 			BodyPath: "minimal_address",
 		},
 		&requestflag.Flag[string]{
+			Name:     "payment-method-id",
+			Usage:    "Optional payment method ID to use for this checkout session.\nOnly allowed when `confirm` is true.\nIf provided, existing customer id must also be provided.",
+			BodyPath: "payment_method_id",
+		},
+		&requestflag.Flag[string]{
 			Name:     "return-url",
 			Usage:    "The url to redirect after payment failure or success.",
 			BodyPath: "return_url",

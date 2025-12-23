@@ -61,6 +61,11 @@ var paymentsCreate = cli.Command{
 			Usage:    "Whether to generate a payment link. Defaults to false if not specified.",
 			BodyPath: "payment_link",
 		},
+		&requestflag.Flag[string]{
+			Name:     "payment-method-id",
+			Usage:    "Optional payment method ID to use for this payment.\nIf provided, customer_id must also be provided.\nThe payment method will be validated for eligibility with the payment's currency.",
+			BodyPath: "payment_method_id",
+		},
 		&requestflag.Flag[bool]{
 			Name:     "redirect-immediately",
 			Usage:    "If true, redirects the customer immediately after payment completion\nFalse by default",
