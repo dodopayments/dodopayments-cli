@@ -181,7 +181,7 @@ func handleLicenseKeyInstancesList(ctx context.Context, cmd *cli.Command) error 
 		return streamOutput("license-key-instances list", func(w *os.File) error {
 			for iter.Next() {
 				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
+				obj := gjson.Parse(item.RawJSON())
 				if err := ShowJSON(w, "license-key-instances list", obj, format, transform); err != nil {
 					return err
 				}
