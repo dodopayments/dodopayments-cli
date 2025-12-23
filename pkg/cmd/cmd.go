@@ -204,6 +204,14 @@ func init() {
 				},
 			},
 			{
+				Name:     "products:short-links",
+				Category: "API RESOURCE",
+				Commands: []*cli.Command{
+					&productsShortLinksCreate,
+					&productsShortLinksList,
+				},
+			},
+			{
 				Name:     "misc",
 				Category: "API RESOURCE",
 				Commands: []*cli.Command{
