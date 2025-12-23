@@ -530,7 +530,7 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 		return streamOutput("subscriptions list", func(w *os.File) error {
 			for iter.Next() {
 				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
+				obj := gjson.Parse(item.RawJSON())
 				if err := ShowJSON(w, "subscriptions list", obj, format, transform); err != nil {
 					return err
 				}
@@ -706,7 +706,7 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 		return streamOutput("subscriptions retrieve-usage-history", func(w *os.File) error {
 			for iter.Next() {
 				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
+				obj := gjson.Parse(item.RawJSON())
 				if err := ShowJSON(w, "subscriptions retrieve-usage-history", obj, format, transform); err != nil {
 					return err
 				}

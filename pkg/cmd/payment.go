@@ -270,7 +270,7 @@ func handlePaymentsList(ctx context.Context, cmd *cli.Command) error {
 		return streamOutput("payments list", func(w *os.File) error {
 			for iter.Next() {
 				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
+				obj := gjson.Parse(item.RawJSON())
 				if err := ShowJSON(w, "payments list", obj, format, transform); err != nil {
 					return err
 				}
