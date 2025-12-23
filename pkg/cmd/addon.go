@@ -280,7 +280,7 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 		return streamOutput("addons list", func(w *os.File) error {
 			for iter.Next() {
 				item := iter.Current()
-				obj := gjson.Parse(item.RawJSON())
+				obj := gjson.Parse(item.JSON.RawJSON())
 				if err := ShowJSON(w, "addons list", obj, format, transform); err != nil {
 					return err
 				}
