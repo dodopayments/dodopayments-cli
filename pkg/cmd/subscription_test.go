@@ -25,6 +25,7 @@ func TestSubscriptionsCreate(t *testing.T) {
 		"--on-demand", "{mandate_only: true, adaptive_currency_fees_inclusive: true, product_currency: AED, product_description: product_description, product_price: 0}",
 		"--one-time-product-cart", "{product_id: product_id, quantity: 0, amount: 0}",
 		"--payment-link",
+		"--payment-method-id", "payment_method_id",
 		"--redirect-immediately",
 		"--return-url", "return_url",
 		"--short-link",

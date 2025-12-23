@@ -80,6 +80,11 @@ var subscriptionsCreate = cli.Command{
 			Usage:    "If true, generates a payment link.\nDefaults to false if not specified.",
 			BodyPath: "payment_link",
 		},
+		&requestflag.Flag[string]{
+			Name:     "payment-method-id",
+			Usage:    "Optional payment method ID to use for this subscription.\nIf provided, customer_id must also be provided (via AttachExistingCustomer).\nThe payment method will be validated for eligibility with the subscription's currency.",
+			BodyPath: "payment_method_id",
+		},
 		&requestflag.Flag[bool]{
 			Name:     "redirect-immediately",
 			Usage:    "If true, redirects the customer immediately after payment completion\nFalse by default",

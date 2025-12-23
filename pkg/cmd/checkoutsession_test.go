@@ -24,6 +24,7 @@ func TestCheckoutSessionsCreate(t *testing.T) {
 		"--force-3ds",
 		"--metadata", "{foo: string}",
 		"--minimal-address",
+		"--payment-method-id", "payment_method_id",
 		"--return-url", "return_url",
 		"--short-link",
 		"--show-saved-payment-methods",
