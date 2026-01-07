@@ -15,7 +15,7 @@ func TestPaymentsCreate(t *testing.T) {
 		"--billing", "{country: AF, city: city, state: state, street: street, zipcode: zipcode}",
 		"--customer", "{customer_id: customer_id}",
 		"--product-cart", "{product_id: product_id, quantity: 0, amount: 0}",
-		"--allowed-payment-method-type", "credit",
+		"--allowed-payment-method-type", "ach",
 		"--billing-currency", "AED",
 		"--discount-code", "discount_code",
 		"--force-3ds",
