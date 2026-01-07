@@ -156,16 +156,7 @@ func handleUsageEventsList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "usage-events list", obj, format, transform)
 	} else {
 		iter := client.UsageEvents.ListAutoPaging(ctx, params, options...)
-		return streamOutput("usage-events list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "usage-events list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "usage-events list", iter, format, transform)
 	}
 }
 

@@ -552,16 +552,7 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "subscriptions list", obj, format, transform)
 	} else {
 		iter := client.Subscriptions.ListAutoPaging(ctx, params, options...)
-		return streamOutput("subscriptions list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "subscriptions list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "subscriptions list", iter, format, transform)
 	}
 }
 
@@ -728,16 +719,7 @@ func handleSubscriptionsRetrieveUsageHistory(ctx context.Context, cmd *cli.Comma
 			params,
 			options...,
 		)
-		return streamOutput("subscriptions retrieve-usage-history", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "subscriptions retrieve-usage-history", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "subscriptions retrieve-usage-history", iter, format, transform)
 	}
 }
 
