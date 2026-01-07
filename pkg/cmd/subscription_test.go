@@ -17,7 +17,7 @@ func TestSubscriptionsCreate(t *testing.T) {
 		"--product-id", "product_id",
 		"--quantity", "0",
 		"--addon", "{addon_id: addon_id, quantity: 0}",
-		"--allowed-payment-method-type", "credit",
+		"--allowed-payment-method-type", "ach",
 		"--billing-currency", "AED",
 		"--discount-code", "discount_code",
 		"--force-3ds",
