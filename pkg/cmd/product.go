@@ -22,16 +22,19 @@ var productsCreate = cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "name",
 			Usage:    "Name of the product",
+			Required: true,
 			BodyPath: "name",
 		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "price",
 			Usage:    "One-time price details.",
+			Required: true,
 			BodyPath: "price",
 		},
 		&requestflag.Flag[string]{
 			Name:     "tax-category",
 			Usage:    "Represents the different categories of taxation applicable to various products and services.",
+			Required: true,
 			BodyPath: "tax_category",
 		},
 		&requestflag.Flag[[]string]{
@@ -88,7 +91,8 @@ var productsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleProductsRetrieve,
@@ -100,7 +104,8 @@ var productsUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[[]string]{
 			Name:     "addon",
@@ -209,7 +214,8 @@ var productsArchive = cli.Command{
 	Usage: "Perform archive operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleProductsArchive,
@@ -221,7 +227,8 @@ var productsUnarchive = cli.Command{
 	Usage: "Perform unarchive operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleProductsUnarchive,
@@ -233,10 +240,12 @@ var productsUpdateFiles = cli.Command{
 	Usage: "Perform update-files operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "file-name",
+			Required: true,
 			BodyPath: "file_name",
 		},
 	},

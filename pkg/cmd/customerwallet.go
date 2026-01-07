@@ -20,7 +20,8 @@ var customersWalletsList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 	},
 	Action:          handleCustomersWalletsList,

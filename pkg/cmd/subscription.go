@@ -21,20 +21,24 @@ var subscriptionsCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[map[string]string]{
 			Name:     "billing",
+			Required: true,
 			BodyPath: "billing",
 		},
 		&requestflag.Flag[map[string]string]{
 			Name:     "customer",
+			Required: true,
 			BodyPath: "customer",
 		},
 		&requestflag.Flag[string]{
 			Name:     "product-id",
 			Usage:    "Unique identifier of the product to subscribe to",
+			Required: true,
 			BodyPath: "product_id",
 		},
 		&requestflag.Flag[int64]{
 			Name:     "quantity",
 			Usage:    "Number of units to subscribe for. Must be at least 1.",
+			Required: true,
 			BodyPath: "quantity",
 		},
 		&requestflag.Flag[[]map[string]any]{
@@ -125,7 +129,8 @@ var subscriptionsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 	},
 	Action:          handleSubscriptionsRetrieve,
@@ -137,7 +142,8 @@ var subscriptionsUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 		&requestflag.Flag[map[string]string]{
 			Name:     "billing",
@@ -226,21 +232,25 @@ var subscriptionsChangePlan = cli.Command{
 	Usage: "Perform change-plan operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "product-id",
 			Usage:    "Unique identifier of the product to subscribe to",
+			Required: true,
 			BodyPath: "product_id",
 		},
 		&requestflag.Flag[string]{
 			Name:     "proration-billing-mode",
 			Usage:    "Proration Billing Mode",
+			Required: true,
 			BodyPath: "proration_billing_mode",
 		},
 		&requestflag.Flag[int64]{
 			Name:     "quantity",
 			Usage:    "Number of units to subscribe for. Must be at least 1.",
+			Required: true,
 			BodyPath: "quantity",
 		},
 		&requestflag.Flag[[]map[string]any]{
@@ -258,11 +268,13 @@ var subscriptionsCharge = cli.Command{
 	Usage: "Perform charge operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 		&requestflag.Flag[int64]{
 			Name:     "product-price",
 			Usage:    "The product price. Represented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
+			Required: true,
 			BodyPath: "product_price",
 		},
 		&requestflag.Flag[bool]{
@@ -299,21 +311,25 @@ var subscriptionsPreviewChangePlan = cli.Command{
 	Usage: "Perform preview-change-plan operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "product-id",
 			Usage:    "Unique identifier of the product to subscribe to",
+			Required: true,
 			BodyPath: "product_id",
 		},
 		&requestflag.Flag[string]{
 			Name:     "proration-billing-mode",
 			Usage:    "Proration Billing Mode",
+			Required: true,
 			BodyPath: "proration_billing_mode",
 		},
 		&requestflag.Flag[int64]{
 			Name:     "quantity",
 			Usage:    "Number of units to subscribe for. Must be at least 1.",
+			Required: true,
 			BodyPath: "quantity",
 		},
 		&requestflag.Flag[[]map[string]any]{
@@ -331,7 +347,8 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 	Usage: "Get detailed usage history for a subscription that includes usage-based billing\n(metered components). This endpoint provides insights into customer usage\npatterns and billing calculations over time.",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 		&requestflag.Flag[requestflag.DateTimeValue]{
 			Name:      "end-date",
@@ -368,10 +385,12 @@ var subscriptionsUpdatePaymentMethod = cli.Command{
 	Usage: "Perform update-payment-method operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "subscription-id",
+			Name:     "subscription-id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "type",
+			Required: true,
 			BodyPath: "type",
 		},
 		&requestflag.Flag[string]{
@@ -380,6 +399,7 @@ var subscriptionsUpdatePaymentMethod = cli.Command{
 		},
 		&requestflag.Flag[string]{
 			Name:     "payment-method-id",
+			Required: true,
 			BodyPath: "payment_method_id",
 		},
 	},

@@ -20,7 +20,8 @@ var disputesRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "dispute-id",
+			Name:     "dispute-id",
+			Required: true,
 		},
 	},
 	Action:          handleDisputesRetrieve,

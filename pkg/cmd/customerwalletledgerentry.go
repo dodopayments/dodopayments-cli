@@ -20,19 +20,23 @@ var customersWalletsLedgerEntriesCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 		&requestflag.Flag[int64]{
 			Name:     "amount",
+			Required: true,
 			BodyPath: "amount",
 		},
 		&requestflag.Flag[string]{
 			Name:     "currency",
+			Required: true,
 			BodyPath: "currency",
 		},
 		&requestflag.Flag[string]{
 			Name:     "entry-type",
 			Usage:    "Type of ledger entry - credit or debit",
+			Required: true,
 			BodyPath: "entry_type",
 		},
 		&requestflag.Flag[string]{
@@ -54,7 +58,8 @@ var customersWalletsLedgerEntriesList = cli.Command{
 	Usage: "Perform list operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:      "currency",

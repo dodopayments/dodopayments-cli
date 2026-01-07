@@ -20,7 +20,8 @@ var webhooksHeadersRetrieve = cli.Command{
 	Usage: "Get a webhook by id",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "webhook-id",
+			Name:     "webhook-id",
+			Required: true,
 		},
 	},
 	Action:          handleWebhooksHeadersRetrieve,
@@ -32,11 +33,13 @@ var webhooksHeadersUpdate = cli.Command{
 	Usage: "Patch a webhook by id",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "webhook-id",
+			Name:     "webhook-id",
+			Required: true,
 		},
 		&requestflag.Flag[map[string]string]{
 			Name:     "headers",
 			Usage:    "Object of header-value pair to update or add",
+			Required: true,
 			BodyPath: "headers",
 		},
 	},

@@ -21,10 +21,12 @@ var customersCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "email",
+			Required: true,
 			BodyPath: "email",
 		},
 		&requestflag.Flag[string]{
 			Name:     "name",
+			Required: true,
 			BodyPath: "name",
 		},
 		&requestflag.Flag[map[string]string]{
@@ -46,7 +48,8 @@ var customersRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 	},
 	Action:          handleCustomersRetrieve,
@@ -58,7 +61,8 @@ var customersUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 		&requestflag.Flag[map[string]string]{
 			Name:     "metadata",
@@ -107,7 +111,8 @@ var customersRetrievePaymentMethods = cli.Command{
 	Usage: "Perform retrieve-payment-methods operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 	},
 	Action:          handleCustomersRetrievePaymentMethods,

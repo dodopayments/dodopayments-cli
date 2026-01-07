@@ -21,10 +21,12 @@ var licensesActivate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "license-key",
+			Required: true,
 			BodyPath: "license_key",
 		},
 		&requestflag.Flag[string]{
 			Name:     "name",
+			Required: true,
 			BodyPath: "name",
 		},
 	},
@@ -38,10 +40,12 @@ var licensesDeactivate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "license-key",
+			Required: true,
 			BodyPath: "license_key",
 		},
 		&requestflag.Flag[string]{
 			Name:     "license-key-instance-id",
+			Required: true,
 			BodyPath: "license_key_instance_id",
 		},
 	},
@@ -55,6 +59,7 @@ var licensesValidate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "license-key",
+			Required: true,
 			BodyPath: "license_key",
 		},
 		&requestflag.Flag[string]{

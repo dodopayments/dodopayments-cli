@@ -21,21 +21,25 @@ var metersCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[map[string]string]{
 			Name:     "aggregation",
+			Required: true,
 			BodyPath: "aggregation",
 		},
 		&requestflag.Flag[string]{
 			Name:     "event-name",
 			Usage:    "Event name to track",
+			Required: true,
 			BodyPath: "event_name",
 		},
 		&requestflag.Flag[string]{
 			Name:     "measurement-unit",
 			Usage:    "measurement unit",
+			Required: true,
 			BodyPath: "measurement_unit",
 		},
 		&requestflag.Flag[string]{
 			Name:     "name",
 			Usage:    "Name of the meter",
+			Required: true,
 			BodyPath: "name",
 		},
 		&requestflag.Flag[string]{
@@ -58,7 +62,8 @@ var metersRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleMetersRetrieve,
@@ -94,7 +99,8 @@ var metersArchive = cli.Command{
 	Usage: "Perform archive operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleMetersArchive,
@@ -106,7 +112,8 @@ var metersUnarchive = cli.Command{
 	Usage: "Perform unarchive operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleMetersUnarchive,

@@ -21,21 +21,25 @@ var addonsCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "currency",
+			Required: true,
 			BodyPath: "currency",
 		},
 		&requestflag.Flag[string]{
 			Name:     "name",
 			Usage:    "Name of the Addon",
+			Required: true,
 			BodyPath: "name",
 		},
 		&requestflag.Flag[int64]{
 			Name:     "price",
 			Usage:    "Amount of the addon",
+			Required: true,
 			BodyPath: "price",
 		},
 		&requestflag.Flag[string]{
 			Name:     "tax-category",
 			Usage:    "Represents the different categories of taxation applicable to various products and services.",
+			Required: true,
 			BodyPath: "tax_category",
 		},
 		&requestflag.Flag[string]{
@@ -53,7 +57,8 @@ var addonsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleAddonsRetrieve,
@@ -65,7 +70,8 @@ var addonsUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "currency",
@@ -125,7 +131,8 @@ var addonsUpdateImages = cli.Command{
 	Usage: "Perform update-images operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleAddonsUpdateImages,
