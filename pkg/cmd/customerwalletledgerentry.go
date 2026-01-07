@@ -167,15 +167,6 @@ func handleCustomersWalletsLedgerEntriesList(ctx context.Context, cmd *cli.Comma
 			params,
 			options...,
 		)
-		return streamOutput("customers:wallets:ledger-entries list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "customers:wallets:ledger-entries list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "customers:wallets:ledger-entries list", iter, format, transform)
 	}
 }

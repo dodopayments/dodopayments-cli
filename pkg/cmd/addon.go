@@ -284,16 +284,7 @@ func handleAddonsList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "addons list", obj, format, transform)
 	} else {
 		iter := client.Addons.ListAutoPaging(ctx, params, options...)
-		return streamOutput("addons list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "addons list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "addons list", iter, format, transform)
 	}
 }
 

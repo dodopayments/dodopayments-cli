@@ -303,16 +303,7 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "discounts list", obj, format, transform)
 	} else {
 		iter := client.Discounts.ListAutoPaging(ctx, params, options...)
-		return streamOutput("discounts list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "discounts list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "discounts list", iter, format, transform)
 	}
 }
 

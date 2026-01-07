@@ -200,15 +200,6 @@ func handleRefundsList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "refunds list", obj, format, transform)
 	} else {
 		iter := client.Refunds.ListAutoPaging(ctx, params, options...)
-		return streamOutput("refunds list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "refunds list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "refunds list", iter, format, transform)
 	}
 }

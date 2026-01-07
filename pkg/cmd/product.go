@@ -388,16 +388,7 @@ func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "products list", obj, format, transform)
 	} else {
 		iter := client.Products.ListAutoPaging(ctx, params, options...)
-		return streamOutput("products list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "products list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "products list", iter, format, transform)
 	}
 }
 

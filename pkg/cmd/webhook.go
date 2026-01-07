@@ -309,16 +309,7 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 		return ShowJSON(os.Stdout, "webhooks list", obj, format, transform)
 	} else {
 		iter := client.Webhooks.ListAutoPaging(ctx, params, options...)
-		return streamOutput("webhooks list", func(w *os.File) error {
-			for iter.Next() {
-				item := iter.Current()
-				obj := gjson.Parse(item.JSON.RawJSON())
-				if err := ShowJSON(w, "webhooks list", obj, format, transform); err != nil {
-					return err
-				}
-			}
-			return iter.Err()
-		})
+		return ShowJSONIterator(os.Stdout, "webhooks list", iter, format, transform)
 	}
 }
 
