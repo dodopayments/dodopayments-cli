@@ -254,21 +254,21 @@ func (f *Flag[T]) TypeName() string {
 		case reflect.Bool:
 			return "boolean"
 		case reflect.String:
-			return "string"
-		default:
 			switch t.Name() {
-			case "dateTimeValue":
+			case "DateTimeValue":
 				return "datetime"
-			case "dateValue":
+			case "DateValue":
 				return "date"
-			case "timeValue":
+			case "TimeValue":
 				return "time"
 			default:
-				if t.Name() == "" {
-					return "any"
-				}
-				return strings.ToLower(t.Name())
+				return "string"
 			}
+		default:
+			if t.Name() == "" {
+				return "any"
+			}
+			return strings.ToLower(t.Name())
 		}
 	}
 
