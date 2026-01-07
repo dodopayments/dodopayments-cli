@@ -22,6 +22,7 @@ var webhooksCreate = cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "url",
 			Usage:    "Url of the webhook",
+			Required: true,
 			BodyPath: "url",
 		},
 		&requestflag.Flag[string]{
@@ -67,7 +68,8 @@ var webhooksRetrieve = cli.Command{
 	Usage: "Get a webhook by id",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "webhook-id",
+			Name:     "webhook-id",
+			Required: true,
 		},
 	},
 	Action:          handleWebhooksRetrieve,
@@ -79,7 +81,8 @@ var webhooksUpdate = cli.Command{
 	Usage: "Patch a webhook by id",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "webhook-id",
+			Name:     "webhook-id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "description",
@@ -140,7 +143,8 @@ var webhooksDelete = cli.Command{
 	Usage: "Delete a webhook by id",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "webhook-id",
+			Name:     "webhook-id",
+			Required: true,
 		},
 	},
 	Action:          handleWebhooksDelete,
@@ -152,7 +156,8 @@ var webhooksRetrieveSecret = cli.Command{
 	Usage: "Get webhook secret by id",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "webhook-id",
+			Name:     "webhook-id",
+			Required: true,
 		},
 	},
 	Action:          handleWebhooksRetrieveSecret,

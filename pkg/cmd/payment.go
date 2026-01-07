@@ -21,15 +21,18 @@ var paymentsCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[map[string]string]{
 			Name:     "billing",
+			Required: true,
 			BodyPath: "billing",
 		},
 		&requestflag.Flag[map[string]string]{
 			Name:     "customer",
+			Required: true,
 			BodyPath: "customer",
 		},
 		&requestflag.Flag[[]map[string]any]{
 			Name:     "product-cart",
 			Usage:    "List of products in the cart. Must contain at least 1 and at most 100 items.",
+			Required: true,
 			BodyPath: "product_cart",
 		},
 		&requestflag.Flag[[]string]{
@@ -101,7 +104,8 @@ var paymentsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "payment-id",
+			Name:     "payment-id",
+			Required: true,
 		},
 	},
 	Action:          handlePaymentsRetrieve,
@@ -162,7 +166,8 @@ var paymentsRetrieveLineItems = cli.Command{
 	Usage: "Perform retrieve-line-items operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "payment-id",
+			Name:     "payment-id",
+			Required: true,
 		},
 	},
 	Action:          handlePaymentsRetrieveLineItems,

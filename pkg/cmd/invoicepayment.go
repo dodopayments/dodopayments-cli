@@ -20,7 +20,8 @@ var invoicesPaymentsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "payment-id",
+			Name:     "payment-id",
+			Required: true,
 		},
 	},
 	Action:          handleInvoicesPaymentsRetrieve,
@@ -32,7 +33,8 @@ var invoicesPaymentsRetrieveRefund = cli.Command{
 	Usage: "Perform retrieve-refund operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "refund-id",
+			Name:     "refund-id",
+			Required: true,
 		},
 	},
 	Action:          handleInvoicesPaymentsRetrieveRefund,

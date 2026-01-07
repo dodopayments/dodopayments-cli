@@ -22,10 +22,12 @@ var discountsCreate = cli.Command{
 		&requestflag.Flag[int64]{
 			Name:     "amount",
 			Usage:    "The discount amount.\n\n- If `discount_type` is **not** `percentage`, `amount` is in **USD cents**. For example, `100` means `$1.00`.\n  Only USD is allowed.\n- If `discount_type` **is** `percentage`, `amount` is in **basis points**. For example, `540` means `5.4%`.\n\nMust be at least 1.",
+			Required: true,
 			BodyPath: "amount",
 		},
 		&requestflag.Flag[string]{
 			Name:     "type",
+			Required: true,
 			BodyPath: "type",
 		},
 		&requestflag.Flag[string]{
@@ -67,7 +69,8 @@ var discountsRetrieve = cli.Command{
 	Usage: "GET /discounts/{discount_id}",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "discount-id",
+			Name:     "discount-id",
+			Required: true,
 		},
 	},
 	Action:          handleDiscountsRetrieve,
@@ -79,7 +82,8 @@ var discountsUpdate = cli.Command{
 	Usage: "PATCH /discounts/{discount_id}",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "discount-id",
+			Name:     "discount-id",
+			Required: true,
 		},
 		&requestflag.Flag[int64]{
 			Name:     "amount",
@@ -146,7 +150,8 @@ var discountsDelete = cli.Command{
 	Usage: "DELETE /discounts/{discount_id}",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "discount-id",
+			Name:     "discount-id",
+			Required: true,
 		},
 	},
 	Action:          handleDiscountsDelete,

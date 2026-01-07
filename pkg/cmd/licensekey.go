@@ -20,7 +20,8 @@ var licenseKeysRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleLicenseKeysRetrieve,
@@ -32,7 +33,8 @@ var licenseKeysUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[int64]{
 			Name:     "activations-limit",

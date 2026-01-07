@@ -20,11 +20,13 @@ var productsShortLinksCreate = cli.Command{
 	Usage: "Gives a Short Checkout URL with custom slug for a product. Uses a Static\nCheckout URL under the hood.",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "slug",
 			Usage:    "Slug for the short link.",
+			Required: true,
 			BodyPath: "slug",
 		},
 		&requestflag.Flag[map[string]string]{

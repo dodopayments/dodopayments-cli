@@ -49,7 +49,8 @@ var brandsRetrieve = cli.Command{
 	Usage: "Thin handler just calls `get_brand` and wraps in `Json(...)`",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleBrandsRetrieve,
@@ -61,7 +62,8 @@ var brandsUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[string]{
 			Name:     "image-id",
@@ -98,7 +100,8 @@ var brandsUpdateImages = cli.Command{
 	Usage: "Perform update-images operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleBrandsUpdateImages,

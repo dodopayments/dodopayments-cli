@@ -22,6 +22,7 @@ var refundsCreate = cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "payment-id",
 			Usage:    "The unique identifier of the payment to be refunded.",
+			Required: true,
 			BodyPath: "payment_id",
 		},
 		&requestflag.Flag[[]map[string]any]{
@@ -49,7 +50,8 @@ var refundsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "refund-id",
+			Name:     "refund-id",
+			Required: true,
 		},
 	},
 	Action:          handleRefundsRetrieve,

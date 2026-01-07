@@ -20,7 +20,8 @@ var usageEventsRetrieve = cli.Command{
 	Usage: "Fetch detailed information about a single event using its unique event ID. This\nendpoint is useful for:",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "event-id",
+			Name:     "event-id",
+			Required: true,
 		},
 	},
 	Action:          handleUsageEventsRetrieve,
@@ -78,6 +79,7 @@ var usageEventsIngest = cli.Command{
 		&requestflag.Flag[[]map[string]any]{
 			Name:     "event",
 			Usage:    "List of events to be pushed",
+			Required: true,
 			BodyPath: "events",
 		},
 	},

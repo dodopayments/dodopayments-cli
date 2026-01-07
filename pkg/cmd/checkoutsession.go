@@ -21,6 +21,7 @@ var checkoutSessionsCreate = cli.Command{
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]map[string]any]{
 			Name:     "product-cart",
+			Required: true,
 			BodyPath: "product_cart",
 		},
 		&requestflag.Flag[[]string]{
@@ -108,7 +109,8 @@ var checkoutSessionsRetrieve = cli.Command{
 	Usage: "Perform retrieve operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 	},
 	Action:          handleCheckoutSessionsRetrieve,

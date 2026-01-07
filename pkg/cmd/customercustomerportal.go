@@ -20,7 +20,8 @@ var customersCustomerPortalCreate = cli.Command{
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "customer-id",
+			Name:     "customer-id",
+			Required: true,
 		},
 		&requestflag.Flag[bool]{
 			Name:      "send-email",

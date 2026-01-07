@@ -20,7 +20,8 @@ var productsImagesUpdate = cli.Command{
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
-			Name: "id",
+			Name:     "id",
+			Required: true,
 		},
 		&requestflag.Flag[bool]{
 			Name:      "force-update",
