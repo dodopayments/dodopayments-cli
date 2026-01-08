@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var checkoutSessionsCreate = cli.Command{
+var checkoutSessionsCreate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
@@ -29,7 +29,7 @@ var checkoutSessionsCreate = cli.Command{
 			Usage:    "Customers will never see payment methods that are not in this list.\nHowever, adding a method here does not guarantee customers will see it.\nAvailability still depends on other factors (e.g., customer location, merchant settings).\n\nDisclaimar: Always provide 'credit' and 'debit' as a fallback.\nIf all payment methods are unavailable, checkout session will fail.",
 			BodyPath: "allowed_payment_method_types",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "billing-address",
 			Usage:    "Billing address information for the session",
 			BodyPath: "billing_address",
@@ -56,7 +56,7 @@ var checkoutSessionsCreate = cli.Command{
 			Name:     "discount-code",
 			BodyPath: "discount_code",
 		},
-		&requestflag.Flag[map[string]bool]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "feature-flags",
 			BodyPath: "feature_flags",
 		},
@@ -65,7 +65,7 @@ var checkoutSessionsCreate = cli.Command{
 			Usage:    "Override merchant default 3DS behaviour for this session",
 			BodyPath: "force_3ds",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Additional metadata associated with the payment. Defaults to empty if not provided.",
 			BodyPath: "metadata",
@@ -102,7 +102,149 @@ var checkoutSessionsCreate = cli.Command{
 	},
 	Action:          handleCheckoutSessionsCreate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"product-cart": {
+		&requestflag.InnerFlag[string]{
+			Name:       "product-cart.product-id",
+			Usage:      "unique id of the product",
+			InnerField: "product_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "product-cart.quantity",
+			InnerField: "quantity",
+		},
+		&requestflag.InnerFlag[[]map[string]any]{
+			Name:       "product-cart.addons",
+			Usage:      "only valid if product is a subscription",
+			InnerField: "addons",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "product-cart.amount",
+			Usage:      "Amount the customer pays if pay_what_you_want is enabled. If disabled then amount will be ignored\nRepresented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.\nOnly applicable for one time payments\n\nIf amount is not set for pay_what_you_want product,\ncustomer is allowed to select the amount.",
+			InnerField: "amount",
+		},
+	},
+	"billing-address": {
+		&requestflag.InnerFlag[string]{
+			Name:       "billing-address.country",
+			Usage:      "ISO country code alpha2 variant",
+			InnerField: "country",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing-address.city",
+			Usage:      "City name",
+			InnerField: "city",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing-address.state",
+			Usage:      "State or province name",
+			InnerField: "state",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing-address.street",
+			Usage:      "Street address including house number and unit/apartment if applicable",
+			InnerField: "street",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing-address.zipcode",
+			Usage:      "Postal code or ZIP code",
+			InnerField: "zipcode",
+		},
+	},
+	"customization": {
+		&requestflag.InnerFlag[string]{
+			Name:       "customization.force-language",
+			Usage:      "Force the checkout interface to render in a specific language (e.g. `en`, `es`)",
+			InnerField: "force_language",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "customization.show-on-demand-tag",
+			Usage:      "Show on demand tag\n\nDefault is true",
+			InnerField: "show_on_demand_tag",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "customization.show-order-details",
+			Usage:      "Show order details by default\n\nDefault is true",
+			InnerField: "show_order_details",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "customization.theme",
+			Usage:      "Theme of the page\n\nDefault is `System`.",
+			InnerField: "theme",
+		},
+	},
+	"feature-flags": {
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-currency-selection",
+			Usage:      "if customer is allowed to change currency, set it to true\n\nDefault is true",
+			InnerField: "allow_currency_selection",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-city",
+			InnerField: "allow_customer_editing_city",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-country",
+			InnerField: "allow_customer_editing_country",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-email",
+			InnerField: "allow_customer_editing_email",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-name",
+			InnerField: "allow_customer_editing_name",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-state",
+			InnerField: "allow_customer_editing_state",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-street",
+			InnerField: "allow_customer_editing_street",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-customer-editing-zipcode",
+			InnerField: "allow_customer_editing_zipcode",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-discount-code",
+			Usage:      "If the customer is allowed to apply discount code, set it to true.\n\nDefault is true",
+			InnerField: "allow_discount_code",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-phone-number-collection",
+			Usage:      "If phone number is collected from customer, set it to rue\n\nDefault is true",
+			InnerField: "allow_phone_number_collection",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.allow-tax-id",
+			Usage:      "If the customer is allowed to add tax id, set it to true\n\nDefault is true",
+			InnerField: "allow_tax_id",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.always-create-new-customer",
+			Usage:      "Set to true if a new customer object should be created.\nBy default email is used to find an existing customer to attach the session to\n\nDefault is false",
+			InnerField: "always_create_new_customer",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "feature-flags.redirect-immediately",
+			Usage:      "If true, redirects the customer immediately after payment completion\n\nDefault is false",
+			InnerField: "redirect_immediately",
+		},
+	},
+	"subscription-data": {
+		&requestflag.InnerFlag[map[string]any]{
+			Name:       "subscription-data.on-demand",
+			InnerField: "on_demand",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "subscription-data.trial-period-days",
+			Usage:      "Optional trial period in days If specified, this value overrides the trial period set in the product's price Must be between 0 and 10000 days",
+			InnerField: "trial_period_days",
+		},
+	},
+})
 
 var checkoutSessionsRetrieve = cli.Command{
 	Name:  "retrieve",

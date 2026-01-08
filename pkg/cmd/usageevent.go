@@ -72,7 +72,7 @@ var usageEventsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-var usageEventsIngest = cli.Command{
+var usageEventsIngest = requestflag.WithInnerFlags(cli.Command{
 	Name:  "ingest",
 	Usage: "This endpoint allows you to ingest custom events that can be used for:",
 	Flags: []cli.Flag{
@@ -85,7 +85,35 @@ var usageEventsIngest = cli.Command{
 	},
 	Action:          handleUsageEventsIngest,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"event": {
+		&requestflag.InnerFlag[string]{
+			Name:       "event.customer-id",
+			Usage:      "customer_id of the customer whose usage needs to be tracked",
+			InnerField: "customer_id",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "event.event-id",
+			Usage:      "Event Id acts as an idempotency key. Any subsequent requests with the same event_id will be ignored",
+			InnerField: "event_id",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "event.event-name",
+			Usage:      "Name of the event",
+			InnerField: "event_name",
+		},
+		&requestflag.InnerFlag[map[string]any]{
+			Name:       "event.metadata",
+			Usage:      "Custom metadata. Only key value pairs are accepted, objects or arrays submitted will be rejected.",
+			InnerField: "metadata",
+		},
+		&requestflag.InnerFlag[requestflag.DateTimeValue]{
+			Name:       "event.timestamp",
+			Usage:      "Custom Timestamp. Defaults to current timestamp in UTC.\nTimestamps that are older that 1 hour or after 5 mins, from current timestamp, will be rejected.",
+			InnerField: "timestamp",
+		},
+	},
+})
 
 func handleUsageEventsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)

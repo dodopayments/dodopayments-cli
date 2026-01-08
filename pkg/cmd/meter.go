@@ -15,11 +15,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var metersCreate = cli.Command{
+var metersCreate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "aggregation",
 			Required: true,
 			BodyPath: "aggregation",
@@ -55,7 +55,32 @@ var metersCreate = cli.Command{
 	},
 	Action:          handleMetersCreate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"aggregation": {
+		&requestflag.InnerFlag[string]{
+			Name:       "aggregation.type",
+			Usage:      "Aggregation type for the meter",
+			InnerField: "type",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "aggregation.key",
+			Usage:      "Required when type is not COUNT",
+			InnerField: "key",
+		},
+	},
+	"filter": {
+		&requestflag.InnerFlag[[]map[string]any]{
+			Name:       "filter.clauses",
+			Usage:      "Filter clauses - can be direct conditions or nested filters (up to 3 levels deep)",
+			InnerField: "clauses",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "filter.conjunction",
+			Usage:      "Logical conjunction to apply between clauses (and/or)",
+			InnerField: "conjunction",
+		},
+	},
+})
 
 var metersRetrieve = cli.Command{
 	Name:  "retrieve",

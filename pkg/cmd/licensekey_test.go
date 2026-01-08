@@ -22,7 +22,7 @@ func TestLicenseKeysUpdate(t *testing.T) {
 		"license-keys", "update",
 		"--id", "lic_123",
 		"--activations-limit", "0",
-		"--disabled",
+		"--disabled=true",
 		"--expires-at", "2019-12-27T18:11:19.117Z",
 	)
 }

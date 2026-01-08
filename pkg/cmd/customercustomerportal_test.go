@@ -13,6 +13,6 @@ func TestCustomersCustomerPortalCreate(t *testing.T) {
 		t,
 		"customers:customer-portal", "create",
 		"--customer-id", "customer_id",
-		"--send-email",
+		"--send-email=true",
 	)
 }

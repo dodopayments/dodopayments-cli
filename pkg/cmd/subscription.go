@@ -15,11 +15,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var subscriptionsCreate = cli.Command{
+var subscriptionsCreate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "billing",
 			Required: true,
 			BodyPath: "billing",
@@ -65,7 +65,7 @@ var subscriptionsCreate = cli.Command{
 			Usage:    "Override merchant default 3DS behaviour for this subscription",
 			BodyPath: "force_3ds",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the subscription\nDefaults to empty if not specified",
 			BodyPath: "metadata",
@@ -122,7 +122,86 @@ var subscriptionsCreate = cli.Command{
 	},
 	Action:          handleSubscriptionsCreate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"billing": {
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.country",
+			Usage:      "ISO country code alpha2 variant",
+			InnerField: "country",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.city",
+			Usage:      "City name",
+			InnerField: "city",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.state",
+			Usage:      "State or province name",
+			InnerField: "state",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.street",
+			Usage:      "Street address including house number and unit/apartment if applicable",
+			InnerField: "street",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.zipcode",
+			Usage:      "Postal code or ZIP code",
+			InnerField: "zipcode",
+		},
+	},
+	"addon": {
+		&requestflag.InnerFlag[string]{
+			Name:       "addon.addon-id",
+			InnerField: "addon_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "addon.quantity",
+			InnerField: "quantity",
+		},
+	},
+	"on-demand": {
+		&requestflag.InnerFlag[bool]{
+			Name:       "on-demand.mandate-only",
+			Usage:      "If set as True, does not perform any charge and only authorizes payment method details for future use.",
+			InnerField: "mandate_only",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "on-demand.adaptive-currency-fees-inclusive",
+			Usage:      "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
+			InnerField: "adaptive_currency_fees_inclusive",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "on-demand.product-currency",
+			InnerField: "product_currency",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "on-demand.product-description",
+			Usage:      "Optional product description override for billing and line items.\nIf not specified, the stored description of the product will be used.",
+			InnerField: "product_description",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "on-demand.product-price",
+			Usage:      "Product price for the initial charge to customer\nIf not specified the stored price of the product will be used\nRepresented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
+			InnerField: "product_price",
+		},
+	},
+	"one-time-product-cart": {
+		&requestflag.InnerFlag[string]{
+			Name:       "one-time-product-cart.product-id",
+			InnerField: "product_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "one-time-product-cart.quantity",
+			InnerField: "quantity",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "one-time-product-cart.amount",
+			Usage:      "Amount the customer pays if pay_what_you_want is enabled. If disabled then amount will be ignored\nRepresented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
+			InnerField: "amount",
+		},
+	},
+})
 
 var subscriptionsRetrieve = cli.Command{
 	Name:  "retrieve",
@@ -137,7 +216,7 @@ var subscriptionsRetrieve = cli.Command{
 	HideHelpCommand: true,
 }
 
-var subscriptionsUpdate = cli.Command{
+var subscriptionsUpdate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
@@ -145,7 +224,7 @@ var subscriptionsUpdate = cli.Command{
 			Name:     "subscription-id",
 			Required: true,
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "billing",
 			BodyPath: "billing",
 		},
@@ -158,11 +237,11 @@ var subscriptionsUpdate = cli.Command{
 			Name:     "customer-name",
 			BodyPath: "customer_name",
 		},
-		&requestflag.Flag[map[string]requestflag.DateTimeValue]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "disable-on-demand",
 			BodyPath: "disable_on_demand",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			BodyPath: "metadata",
 		},
@@ -181,7 +260,41 @@ var subscriptionsUpdate = cli.Command{
 	},
 	Action:          handleSubscriptionsUpdate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"billing": {
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.country",
+			Usage:      "ISO country code alpha2 variant",
+			InnerField: "country",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.city",
+			Usage:      "City name",
+			InnerField: "city",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.state",
+			Usage:      "State or province name",
+			InnerField: "state",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.street",
+			Usage:      "Street address including house number and unit/apartment if applicable",
+			InnerField: "street",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.zipcode",
+			Usage:      "Postal code or ZIP code",
+			InnerField: "zipcode",
+		},
+	},
+	"disable-on-demand": {
+		&requestflag.InnerFlag[requestflag.DateTimeValue]{
+			Name:       "disable-on-demand.next-billing-date",
+			InnerField: "next_billing_date",
+		},
+	},
+})
 
 var subscriptionsList = cli.Command{
 	Name:  "list",
@@ -227,7 +340,7 @@ var subscriptionsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-var subscriptionsChangePlan = cli.Command{
+var subscriptionsChangePlan = requestflag.WithInnerFlags(cli.Command{
 	Name:  "change-plan",
 	Usage: "Perform change-plan operation",
 	Flags: []cli.Flag{
@@ -261,9 +374,20 @@ var subscriptionsChangePlan = cli.Command{
 	},
 	Action:          handleSubscriptionsChangePlan,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"addon": {
+		&requestflag.InnerFlag[string]{
+			Name:       "addon.addon-id",
+			InnerField: "addon_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "addon.quantity",
+			InnerField: "quantity",
+		},
+	},
+})
 
-var subscriptionsCharge = cli.Command{
+var subscriptionsCharge = requestflag.WithInnerFlags(cli.Command{
 	Name:  "charge",
 	Usage: "Perform charge operation",
 	Flags: []cli.Flag{
@@ -282,12 +406,12 @@ var subscriptionsCharge = cli.Command{
 			Usage:    "Whether adaptive currency fees should be included in the product_price (true) or added on top (false).\nThis field is ignored if adaptive pricing is not enabled for the business.",
 			BodyPath: "adaptive_currency_fees_inclusive",
 		},
-		&requestflag.Flag[map[string]bool]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "customer-balance-config",
 			Usage:    "Specify how customer balance is used for the payment",
 			BodyPath: "customer_balance_config",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Metadata for the payment. If not passed, the metadata of the subscription will be taken",
 			BodyPath: "metadata",
@@ -304,9 +428,22 @@ var subscriptionsCharge = cli.Command{
 	},
 	Action:          handleSubscriptionsCharge,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"customer-balance-config": {
+		&requestflag.InnerFlag[bool]{
+			Name:       "customer-balance-config.allow-customer-credits-purchase",
+			Usage:      "Allows Customer Credit to be purchased to settle payments",
+			InnerField: "allow_customer_credits_purchase",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "customer-balance-config.allow-customer-credits-usage",
+			Usage:      "Allows Customer Credit Balance to be used to settle payments",
+			InnerField: "allow_customer_credits_usage",
+		},
+	},
+})
 
-var subscriptionsPreviewChangePlan = cli.Command{
+var subscriptionsPreviewChangePlan = requestflag.WithInnerFlags(cli.Command{
 	Name:  "preview-change-plan",
 	Usage: "Perform preview-change-plan operation",
 	Flags: []cli.Flag{
@@ -340,7 +477,18 @@ var subscriptionsPreviewChangePlan = cli.Command{
 	},
 	Action:          handleSubscriptionsPreviewChangePlan,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"addon": {
+		&requestflag.InnerFlag[string]{
+			Name:       "addon.addon-id",
+			InnerField: "addon_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "addon.quantity",
+			InnerField: "quantity",
+		},
+	},
+})
 
 var subscriptionsRetrieveUsageHistory = cli.Command{
 	Name:  "retrieve-usage-history",

@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var refundsCreate = cli.Command{
+var refundsCreate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
@@ -30,7 +30,7 @@ var refundsCreate = cli.Command{
 			Usage:    "Partially Refund an Individual Item",
 			BodyPath: "items",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Additional metadata associated with the refund.",
 			BodyPath: "metadata",
@@ -43,7 +43,25 @@ var refundsCreate = cli.Command{
 	},
 	Action:          handleRefundsCreate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"item": {
+		&requestflag.InnerFlag[string]{
+			Name:       "item.item-id",
+			Usage:      "The id of the item (i.e. `product_id` or `addon_id`)",
+			InnerField: "item_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "item.amount",
+			Usage:      "The amount to refund. if None the whole item is refunded",
+			InnerField: "amount",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "item.tax-inclusive",
+			Usage:      "Specify if tax is inclusive of the refund. Default true.",
+			InnerField: "tax_inclusive",
+		},
+	},
+})
 
 var refundsRetrieve = cli.Command{
 	Name:  "retrieve",

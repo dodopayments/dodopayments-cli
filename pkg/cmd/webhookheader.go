@@ -36,7 +36,7 @@ var webhooksHeadersUpdate = cli.Command{
 			Name:     "webhook-id",
 			Required: true,
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "headers",
 			Usage:    "Object of header-value pair to update or add",
 			Required: true,
