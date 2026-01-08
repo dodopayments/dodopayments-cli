@@ -15,11 +15,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var paymentsCreate = cli.Command{
+var paymentsCreate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "billing",
 			Required: true,
 			BodyPath: "billing",
@@ -54,7 +54,7 @@ var paymentsCreate = cli.Command{
 			Usage:    "Override merchant default 3DS behaviour for this payment",
 			BodyPath: "force_3ds",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Additional metadata associated with the payment.\nDefaults to empty if not provided.",
 			BodyPath: "metadata",
@@ -97,7 +97,50 @@ var paymentsCreate = cli.Command{
 	},
 	Action:          handlePaymentsCreate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"billing": {
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.country",
+			Usage:      "ISO country code alpha2 variant",
+			InnerField: "country",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.city",
+			Usage:      "City name",
+			InnerField: "city",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.state",
+			Usage:      "State or province name",
+			InnerField: "state",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.street",
+			Usage:      "Street address including house number and unit/apartment if applicable",
+			InnerField: "street",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "billing.zipcode",
+			Usage:      "Postal code or ZIP code",
+			InnerField: "zipcode",
+		},
+	},
+	"product-cart": {
+		&requestflag.InnerFlag[string]{
+			Name:       "product-cart.product-id",
+			InnerField: "product_id",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "product-cart.quantity",
+			InnerField: "quantity",
+		},
+		&requestflag.InnerFlag[int64]{
+			Name:       "product-cart.amount",
+			Usage:      "Amount the customer pays if pay_what_you_want is enabled. If disabled then amount will be ignored\nRepresented in the lowest denomination of the currency (e.g., cents for USD).\nFor example, to charge $1.00, pass `100`.",
+			InnerField: "amount",
+		},
+	},
+})
 
 var paymentsRetrieve = cli.Command{
 	Name:  "retrieve",

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dodopayments/dodopayments-cli/internal/mocktest"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 )
 
 func TestProductsCreate(t *testing.T) {
@@ -22,7 +23,30 @@ func TestProductsCreate(t *testing.T) {
 		"--license-key-activation-message", "license_key_activation_message",
 		"--license-key-activations-limit", "0",
 		"--license-key-duration", "{count: 0, interval: Day}",
-		"--license-key-enabled",
+		"--license-key-enabled=true",
+		"--metadata", "{foo: string}",
+	)
+
+	// Check that inner flags have been set up correctly
+	requestflag.CheckInnerFlags(productsCreate)
+
+	// Alternative argument passing style using inner flags
+	mocktest.TestRunMockTestWithFlags(
+		t,
+		"products", "create",
+		"--name", "name",
+		"--price", "{currency: AED, discount: 0, price: 0, purchasing_power_parity: true, type: one_time_price, pay_what_you_want: true, suggested_price: 0, tax_inclusive: true}",
+		"--tax-category", "digital_products",
+		"--addon", "string",
+		"--brand-id", "brand_id",
+		"--description", "description",
+		"--digital-product-delivery.external_url", "external_url",
+		"--digital-product-delivery.instructions", "instructions",
+		"--license-key-activation-message", "license_key_activation_message",
+		"--license-key-activations-limit", "0",
+		"--license-key-duration.count", "0",
+		"--license-key-duration.interval", "Day",
+		"--license-key-enabled=true",
 		"--metadata", "{foo: string}",
 	)
 }
@@ -48,7 +72,33 @@ func TestProductsUpdate(t *testing.T) {
 		"--license-key-activation-message", "license_key_activation_message",
 		"--license-key-activations-limit", "0",
 		"--license-key-duration", "{count: 0, interval: Day}",
-		"--license-key-enabled",
+		"--license-key-enabled=true",
+		"--metadata", "{foo: string}",
+		"--name", "name",
+		"--price", "{currency: AED, discount: 0, price: 0, purchasing_power_parity: true, type: one_time_price, pay_what_you_want: true, suggested_price: 0, tax_inclusive: true}",
+		"--tax-category", "digital_products",
+	)
+
+	// Check that inner flags have been set up correctly
+	requestflag.CheckInnerFlags(productsUpdate)
+
+	// Alternative argument passing style using inner flags
+	mocktest.TestRunMockTestWithFlags(
+		t,
+		"products", "update",
+		"--id", "id",
+		"--addon", "string",
+		"--brand-id", "brand_id",
+		"--description", "description",
+		"--digital-product-delivery.external_url", "external_url",
+		"--digital-product-delivery.files", "[182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e]",
+		"--digital-product-delivery.instructions", "instructions",
+		"--image-id", "182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
+		"--license-key-activation-message", "license_key_activation_message",
+		"--license-key-activations-limit", "0",
+		"--license-key-duration.count", "0",
+		"--license-key-duration.interval", "Day",
+		"--license-key-enabled=true",
 		"--metadata", "{foo: string}",
 		"--name", "name",
 		"--price", "{currency: AED, discount: 0, price: 0, purchasing_power_parity: true, type: one_time_price, pay_what_you_want: true, suggested_price: 0, tax_inclusive: true}",
@@ -60,11 +110,11 @@ func TestProductsList(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"products", "list",
-		"--archived",
+		"--archived=true",
 		"--brand-id", "brand_id",
 		"--page-number", "0",
 		"--page-size", "0",
-		"--recurring",
+		"--recurring=true",
 	)
 }
 

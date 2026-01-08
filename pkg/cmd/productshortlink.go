@@ -29,7 +29,7 @@ var productsShortLinksCreate = cli.Command{
 			Required: true,
 			BodyPath: "slug",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "static-checkout-params",
 			Usage:    "Static Checkout URL parameters to apply to the resulting\nshort URL.",
 			BodyPath: "static_checkout_params",

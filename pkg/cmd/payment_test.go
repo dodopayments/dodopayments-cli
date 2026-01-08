@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dodopayments/dodopayments-cli/internal/mocktest"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 )
 
 func TestPaymentsCreate(t *testing.T) {
@@ -18,14 +19,44 @@ func TestPaymentsCreate(t *testing.T) {
 		"--allowed-payment-method-type", "ach",
 		"--billing-currency", "AED",
 		"--discount-code", "discount_code",
-		"--force-3ds",
+		"--force-3ds=true",
 		"--metadata", "{foo: string}",
-		"--payment-link",
+		"--payment-link=true",
 		"--payment-method-id", "payment_method_id",
-		"--redirect-immediately",
+		"--redirect-immediately=true",
 		"--return-url", "return_url",
-		"--short-link",
-		"--show-saved-payment-methods",
+		"--short-link=true",
+		"--show-saved-payment-methods=true",
+		"--tax-id", "tax_id",
+	)
+
+	// Check that inner flags have been set up correctly
+	requestflag.CheckInnerFlags(paymentsCreate)
+
+	// Alternative argument passing style using inner flags
+	mocktest.TestRunMockTestWithFlags(
+		t,
+		"payments", "create",
+		"--billing.country", "AF",
+		"--billing.city", "city",
+		"--billing.state", "state",
+		"--billing.street", "street",
+		"--billing.zipcode", "zipcode",
+		"--customer", "{customer_id: customer_id}",
+		"--product-cart.product_id", "product_id",
+		"--product-cart.quantity", "0",
+		"--product-cart.amount", "0",
+		"--allowed-payment-method-type", "ach",
+		"--billing-currency", "AED",
+		"--discount-code", "discount_code",
+		"--force-3ds=true",
+		"--metadata", "{foo: string}",
+		"--payment-link=true",
+		"--payment-method-id", "payment_method_id",
+		"--redirect-immediately=true",
+		"--return-url", "return_url",
+		"--short-link=true",
+		"--show-saved-payment-methods=true",
 		"--tax-id", "tax_id",
 	)
 }

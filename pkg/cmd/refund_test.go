@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/dodopayments/dodopayments-cli/internal/mocktest"
+	"github.com/dodopayments/dodopayments-cli/internal/requestflag"
 )
 
 func TestRefundsCreate(t *testing.T) {
@@ -14,6 +15,21 @@ func TestRefundsCreate(t *testing.T) {
 		"refunds", "create",
 		"--payment-id", "payment_id",
 		"--item", "{item_id: item_id, amount: 0, tax_inclusive: true}",
+		"--metadata", "{foo: string}",
+		"--reason", "reason",
+	)
+
+	// Check that inner flags have been set up correctly
+	requestflag.CheckInnerFlags(refundsCreate)
+
+	// Alternative argument passing style using inner flags
+	mocktest.TestRunMockTestWithFlags(
+		t,
+		"refunds", "create",
+		"--payment-id", "payment_id",
+		"--item.item_id", "item_id",
+		"--item.amount", "0",
+		"--item.tax_inclusive=true",
 		"--metadata", "{foo: string}",
 		"--reason", "reason",
 	)

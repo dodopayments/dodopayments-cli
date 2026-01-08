@@ -13,6 +13,6 @@ func TestProductsImagesUpdate(t *testing.T) {
 		t,
 		"products:images", "update",
 		"--id", "id",
-		"--force-update",
+		"--force-update=true",
 	)
 }

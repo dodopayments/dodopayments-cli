@@ -15,7 +15,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var productsCreate = cli.Command{
+var productsCreate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "create",
 	Usage: "Perform create operation",
 	Flags: []cli.Flag{
@@ -52,7 +52,7 @@ var productsCreate = cli.Command{
 			Usage:    "Optional description of the product",
 			BodyPath: "description",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "digital-product-delivery",
 			Usage:    "Choose how you would like you digital product delivered",
 			BodyPath: "digital_product_delivery",
@@ -76,7 +76,7 @@ var productsCreate = cli.Command{
 			Usage:    "When true, generates and sends a license key to your customer.\nDefaults to false",
 			BodyPath: "license_key_enabled",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the product",
 			BodyPath: "metadata",
@@ -84,7 +84,30 @@ var productsCreate = cli.Command{
 	},
 	Action:          handleProductsCreate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"digital-product-delivery": {
+		&requestflag.InnerFlag[string]{
+			Name:       "digital-product-delivery.external-url",
+			Usage:      "External URL to digital product",
+			InnerField: "external_url",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "digital-product-delivery.instructions",
+			Usage:      "Instructions to download and use the digital product",
+			InnerField: "instructions",
+		},
+	},
+	"license-key-duration": {
+		&requestflag.InnerFlag[int64]{
+			Name:       "license-key-duration.count",
+			InnerField: "count",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "license-key-duration.interval",
+			InnerField: "interval",
+		},
+	},
+})
 
 var productsRetrieve = cli.Command{
 	Name:  "retrieve",
@@ -99,7 +122,7 @@ var productsRetrieve = cli.Command{
 	HideHelpCommand: true,
 }
 
-var productsUpdate = cli.Command{
+var productsUpdate = requestflag.WithInnerFlags(cli.Command{
 	Name:  "update",
 	Usage: "Perform update operation",
 	Flags: []cli.Flag{
@@ -150,7 +173,7 @@ var productsUpdate = cli.Command{
 			Usage:    "Whether the product requires a license key.\n\nIf `true`, additional fields related to license key (duration, activations limit, activation message)\nbecome applicable.",
 			BodyPath: "license_key_enabled",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "metadata",
 			Usage:    "Additional metadata for the product",
 			BodyPath: "metadata",
@@ -173,7 +196,35 @@ var productsUpdate = cli.Command{
 	},
 	Action:          handleProductsUpdate,
 	HideHelpCommand: true,
-}
+}, map[string][]requestflag.HasOuterFlag{
+	"digital-product-delivery": {
+		&requestflag.InnerFlag[string]{
+			Name:       "digital-product-delivery.external-url",
+			Usage:      "External URL to digital product",
+			InnerField: "external_url",
+		},
+		&requestflag.InnerFlag[[]string]{
+			Name:       "digital-product-delivery.files",
+			Usage:      "Uploaded files ids of digital product",
+			InnerField: "files",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "digital-product-delivery.instructions",
+			Usage:      "Instructions to download and use the digital product",
+			InnerField: "instructions",
+		},
+	},
+	"license-key-duration": {
+		&requestflag.InnerFlag[int64]{
+			Name:       "license-key-duration.count",
+			InnerField: "count",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "license-key-duration.interval",
+			InnerField: "interval",
+		},
+	},
+})
 
 var productsList = cli.Command{
 	Name:  "list",
