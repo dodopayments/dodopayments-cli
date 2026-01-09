@@ -17,15 +17,6 @@ func TestLicensesActivate(t *testing.T) {
 	)
 }
 
-func TestLicensesDeactivate(t *testing.T) {
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"licenses", "deactivate",
-		"--license-key", "license_key",
-		"--license-key-instance-id", "license_key_instance_id",
-	)
-}
-
 func TestLicensesValidate(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,

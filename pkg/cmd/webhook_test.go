@@ -54,14 +54,6 @@ func TestWebhooksList(t *testing.T) {
 	)
 }
 
-func TestWebhooksDelete(t *testing.T) {
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"webhooks", "delete",
-		"--webhook-id", "webhook_id",
-	)
-}
-
 func TestWebhooksRetrieveSecret(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,

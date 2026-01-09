@@ -138,19 +138,6 @@ var webhooksList = cli.Command{
 	HideHelpCommand: true,
 }
 
-var webhooksDelete = cli.Command{
-	Name:  "delete",
-	Usage: "Delete a webhook by id",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "webhook-id",
-			Required: true,
-		},
-	},
-	Action:          handleWebhooksDelete,
-	HideHelpCommand: true,
-}
-
 var webhooksRetrieveSecret = cli.Command{
 	Name:  "retrieve-secret",
 	Usage: "Get webhook secret by id",
@@ -311,31 +298,6 @@ func handleWebhooksList(ctx context.Context, cmd *cli.Command) error {
 		iter := client.Webhooks.ListAutoPaging(ctx, params, options...)
 		return ShowJSONIterator(os.Stdout, "webhooks list", iter, format, transform)
 	}
-}
-
-func handleWebhooksDelete(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("webhook-id") && len(unusedArgs) > 0 {
-		cmd.Set("webhook-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Webhooks.Delete(ctx, cmd.Value("webhook-id").(string), options...)
 }
 
 func handleWebhooksRetrieveSecret(ctx context.Context, cmd *cli.Command) error {

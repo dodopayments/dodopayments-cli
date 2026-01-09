@@ -119,32 +119,6 @@ var metersList = cli.Command{
 	HideHelpCommand: true,
 }
 
-var metersArchive = cli.Command{
-	Name:  "archive",
-	Usage: "Perform archive operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
-		},
-	},
-	Action:          handleMetersArchive,
-	HideHelpCommand: true,
-}
-
-var metersUnarchive = cli.Command{
-	Name:  "unarchive",
-	Usage: "Perform unarchive operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
-		},
-	},
-	Action:          handleMetersUnarchive,
-	HideHelpCommand: true,
-}
-
 func handleMetersCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
@@ -250,54 +224,4 @@ func handleMetersList(ctx context.Context, cmd *cli.Command) error {
 		iter := client.Meters.ListAutoPaging(ctx, params, options...)
 		return ShowJSONIterator(os.Stdout, "meters list", iter, format, transform)
 	}
-}
-
-func handleMetersArchive(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Meters.Archive(ctx, cmd.Value("id").(string), options...)
-}
-
-func handleMetersUnarchive(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Meters.Unarchive(ctx, cmd.Value("id").(string), options...)
 }

@@ -55,11 +55,3 @@ func TestDiscountsList(t *testing.T) {
 		"--page-size", "0",
 	)
 }
-
-func TestDiscountsDelete(t *testing.T) {
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"discounts", "delete",
-		"--discount-id", "discount_id",
-	)
-}

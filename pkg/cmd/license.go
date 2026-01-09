@@ -34,25 +34,6 @@ var licensesActivate = cli.Command{
 	HideHelpCommand: true,
 }
 
-var licensesDeactivate = cli.Command{
-	Name:  "deactivate",
-	Usage: "Perform deactivate operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "license-key",
-			Required: true,
-			BodyPath: "license_key",
-		},
-		&requestflag.Flag[string]{
-			Name:     "license-key-instance-id",
-			Required: true,
-			BodyPath: "license_key_instance_id",
-		},
-	},
-	Action:          handleLicensesDeactivate,
-	HideHelpCommand: true,
-}
-
 var licensesValidate = cli.Command{
 	Name:  "validate",
 	Usage: "Perform validate operation",
@@ -103,30 +84,6 @@ func handleLicensesActivate(ctx context.Context, cmd *cli.Command) error {
 	format := cmd.Root().String("format")
 	transform := cmd.Root().String("transform")
 	return ShowJSON(os.Stdout, "licenses activate", obj, format, transform)
-}
-
-func handleLicensesDeactivate(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	params := dodopayments.LicenseDeactivateParams{}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Licenses.Deactivate(ctx, params, options...)
 }
 
 func handleLicensesValidate(ctx context.Context, cmd *cli.Command) error {
