@@ -56,19 +56,3 @@ func TestMetersList(t *testing.T) {
 		"--page-size", "0",
 	)
 }
-
-func TestMetersArchive(t *testing.T) {
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"meters", "archive",
-		"--id", "id",
-	)
-}
-
-func TestMetersUnarchive(t *testing.T) {
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"meters", "unarchive",
-		"--id", "id",
-	)
-}

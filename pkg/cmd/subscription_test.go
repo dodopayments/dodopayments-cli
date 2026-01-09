@@ -136,33 +136,6 @@ func TestSubscriptionsList(t *testing.T) {
 	)
 }
 
-func TestSubscriptionsChangePlan(t *testing.T) {
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"subscriptions", "change-plan",
-		"--subscription-id", "subscription_id",
-		"--product-id", "product_id",
-		"--proration-billing-mode", "prorated_immediately",
-		"--quantity", "0",
-		"--addon", "{addon_id: addon_id, quantity: 0}",
-	)
-
-	// Check that inner flags have been set up correctly
-	requestflag.CheckInnerFlags(subscriptionsChangePlan)
-
-	// Alternative argument passing style using inner flags
-	mocktest.TestRunMockTestWithFlags(
-		t,
-		"subscriptions", "change-plan",
-		"--subscription-id", "subscription_id",
-		"--product-id", "product_id",
-		"--proration-billing-mode", "prorated_immediately",
-		"--quantity", "0",
-		"--addon.addon_id", "addon_id",
-		"--addon.quantity", "0",
-	)
-}
-
 func TestSubscriptionsCharge(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,

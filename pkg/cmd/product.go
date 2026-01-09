@@ -122,110 +122,6 @@ var productsRetrieve = cli.Command{
 	HideHelpCommand: true,
 }
 
-var productsUpdate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
-		},
-		&requestflag.Flag[[]string]{
-			Name:     "addon",
-			Usage:    "Available Addons for subscription products",
-			BodyPath: "addons",
-		},
-		&requestflag.Flag[string]{
-			Name:     "brand-id",
-			BodyPath: "brand_id",
-		},
-		&requestflag.Flag[string]{
-			Name:     "description",
-			Usage:    "Description of the product, optional and must be at most 1000 characters.",
-			BodyPath: "description",
-		},
-		&requestflag.Flag[map[string]any]{
-			Name:     "digital-product-delivery",
-			Usage:    "Choose how you would like you digital product delivered",
-			BodyPath: "digital_product_delivery",
-		},
-		&requestflag.Flag[string]{
-			Name:     "image-id",
-			Usage:    "Product image id after its uploaded to S3",
-			BodyPath: "image_id",
-		},
-		&requestflag.Flag[string]{
-			Name:     "license-key-activation-message",
-			Usage:    "Message sent to the customer upon license key activation.\n\nOnly applicable if `license_key_enabled` is `true`. This message contains instructions for\nactivating the license key.",
-			BodyPath: "license_key_activation_message",
-		},
-		&requestflag.Flag[int64]{
-			Name:     "license-key-activations-limit",
-			Usage:    "Limit for the number of activations for the license key.\n\nOnly applicable if `license_key_enabled` is `true`. Represents the maximum number of times\nthe license key can be activated.",
-			BodyPath: "license_key_activations_limit",
-		},
-		&requestflag.Flag[map[string]any]{
-			Name:     "license-key-duration",
-			BodyPath: "license_key_duration",
-		},
-		&requestflag.Flag[bool]{
-			Name:     "license-key-enabled",
-			Usage:    "Whether the product requires a license key.\n\nIf `true`, additional fields related to license key (duration, activations limit, activation message)\nbecome applicable.",
-			BodyPath: "license_key_enabled",
-		},
-		&requestflag.Flag[map[string]any]{
-			Name:     "metadata",
-			Usage:    "Additional metadata for the product",
-			BodyPath: "metadata",
-		},
-		&requestflag.Flag[string]{
-			Name:     "name",
-			Usage:    "Name of the product, optional and must be at most 100 characters.",
-			BodyPath: "name",
-		},
-		&requestflag.Flag[map[string]any]{
-			Name:     "price",
-			Usage:    "One-time price details.",
-			BodyPath: "price",
-		},
-		&requestflag.Flag[string]{
-			Name:     "tax-category",
-			Usage:    "Represents the different categories of taxation applicable to various products and services.",
-			BodyPath: "tax_category",
-		},
-	},
-	Action:          handleProductsUpdate,
-	HideHelpCommand: true,
-}, map[string][]requestflag.HasOuterFlag{
-	"digital-product-delivery": {
-		&requestflag.InnerFlag[string]{
-			Name:       "digital-product-delivery.external-url",
-			Usage:      "External URL to digital product",
-			InnerField: "external_url",
-		},
-		&requestflag.InnerFlag[[]string]{
-			Name:       "digital-product-delivery.files",
-			Usage:      "Uploaded files ids of digital product",
-			InnerField: "files",
-		},
-		&requestflag.InnerFlag[string]{
-			Name:       "digital-product-delivery.instructions",
-			Usage:      "Instructions to download and use the digital product",
-			InnerField: "instructions",
-		},
-	},
-	"license-key-duration": {
-		&requestflag.InnerFlag[int64]{
-			Name:       "license-key-duration.count",
-			InnerField: "count",
-		},
-		&requestflag.InnerFlag[string]{
-			Name:       "license-key-duration.interval",
-			InnerField: "interval",
-		},
-	},
-})
-
 var productsList = cli.Command{
 	Name:  "list",
 	Usage: "Perform list operation",
@@ -257,32 +153,6 @@ var productsList = cli.Command{
 		},
 	},
 	Action:          handleProductsList,
-	HideHelpCommand: true,
-}
-
-var productsArchive = cli.Command{
-	Name:  "archive",
-	Usage: "Perform archive operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
-		},
-	},
-	Action:          handleProductsArchive,
-	HideHelpCommand: true,
-}
-
-var productsUnarchive = cli.Command{
-	Name:  "unarchive",
-	Usage: "Perform unarchive operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "id",
-			Required: true,
-		},
-	},
-	Action:          handleProductsUnarchive,
 	HideHelpCommand: true,
 }
 
@@ -373,38 +243,6 @@ func handleProductsRetrieve(ctx context.Context, cmd *cli.Command) error {
 	return ShowJSON(os.Stdout, "products retrieve", obj, format, transform)
 }
 
-func handleProductsUpdate(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	params := dodopayments.ProductUpdateParams{}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Products.Update(
-		ctx,
-		cmd.Value("id").(string),
-		params,
-		options...,
-	)
-}
-
 func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
@@ -441,56 +279,6 @@ func handleProductsList(ctx context.Context, cmd *cli.Command) error {
 		iter := client.Products.ListAutoPaging(ctx, params, options...)
 		return ShowJSONIterator(os.Stdout, "products list", iter, format, transform)
 	}
-}
-
-func handleProductsArchive(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Products.Archive(ctx, cmd.Value("id").(string), options...)
-}
-
-func handleProductsUnarchive(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("id") && len(unusedArgs) > 0 {
-		cmd.Set("id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Products.Unarchive(ctx, cmd.Value("id").(string), options...)
 }
 
 func handleProductsUpdateFiles(ctx context.Context, cmd *cli.Command) error {

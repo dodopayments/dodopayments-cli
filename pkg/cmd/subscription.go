@@ -340,53 +340,6 @@ var subscriptionsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-var subscriptionsChangePlan = requestflag.WithInnerFlags(cli.Command{
-	Name:  "change-plan",
-	Usage: "Perform change-plan operation",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "subscription-id",
-			Required: true,
-		},
-		&requestflag.Flag[string]{
-			Name:     "product-id",
-			Usage:    "Unique identifier of the product to subscribe to",
-			Required: true,
-			BodyPath: "product_id",
-		},
-		&requestflag.Flag[string]{
-			Name:     "proration-billing-mode",
-			Usage:    "Proration Billing Mode",
-			Required: true,
-			BodyPath: "proration_billing_mode",
-		},
-		&requestflag.Flag[int64]{
-			Name:     "quantity",
-			Usage:    "Number of units to subscribe for. Must be at least 1.",
-			Required: true,
-			BodyPath: "quantity",
-		},
-		&requestflag.Flag[[]map[string]any]{
-			Name:     "addon",
-			Usage:    "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
-			BodyPath: "addons",
-		},
-	},
-	Action:          handleSubscriptionsChangePlan,
-	HideHelpCommand: true,
-}, map[string][]requestflag.HasOuterFlag{
-	"addon": {
-		&requestflag.InnerFlag[string]{
-			Name:       "addon.addon-id",
-			InnerField: "addon_id",
-		},
-		&requestflag.InnerFlag[int64]{
-			Name:       "addon.quantity",
-			InnerField: "quantity",
-		},
-	},
-})
-
 var subscriptionsCharge = requestflag.WithInnerFlags(cli.Command{
 	Name:  "charge",
 	Usage: "Perform charge operation",
@@ -702,38 +655,6 @@ func handleSubscriptionsList(ctx context.Context, cmd *cli.Command) error {
 		iter := client.Subscriptions.ListAutoPaging(ctx, params, options...)
 		return ShowJSONIterator(os.Stdout, "subscriptions list", iter, format, transform)
 	}
-}
-
-func handleSubscriptionsChangePlan(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("subscription-id") && len(unusedArgs) > 0 {
-		cmd.Set("subscription-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	params := dodopayments.SubscriptionChangePlanParams{}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		ApplicationJSON,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Subscriptions.ChangePlan(
-		ctx,
-		cmd.Value("subscription-id").(string),
-		params,
-		options...,
-	)
 }
 
 func handleSubscriptionsCharge(ctx context.Context, cmd *cli.Command) error {

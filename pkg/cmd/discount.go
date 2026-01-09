@@ -145,19 +145,6 @@ var discountsList = cli.Command{
 	HideHelpCommand: true,
 }
 
-var discountsDelete = cli.Command{
-	Name:  "delete",
-	Usage: "DELETE /discounts/{discount_id}",
-	Flags: []cli.Flag{
-		&requestflag.Flag[string]{
-			Name:     "discount-id",
-			Required: true,
-		},
-	},
-	Action:          handleDiscountsDelete,
-	HideHelpCommand: true,
-}
-
 func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
@@ -305,29 +292,4 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 		iter := client.Discounts.ListAutoPaging(ctx, params, options...)
 		return ShowJSONIterator(os.Stdout, "discounts list", iter, format, transform)
 	}
-}
-
-func handleDiscountsDelete(ctx context.Context, cmd *cli.Command) error {
-	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
-	unusedArgs := cmd.Args().Slice()
-	if !cmd.IsSet("discount-id") && len(unusedArgs) > 0 {
-		cmd.Set("discount-id", unusedArgs[0])
-		unusedArgs = unusedArgs[1:]
-	}
-	if len(unusedArgs) > 0 {
-		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
-	}
-
-	options, err := flagOptions(
-		cmd,
-		apiquery.NestedQueryFormatBrackets,
-		apiquery.ArrayQueryFormatComma,
-		EmptyBody,
-		false,
-	)
-	if err != nil {
-		return err
-	}
-
-	return client.Discounts.Delete(ctx, cmd.Value("discount-id").(string), options...)
 }
