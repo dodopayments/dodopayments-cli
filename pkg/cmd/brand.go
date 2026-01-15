@@ -16,8 +16,9 @@ import (
 )
 
 var brandsCreate = cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "description",
@@ -45,8 +46,9 @@ var brandsCreate = cli.Command{
 }
 
 var brandsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Thin handler just calls `get_brand` and wraps in `Json(...)`",
+	Name:    "retrieve",
+	Usage:   "Thin handler just calls `get_brand` and wraps in `Json(...)`",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -58,8 +60,9 @@ var brandsRetrieve = cli.Command{
 }
 
 var brandsUpdate = cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
+	Name:    "update",
+	Usage:   "Perform update operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -90,14 +93,16 @@ var brandsUpdate = cli.Command{
 var brandsList = cli.Command{
 	Name:            "list",
 	Usage:           "Perform list operation",
+	Suggest:         true,
 	Flags:           []cli.Flag{},
 	Action:          handleBrandsList,
 	HideHelpCommand: true,
 }
 
 var brandsUpdateImages = cli.Command{
-	Name:  "update-images",
-	Usage: "Perform update-images operation",
+	Name:    "update-images",
+	Usage:   "Perform update-images operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",

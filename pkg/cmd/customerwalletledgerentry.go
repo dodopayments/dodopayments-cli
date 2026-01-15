@@ -16,8 +16,9 @@ import (
 )
 
 var customersWalletsLedgerEntriesCreate = cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",
@@ -54,8 +55,9 @@ var customersWalletsLedgerEntriesCreate = cli.Command{
 }
 
 var customersWalletsLedgerEntriesList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",

@@ -16,8 +16,9 @@ import (
 )
 
 var licensesActivate = cli.Command{
-	Name:  "activate",
-	Usage: "Perform activate operation",
+	Name:    "activate",
+	Usage:   "Perform activate operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "license-key",
@@ -35,8 +36,9 @@ var licensesActivate = cli.Command{
 }
 
 var licensesValidate = cli.Command{
-	Name:  "validate",
-	Usage: "Perform validate operation",
+	Name:    "validate",
+	Usage:   "Perform validate operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "license-key",

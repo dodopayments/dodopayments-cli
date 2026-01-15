@@ -74,6 +74,7 @@ func init() {
 			{
 				Name:     "checkout-sessions",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&checkoutSessionsCreate,
 					&checkoutSessionsRetrieve,
@@ -82,6 +83,7 @@ func init() {
 			{
 				Name:     "payments",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&paymentsCreate,
 					&paymentsRetrieve,
@@ -92,6 +94,7 @@ func init() {
 			{
 				Name:     "subscriptions",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&subscriptionsCreate,
 					&subscriptionsRetrieve,
@@ -106,6 +109,7 @@ func init() {
 			{
 				Name:     "licenses",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&licensesActivate,
 					&licensesValidate,
@@ -114,6 +118,7 @@ func init() {
 			{
 				Name:     "license-keys",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&licenseKeysRetrieve,
 					&licenseKeysUpdate,
@@ -123,6 +128,7 @@ func init() {
 			{
 				Name:     "license-key-instances",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&licenseKeyInstancesRetrieve,
 					&licenseKeyInstancesUpdate,
@@ -132,6 +138,7 @@ func init() {
 			{
 				Name:     "customers",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&customersCreate,
 					&customersRetrieve,
@@ -143,6 +150,7 @@ func init() {
 			{
 				Name:     "customers:customer-portal",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&customersCustomerPortalCreate,
 				},
@@ -150,6 +158,7 @@ func init() {
 			{
 				Name:     "customers:wallets",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&customersWalletsList,
 				},
@@ -157,6 +166,7 @@ func init() {
 			{
 				Name:     "customers:wallets:ledger-entries",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&customersWalletsLedgerEntriesCreate,
 					&customersWalletsLedgerEntriesList,
@@ -165,6 +175,7 @@ func init() {
 			{
 				Name:     "refunds",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&refundsCreate,
 					&refundsRetrieve,
@@ -174,6 +185,7 @@ func init() {
 			{
 				Name:     "disputes",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&disputesRetrieve,
 					&disputesList,
@@ -182,6 +194,7 @@ func init() {
 			{
 				Name:     "payouts",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&payoutsList,
 				},
@@ -189,6 +202,7 @@ func init() {
 			{
 				Name:     "products",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&productsCreate,
 					&productsRetrieve,
@@ -199,6 +213,7 @@ func init() {
 			{
 				Name:     "products:images",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&productsImagesUpdate,
 				},
@@ -206,6 +221,7 @@ func init() {
 			{
 				Name:     "products:short-links",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&productsShortLinksCreate,
 					&productsShortLinksList,
@@ -214,6 +230,7 @@ func init() {
 			{
 				Name:     "misc",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&miscListSupportedCountries,
 				},
@@ -221,6 +238,7 @@ func init() {
 			{
 				Name:     "discounts",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&discountsCreate,
 					&discountsRetrieve,
@@ -231,6 +249,7 @@ func init() {
 			{
 				Name:     "addons",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&addonsCreate,
 					&addonsRetrieve,
@@ -242,6 +261,7 @@ func init() {
 			{
 				Name:     "brands",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&brandsCreate,
 					&brandsRetrieve,
@@ -253,6 +273,7 @@ func init() {
 			{
 				Name:     "webhooks",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&webhooksCreate,
 					&webhooksRetrieve,
@@ -264,6 +285,7 @@ func init() {
 			{
 				Name:     "webhooks:headers",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&webhooksHeadersRetrieve,
 				},
@@ -271,6 +293,7 @@ func init() {
 			{
 				Name:     "usage-events",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&usageEventsRetrieve,
 					&usageEventsList,
@@ -280,6 +303,7 @@ func init() {
 			{
 				Name:     "meters",
 				Category: "API RESOURCE",
+				Suggest:  true,
 				Commands: []*cli.Command{
 					&metersCreate,
 					&metersRetrieve,

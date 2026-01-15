@@ -16,8 +16,9 @@ import (
 )
 
 var usageEventsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Fetch detailed information about a single event using its unique event ID. This\nendpoint is useful for:",
+	Name:    "retrieve",
+	Usage:   "Fetch detailed information about a single event using its unique event ID. This\nendpoint is useful for:",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "event-id",
@@ -29,15 +30,16 @@ var usageEventsRetrieve = cli.Command{
 }
 
 var usageEventsList = cli.Command{
-	Name:  "list",
-	Usage: "Fetch events from your account with powerful filtering capabilities. This\nendpoint is ideal for:",
+	Name:    "list",
+	Usage:   "Fetch events from your account with powerful filtering capabilities. This\nendpoint is ideal for:",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "customer-id",
 			Usage:     "Filter events by customer ID",
 			QueryPath: "customer_id",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "end",
 			Usage:     "Filter events created before this timestamp",
 			QueryPath: "end",
@@ -62,7 +64,7 @@ var usageEventsList = cli.Command{
 			Usage:     "Number of events to return per page (default: 10)",
 			QueryPath: "page_size",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "start",
 			Usage:     "Filter events created after this timestamp",
 			QueryPath: "start",
@@ -73,8 +75,9 @@ var usageEventsList = cli.Command{
 }
 
 var usageEventsIngest = requestflag.WithInnerFlags(cli.Command{
-	Name:  "ingest",
-	Usage: "This endpoint allows you to ingest custom events that can be used for:",
+	Name:    "ingest",
+	Usage:   "This endpoint allows you to ingest custom events that can be used for:",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]map[string]any]{
 			Name:     "event",
@@ -107,7 +110,7 @@ var usageEventsIngest = requestflag.WithInnerFlags(cli.Command{
 			Usage:      "Custom metadata. Only key value pairs are accepted, objects or arrays submitted will be rejected.",
 			InnerField: "metadata",
 		},
-		&requestflag.InnerFlag[requestflag.DateTimeValue]{
+		&requestflag.InnerFlag[any]{
 			Name:       "event.timestamp",
 			Usage:      "Custom Timestamp. Defaults to current timestamp in UTC.\nTimestamps that are older that 1 hour or after 5 mins, from current timestamp, will be rejected.",
 			InnerField: "timestamp",

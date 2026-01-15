@@ -16,8 +16,9 @@ import (
 )
 
 var customersCreate = cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "email",
@@ -44,8 +45,9 @@ var customersCreate = cli.Command{
 }
 
 var customersRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",
@@ -57,8 +59,9 @@ var customersRetrieve = cli.Command{
 }
 
 var customersUpdate = cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
+	Name:    "update",
+	Usage:   "Perform update operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",
@@ -83,8 +86,9 @@ var customersUpdate = cli.Command{
 }
 
 var customersList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "email",
@@ -107,8 +111,9 @@ var customersList = cli.Command{
 }
 
 var customersRetrievePaymentMethods = cli.Command{
-	Name:  "retrieve-payment-methods",
-	Usage: "Perform retrieve-payment-methods operation",
+	Name:    "retrieve-payment-methods",
+	Usage:   "Perform retrieve-payment-methods operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",

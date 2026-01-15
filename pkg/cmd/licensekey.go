@@ -16,8 +16,9 @@ import (
 )
 
 var licenseKeysRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -29,8 +30,9 @@ var licenseKeysRetrieve = cli.Command{
 }
 
 var licenseKeysUpdate = cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
+	Name:    "update",
+	Usage:   "Perform update operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -46,7 +48,7 @@ var licenseKeysUpdate = cli.Command{
 			Usage:    "Indicates whether the license key should be disabled.\nA value of `true` disables the key, while `false` enables it. Omit this field to leave it unchanged.",
 			BodyPath: "disabled",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:     "expires-at",
 			Usage:    "The updated expiration timestamp for the license key in UTC.\nUse `null` to remove the expiration date, or omit this field to leave it unchanged.",
 			BodyPath: "expires_at",
@@ -57,8 +59,9 @@ var licenseKeysUpdate = cli.Command{
 }
 
 var licenseKeysList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "customer-id",

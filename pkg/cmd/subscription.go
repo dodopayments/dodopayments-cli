@@ -16,15 +16,16 @@ import (
 )
 
 var subscriptionsCreate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[map[string]any]{
 			Name:     "billing",
 			Required: true,
 			BodyPath: "billing",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "customer",
 			Required: true,
 			BodyPath: "customer",
@@ -204,8 +205,9 @@ var subscriptionsCreate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var subscriptionsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "subscription-id",
@@ -217,8 +219,9 @@ var subscriptionsRetrieve = cli.Command{
 }
 
 var subscriptionsUpdate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
+	Name:    "update",
+	Usage:   "Perform update operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "subscription-id",
@@ -245,7 +248,7 @@ var subscriptionsUpdate = requestflag.WithInnerFlags(cli.Command{
 			Name:     "metadata",
 			BodyPath: "metadata",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:     "next-billing-date",
 			BodyPath: "next_billing_date",
 		},
@@ -289,7 +292,7 @@ var subscriptionsUpdate = requestflag.WithInnerFlags(cli.Command{
 		},
 	},
 	"disable-on-demand": {
-		&requestflag.InnerFlag[requestflag.DateTimeValue]{
+		&requestflag.InnerFlag[any]{
 			Name:       "disable-on-demand.next-billing-date",
 			InnerField: "next_billing_date",
 		},
@@ -297,20 +300,21 @@ var subscriptionsUpdate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var subscriptionsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "brand-id",
 			Usage:     "filter by Brand id",
 			QueryPath: "brand_id",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-gte",
 			Usage:     "Get events after this created time",
 			QueryPath: "created_at_gte",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-lte",
 			Usage:     "Get events created before this time",
 			QueryPath: "created_at_lte",
@@ -341,8 +345,9 @@ var subscriptionsList = cli.Command{
 }
 
 var subscriptionsCharge = requestflag.WithInnerFlags(cli.Command{
-	Name:  "charge",
-	Usage: "Perform charge operation",
+	Name:    "charge",
+	Usage:   "Perform charge operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "subscription-id",
@@ -397,8 +402,9 @@ var subscriptionsCharge = requestflag.WithInnerFlags(cli.Command{
 })
 
 var subscriptionsPreviewChangePlan = requestflag.WithInnerFlags(cli.Command{
-	Name:  "preview-change-plan",
-	Usage: "Perform preview-change-plan operation",
+	Name:    "preview-change-plan",
+	Usage:   "Perform preview-change-plan operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "subscription-id",
@@ -444,14 +450,15 @@ var subscriptionsPreviewChangePlan = requestflag.WithInnerFlags(cli.Command{
 })
 
 var subscriptionsRetrieveUsageHistory = cli.Command{
-	Name:  "retrieve-usage-history",
-	Usage: "Get detailed usage history for a subscription that includes usage-based billing\n(metered components). This endpoint provides insights into customer usage\npatterns and billing calculations over time.",
+	Name:    "retrieve-usage-history",
+	Usage:   "Get detailed usage history for a subscription that includes usage-based billing\n(metered components). This endpoint provides insights into customer usage\npatterns and billing calculations over time.",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "subscription-id",
 			Required: true,
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "end-date",
 			Usage:     "Filter by end date (inclusive)",
 			QueryPath: "end_date",
@@ -471,7 +478,7 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 			Usage:     "Page size (default: 10, max: 100)",
 			QueryPath: "page_size",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "start-date",
 			Usage:     "Filter by start date (inclusive)",
 			QueryPath: "start_date",
@@ -482,8 +489,9 @@ var subscriptionsRetrieveUsageHistory = cli.Command{
 }
 
 var subscriptionsUpdatePaymentMethod = cli.Command{
-	Name:  "update-payment-method",
-	Usage: "Perform update-payment-method operation",
+	Name:    "update-payment-method",
+	Usage:   "Perform update-payment-method operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "subscription-id",

@@ -16,15 +16,16 @@ import (
 )
 
 var payoutsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-gte",
 			Usage:     "Get payouts created after this time (inclusive)",
 			QueryPath: "created_at_gte",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-lte",
 			Usage:     "Get payouts created before this time (inclusive)",
 			QueryPath: "created_at_lte",

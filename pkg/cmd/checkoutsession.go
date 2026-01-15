@@ -16,8 +16,9 @@ import (
 )
 
 var checkoutSessionsCreate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[[]map[string]any]{
 			Name:     "product-cart",
@@ -43,7 +44,7 @@ var checkoutSessionsCreate = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
 			BodyPath: "confirm",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "customer",
 			BodyPath: "customer",
 		},
@@ -247,8 +248,9 @@ var checkoutSessionsCreate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var checkoutSessionsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",

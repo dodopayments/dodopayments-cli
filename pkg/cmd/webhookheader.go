@@ -16,8 +16,9 @@ import (
 )
 
 var webhooksHeadersRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Get a webhook by id",
+	Name:    "retrieve",
+	Usage:   "Get a webhook by id",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "webhook-id",

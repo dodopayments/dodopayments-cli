@@ -16,8 +16,9 @@ import (
 )
 
 var disputesRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "dispute-id",
@@ -29,15 +30,16 @@ var disputesRetrieve = cli.Command{
 }
 
 var disputesList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-gte",
 			Usage:     "Get events after this created time",
 			QueryPath: "created_at_gte",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-lte",
 			Usage:     "Get events created before this time",
 			QueryPath: "created_at_lte",
