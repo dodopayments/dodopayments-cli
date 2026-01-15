@@ -16,8 +16,9 @@ import (
 )
 
 var customersCustomerPortalCreate = cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",

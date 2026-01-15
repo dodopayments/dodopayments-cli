@@ -16,8 +16,9 @@ import (
 )
 
 var customersWalletsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "customer-id",

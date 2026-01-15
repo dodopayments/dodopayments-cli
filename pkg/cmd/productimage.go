@@ -16,8 +16,9 @@ import (
 )
 
 var productsImagesUpdate = cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
+	Name:    "update",
+	Usage:   "Perform update operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",

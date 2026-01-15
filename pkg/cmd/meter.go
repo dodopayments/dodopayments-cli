@@ -16,8 +16,9 @@ import (
 )
 
 var metersCreate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[map[string]any]{
 			Name:     "aggregation",
@@ -83,8 +84,9 @@ var metersCreate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var metersRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -96,8 +98,9 @@ var metersRetrieve = cli.Command{
 }
 
 var metersList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[bool]{
 			Name:      "archived",

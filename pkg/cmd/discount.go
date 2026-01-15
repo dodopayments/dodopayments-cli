@@ -16,8 +16,9 @@ import (
 )
 
 var discountsCreate = cli.Command{
-	Name:  "create",
-	Usage: "POST /discounts If `code` is omitted or empty, a random 16-char uppercase code\nis generated.",
+	Name:    "create",
+	Usage:   "POST /discounts If `code` is omitted or empty, a random 16-char uppercase code\nis generated.",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:     "amount",
@@ -35,7 +36,7 @@ var discountsCreate = cli.Command{
 			Usage:    "Optionally supply a code (will be uppercased).\n- Must be at least 3 characters if provided.\n- If omitted, a random 16-character code is generated.",
 			BodyPath: "code",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:     "expires-at",
 			Usage:    "When the discount expires, if ever.",
 			BodyPath: "expires_at",
@@ -65,8 +66,9 @@ var discountsCreate = cli.Command{
 }
 
 var discountsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "GET /discounts/{discount_id}",
+	Name:    "retrieve",
+	Usage:   "GET /discounts/{discount_id}",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "discount-id",
@@ -78,8 +80,9 @@ var discountsRetrieve = cli.Command{
 }
 
 var discountsUpdate = cli.Command{
-	Name:  "update",
-	Usage: "PATCH /discounts/{discount_id}",
+	Name:    "update",
+	Usage:   "PATCH /discounts/{discount_id}",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "discount-id",
@@ -95,7 +98,7 @@ var discountsUpdate = cli.Command{
 			Usage:    "If present, update the discount code (uppercase).",
 			BodyPath: "code",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:     "expires-at",
 			BodyPath: "expires_at",
 		},
@@ -127,8 +130,9 @@ var discountsUpdate = cli.Command{
 }
 
 var discountsList = cli.Command{
-	Name:  "list",
-	Usage: "GET /discounts",
+	Name:    "list",
+	Usage:   "GET /discounts",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:      "page-number",

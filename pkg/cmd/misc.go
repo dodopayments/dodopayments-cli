@@ -17,6 +17,7 @@ import (
 var miscListSupportedCountries = cli.Command{
 	Name:            "list-supported-countries",
 	Usage:           "Perform list-supported-countries operation",
+	Suggest:         true,
 	Flags:           []cli.Flag{},
 	Action:          handleMiscListSupportedCountries,
 	HideHelpCommand: true,

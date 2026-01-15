@@ -16,15 +16,16 @@ import (
 )
 
 var paymentsCreate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[map[string]any]{
 			Name:     "billing",
 			Required: true,
 			BodyPath: "billing",
 		},
-		&requestflag.Flag[map[string]string]{
+		&requestflag.Flag[map[string]any]{
 			Name:     "customer",
 			Required: true,
 			BodyPath: "customer",
@@ -143,8 +144,9 @@ var paymentsCreate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var paymentsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "payment-id",
@@ -156,20 +158,21 @@ var paymentsRetrieve = cli.Command{
 }
 
 var paymentsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "brand-id",
 			Usage:     "filter by Brand id",
 			QueryPath: "brand_id",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-gte",
 			Usage:     "Get events after this created time",
 			QueryPath: "created_at_gte",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-lte",
 			Usage:     "Get events created before this time",
 			QueryPath: "created_at_lte",
@@ -205,8 +208,9 @@ var paymentsList = cli.Command{
 }
 
 var paymentsRetrieveLineItems = cli.Command{
-	Name:  "retrieve-line-items",
-	Usage: "Perform retrieve-line-items operation",
+	Name:    "retrieve-line-items",
+	Usage:   "Perform retrieve-line-items operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "payment-id",

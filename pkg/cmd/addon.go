@@ -16,8 +16,9 @@ import (
 )
 
 var addonsCreate = cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "currency",
@@ -53,8 +54,9 @@ var addonsCreate = cli.Command{
 }
 
 var addonsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -66,8 +68,9 @@ var addonsRetrieve = cli.Command{
 }
 
 var addonsUpdate = cli.Command{
-	Name:  "update",
-	Usage: "Perform update operation",
+	Name:    "update",
+	Usage:   "Perform update operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -108,8 +111,9 @@ var addonsUpdate = cli.Command{
 }
 
 var addonsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:      "page-number",
@@ -127,8 +131,9 @@ var addonsList = cli.Command{
 }
 
 var addonsUpdateImages = cli.Command{
-	Name:  "update-images",
-	Usage: "Perform update-images operation",
+	Name:    "update-images",
+	Usage:   "Perform update-images operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",

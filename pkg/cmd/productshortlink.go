@@ -16,8 +16,9 @@ import (
 )
 
 var productsShortLinksCreate = cli.Command{
-	Name:  "create",
-	Usage: "Gives a Short Checkout URL with custom slug for a product. Uses a Static\nCheckout URL under the hood.",
+	Name:    "create",
+	Usage:   "Gives a Short Checkout URL with custom slug for a product. Uses a Static\nCheckout URL under the hood.",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -40,8 +41,9 @@ var productsShortLinksCreate = cli.Command{
 }
 
 var productsShortLinksList = cli.Command{
-	Name:  "list",
-	Usage: "Lists all short links created by the business.",
+	Name:    "list",
+	Usage:   "Lists all short links created by the business.",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[int64]{
 			Name:      "page-number",

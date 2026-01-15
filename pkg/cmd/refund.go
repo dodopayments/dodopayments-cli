@@ -16,8 +16,9 @@ import (
 )
 
 var refundsCreate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "payment-id",
@@ -64,8 +65,9 @@ var refundsCreate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var refundsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "refund-id",
@@ -77,15 +79,16 @@ var refundsRetrieve = cli.Command{
 }
 
 var refundsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-gte",
 			Usage:     "Get events after this created time",
 			QueryPath: "created_at_gte",
 		},
-		&requestflag.Flag[requestflag.DateTimeValue]{
+		&requestflag.Flag[any]{
 			Name:      "created-at-lte",
 			Usage:     "Get events created before this time",
 			QueryPath: "created_at_lte",

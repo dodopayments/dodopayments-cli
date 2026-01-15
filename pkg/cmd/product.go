@@ -16,8 +16,9 @@ import (
 )
 
 var productsCreate = requestflag.WithInnerFlags(cli.Command{
-	Name:  "create",
-	Usage: "Perform create operation",
+	Name:    "create",
+	Usage:   "Perform create operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "name",
@@ -110,8 +111,9 @@ var productsCreate = requestflag.WithInnerFlags(cli.Command{
 })
 
 var productsRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Perform retrieve operation",
+	Name:    "retrieve",
+	Usage:   "Perform retrieve operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",
@@ -123,8 +125,9 @@ var productsRetrieve = cli.Command{
 }
 
 var productsList = cli.Command{
-	Name:  "list",
-	Usage: "Perform list operation",
+	Name:    "list",
+	Usage:   "Perform list operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[bool]{
 			Name:      "archived",
@@ -157,8 +160,9 @@ var productsList = cli.Command{
 }
 
 var productsUpdateFiles = cli.Command{
-	Name:  "update-files",
-	Usage: "Perform update-files operation",
+	Name:    "update-files",
+	Usage:   "Perform update-files operation",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "id",

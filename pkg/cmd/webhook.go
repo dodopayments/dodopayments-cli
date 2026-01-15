@@ -16,8 +16,9 @@ import (
 )
 
 var webhooksCreate = cli.Command{
-	Name:  "create",
-	Usage: "Create a new webhook",
+	Name:    "create",
+	Usage:   "Create a new webhook",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "url",
@@ -64,8 +65,9 @@ var webhooksCreate = cli.Command{
 }
 
 var webhooksRetrieve = cli.Command{
-	Name:  "retrieve",
-	Usage: "Get a webhook by id",
+	Name:    "retrieve",
+	Usage:   "Get a webhook by id",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "webhook-id",
@@ -77,8 +79,9 @@ var webhooksRetrieve = cli.Command{
 }
 
 var webhooksUpdate = cli.Command{
-	Name:  "update",
-	Usage: "Patch a webhook by id",
+	Name:    "update",
+	Usage:   "Patch a webhook by id",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "webhook-id",
@@ -120,8 +123,9 @@ var webhooksUpdate = cli.Command{
 }
 
 var webhooksList = cli.Command{
-	Name:  "list",
-	Usage: "List all webhooks",
+	Name:    "list",
+	Usage:   "List all webhooks",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:      "iterator",
@@ -139,8 +143,9 @@ var webhooksList = cli.Command{
 }
 
 var webhooksRetrieveSecret = cli.Command{
-	Name:  "retrieve-secret",
-	Usage: "Get webhook secret by id",
+	Name:    "retrieve-secret",
+	Usage:   "Get webhook secret by id",
+	Suggest: true,
 	Flags: []cli.Flag{
 		&requestflag.Flag[string]{
 			Name:     "webhook-id",
