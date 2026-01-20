@@ -18,7 +18,7 @@ func TestSubscriptionsCreate(t *testing.T) {
 		"--product-id", "product_id",
 		"--quantity", "0",
 		"--addon", "{addon_id: addon_id, quantity: 0}",
-		"--allowed-payment-method-type", "ach",
+		"--allowed-payment-method-type", "credit",
 		"--billing-currency", "AED",
 		"--discount-code", "discount_code",
 		"--force-3ds=true",
@@ -52,7 +52,7 @@ func TestSubscriptionsCreate(t *testing.T) {
 		"--quantity", "0",
 		"--addon.addon_id", "addon_id",
 		"--addon.quantity", "0",
-		"--allowed-payment-method-type", "ach",
+		"--allowed-payment-method-type", "credit",
 		"--billing-currency", "AED",
 		"--discount-code", "discount_code",
 		"--force-3ds=true",
@@ -176,6 +176,7 @@ func TestSubscriptionsPreviewChangePlan(t *testing.T) {
 		"--proration-billing-mode", "prorated_immediately",
 		"--quantity", "0",
 		"--addon", "{addon_id: addon_id, quantity: 0}",
+		"--metadata", "{foo: string}",
 	)
 
 	// Check that inner flags have been set up correctly
@@ -191,6 +192,7 @@ func TestSubscriptionsPreviewChangePlan(t *testing.T) {
 		"--quantity", "0",
 		"--addon.addon_id", "addon_id",
 		"--addon.quantity", "0",
+		"--metadata", "{foo: string}",
 	)
 }
 
