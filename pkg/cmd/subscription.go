@@ -433,6 +433,11 @@ var subscriptionsPreviewChangePlan = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "Addons for the new plan.\nNote : Leaving this empty would remove any existing addons",
 			BodyPath: "addons",
 		},
+		&requestflag.Flag[map[string]any]{
+			Name:     "metadata",
+			Usage:    "Metadata for the payment. If not passed, the metadata of the subscription will be taken",
+			BodyPath: "metadata",
+		},
 	},
 	Action:          handleSubscriptionsPreviewChangePlan,
 	HideHelpCommand: true,

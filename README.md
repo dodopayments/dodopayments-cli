@@ -33,7 +33,7 @@ dodopayments [resource] [command] [flags]
 ```sh
 dodopayments checkout-sessions create \
   --product-cart '{product_id: product_id, quantity: 0, addons: [{addon_id: addon_id, quantity: 0}], amount: 0}' \
-  --allowed-payment-method-type ach \
+  --allowed-payment-method-type credit \
   --billing-address '{country: AF, city: city, state: state, street: street, zipcode: zipcode}' \
   --billing-currency AED \
   --confirm \
@@ -45,6 +45,7 @@ dodopayments checkout-sessions create \
   --metadata '{foo: string}' \
   --minimal-address \
   --payment-method-id payment_method_id \
+  --product-collection-id product_collection_id \
   --return-url return_url \
   --short-link \
   --show-saved-payment-methods \

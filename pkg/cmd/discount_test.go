@@ -55,3 +55,11 @@ func TestDiscountsList(t *testing.T) {
 		"--page-size", "0",
 	)
 }
+
+func TestDiscountsRetrieveByCode(t *testing.T) {
+	mocktest.TestRunMockTestWithFlags(
+		t,
+		"discounts", "retrieve-by-code",
+		"--code", "code",
+	)
+}

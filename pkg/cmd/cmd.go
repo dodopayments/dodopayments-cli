@@ -78,6 +78,7 @@ func init() {
 				Commands: []*cli.Command{
 					&checkoutSessionsCreate,
 					&checkoutSessionsRetrieve,
+					&checkoutSessionsPreview,
 				},
 			},
 			{
@@ -244,6 +245,7 @@ func init() {
 					&discountsRetrieve,
 					&discountsUpdate,
 					&discountsList,
+					&discountsRetrieveByCode,
 				},
 			},
 			{

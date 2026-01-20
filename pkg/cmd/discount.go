@@ -149,6 +149,20 @@ var discountsList = cli.Command{
 	HideHelpCommand: true,
 }
 
+var discountsRetrieveByCode = cli.Command{
+	Name:    "retrieve-by-code",
+	Usage:   "Validate and fetch a discount by its code name (e.g., \"SAVE20\"). This allows\nreal-time validation directly against the API using the human-readable discount\ncode instead of requiring the internal discount_id.",
+	Suggest: true,
+	Flags: []cli.Flag{
+		&requestflag.Flag[string]{
+			Name:     "code",
+			Required: true,
+		},
+	},
+	Action:          handleDiscountsRetrieveByCode,
+	HideHelpCommand: true,
+}
+
 func handleDiscountsCreate(ctx context.Context, cmd *cli.Command) error {
 	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
 	unusedArgs := cmd.Args().Slice()
@@ -296,4 +310,39 @@ func handleDiscountsList(ctx context.Context, cmd *cli.Command) error {
 		iter := client.Discounts.ListAutoPaging(ctx, params, options...)
 		return ShowJSONIterator(os.Stdout, "discounts list", iter, format, transform)
 	}
+}
+
+func handleDiscountsRetrieveByCode(ctx context.Context, cmd *cli.Command) error {
+	client := dodopayments.NewClient(getDefaultRequestOptions(cmd)...)
+	unusedArgs := cmd.Args().Slice()
+	if !cmd.IsSet("code") && len(unusedArgs) > 0 {
+		cmd.Set("code", unusedArgs[0])
+		unusedArgs = unusedArgs[1:]
+	}
+	if len(unusedArgs) > 0 {
+		return fmt.Errorf("Unexpected extra arguments: %v", unusedArgs)
+	}
+
+	options, err := flagOptions(
+		cmd,
+		apiquery.NestedQueryFormatBrackets,
+		apiquery.ArrayQueryFormatComma,
+		EmptyBody,
+		false,
+	)
+	if err != nil {
+		return err
+	}
+
+	var res []byte
+	options = append(options, option.WithResponseBodyInto(&res))
+	_, err = client.Discounts.GetByCode(ctx, cmd.Value("code").(string), options...)
+	if err != nil {
+		return err
+	}
+
+	obj := gjson.ParseBytes(res)
+	format := cmd.Root().String("format")
+	transform := cmd.Root().String("transform")
+	return ShowJSON(os.Stdout, "discounts retrieve-by-code", obj, format, transform)
 }
