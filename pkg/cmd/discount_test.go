@@ -51,8 +51,12 @@ func TestDiscountsList(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"discounts", "list",
+		"--active=true",
+		"--code", "code",
+		"--discount-type", "percentage",
 		"--page-number", "0",
 		"--page-size", "0",
+		"--product-id", "product_id",
 	)
 }
 

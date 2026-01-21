@@ -37,6 +37,7 @@ dodopayments checkout-sessions create \
   --billing-address '{country: AF, city: city, state: state, street: street, zipcode: zipcode}' \
   --billing-currency AED \
   --confirm \
+  --custom-field '{field_type: text, key: key, label: label, options: [string], placeholder: placeholder, required: true}' \
   --customer '{customer_id: customer_id}' \
   --customization '{force_language: force_language, show_on_demand_tag: true, show_order_details: true, theme: dark}' \
   --discount-code discount_code \

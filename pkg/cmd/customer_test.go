@@ -42,7 +42,10 @@ func TestCustomersList(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"customers", "list",
+		"--created-at-gte", "2019-12-27T18:11:19.117Z",
+		"--created-at-lte", "2019-12-27T18:11:19.117Z",
 		"--email", "email",
+		"--name", "name",
 		"--page-number", "0",
 		"--page-size", "0",
 	)
