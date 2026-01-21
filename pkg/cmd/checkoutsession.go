@@ -44,6 +44,11 @@ var checkoutSessionsCreate = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
 			BodyPath: "confirm",
 		},
+		&requestflag.Flag[[]map[string]any]{
+			Name:     "custom-field",
+			Usage:    "Custom fields to collect from customer during checkout (max 5 fields)",
+			BodyPath: "custom_fields",
+		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "customer",
 			BodyPath: "customer",
@@ -155,6 +160,38 @@ var checkoutSessionsCreate = requestflag.WithInnerFlags(cli.Command{
 			Name:       "billing-address.zipcode",
 			Usage:      "Postal code or ZIP code",
 			InnerField: "zipcode",
+		},
+	},
+	"custom-field": {
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.field-type",
+			Usage:      "Type of field determining validation rules",
+			InnerField: "field_type",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.key",
+			Usage:      "Unique identifier for this field (used as key in responses)",
+			InnerField: "key",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.label",
+			Usage:      "Display label shown to customer",
+			InnerField: "label",
+		},
+		&requestflag.InnerFlag[[]string]{
+			Name:       "custom-field.options",
+			Usage:      "Options for dropdown type (required for dropdown, ignored for others)",
+			InnerField: "options",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.placeholder",
+			Usage:      "Placeholder text for the input",
+			InnerField: "placeholder",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "custom-field.required",
+			Usage:      "Whether this field is required",
+			InnerField: "required",
 		},
 	},
 	"customization": {
@@ -295,6 +332,11 @@ var checkoutSessionsPreview = requestflag.WithInnerFlags(cli.Command{
 			Usage:    "If confirm is true, all the details will be finalized. If required data is missing, an API error is thrown.",
 			BodyPath: "confirm",
 		},
+		&requestflag.Flag[[]map[string]any]{
+			Name:     "custom-field",
+			Usage:    "Custom fields to collect from customer during checkout (max 5 fields)",
+			BodyPath: "custom_fields",
+		},
 		&requestflag.Flag[map[string]any]{
 			Name:     "customer",
 			BodyPath: "customer",
@@ -406,6 +448,38 @@ var checkoutSessionsPreview = requestflag.WithInnerFlags(cli.Command{
 			Name:       "billing-address.zipcode",
 			Usage:      "Postal code or ZIP code",
 			InnerField: "zipcode",
+		},
+	},
+	"custom-field": {
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.field-type",
+			Usage:      "Type of field determining validation rules",
+			InnerField: "field_type",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.key",
+			Usage:      "Unique identifier for this field (used as key in responses)",
+			InnerField: "key",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.label",
+			Usage:      "Display label shown to customer",
+			InnerField: "label",
+		},
+		&requestflag.InnerFlag[[]string]{
+			Name:       "custom-field.options",
+			Usage:      "Options for dropdown type (required for dropdown, ignored for others)",
+			InnerField: "options",
+		},
+		&requestflag.InnerFlag[string]{
+			Name:       "custom-field.placeholder",
+			Usage:      "Placeholder text for the input",
+			InnerField: "placeholder",
+		},
+		&requestflag.InnerFlag[bool]{
+			Name:       "custom-field.required",
+			Usage:      "Whether this field is required",
+			InnerField: "required",
 		},
 	},
 	"customization": {

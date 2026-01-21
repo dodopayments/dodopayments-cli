@@ -63,6 +63,16 @@ var licenseKeysList = cli.Command{
 	Usage:   "Perform list operation",
 	Suggest: true,
 	Flags: []cli.Flag{
+		&requestflag.Flag[any]{
+			Name:      "created-at-gte",
+			Usage:     "Filter license keys created on or after this timestamp",
+			QueryPath: "created_at_gte",
+		},
+		&requestflag.Flag[any]{
+			Name:      "created-at-lte",
+			Usage:     "Filter license keys created on or before this timestamp",
+			QueryPath: "created_at_lte",
+		},
 		&requestflag.Flag[string]{
 			Name:      "customer-id",
 			Usage:     "Filter by customer ID",

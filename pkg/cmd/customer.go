@@ -90,10 +90,25 @@ var customersList = cli.Command{
 	Usage:   "Perform list operation",
 	Suggest: true,
 	Flags: []cli.Flag{
+		&requestflag.Flag[any]{
+			Name:      "created-at-gte",
+			Usage:     "Filter customers created on or after this timestamp",
+			QueryPath: "created_at_gte",
+		},
+		&requestflag.Flag[any]{
+			Name:      "created-at-lte",
+			Usage:     "Filter customers created on or before this timestamp",
+			QueryPath: "created_at_lte",
+		},
 		&requestflag.Flag[string]{
 			Name:      "email",
 			Usage:     "Filter by customer email",
 			QueryPath: "email",
+		},
+		&requestflag.Flag[string]{
+			Name:      "name",
+			Usage:     "Filter by customer name (partial match, case-insensitive)",
+			QueryPath: "name",
 		},
 		&requestflag.Flag[int64]{
 			Name:      "page-number",

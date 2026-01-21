@@ -31,6 +31,8 @@ func TestLicenseKeysList(t *testing.T) {
 	mocktest.TestRunMockTestWithFlags(
 		t,
 		"license-keys", "list",
+		"--created-at-gte", "2019-12-27T18:11:19.117Z",
+		"--created-at-lte", "2019-12-27T18:11:19.117Z",
 		"--customer-id", "customer_id",
 		"--page-number", "0",
 		"--page-size", "0",

@@ -134,6 +134,20 @@ var discountsList = cli.Command{
 	Usage:   "GET /discounts",
 	Suggest: true,
 	Flags: []cli.Flag{
+		&requestflag.Flag[bool]{
+			Name:      "active",
+			Usage:     "Filter by active status (true = not expired, false = expired)",
+			QueryPath: "active",
+		},
+		&requestflag.Flag[string]{
+			Name:      "code",
+			Usage:     "Filter by discount code (partial match, case-insensitive)",
+			QueryPath: "code",
+		},
+		&requestflag.Flag[string]{
+			Name:      "discount-type",
+			QueryPath: "discount_type",
+		},
 		&requestflag.Flag[int64]{
 			Name:      "page-number",
 			Usage:     "Page number (default = 0).",
@@ -143,6 +157,11 @@ var discountsList = cli.Command{
 			Name:      "page-size",
 			Usage:     "Page size (default = 10, max = 100).",
 			QueryPath: "page_size",
+		},
+		&requestflag.Flag[string]{
+			Name:      "product-id",
+			Usage:     "Filter by product restriction (only discounts that apply to this product)",
+			QueryPath: "product_id",
 		},
 	},
 	Action:          handleDiscountsList,
