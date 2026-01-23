@@ -69,6 +69,10 @@ var brandsUpdate = cli.Command{
 			Required: true,
 		},
 		&requestflag.Flag[string]{
+			Name:     "description",
+			BodyPath: "description",
+		},
+		&requestflag.Flag[string]{
 			Name:     "image-id",
 			Usage:    "The UUID you got back from the presigned‐upload call",
 			BodyPath: "image_id",
@@ -84,6 +88,10 @@ var brandsUpdate = cli.Command{
 		&requestflag.Flag[string]{
 			Name:     "support-email",
 			BodyPath: "support_email",
+		},
+		&requestflag.Flag[string]{
+			Name:     "url",
+			BodyPath: "url",
 		},
 	},
 	Action:          handleBrandsUpdate,
