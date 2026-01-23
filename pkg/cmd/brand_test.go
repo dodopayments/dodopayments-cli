@@ -33,10 +33,12 @@ func TestBrandsUpdate(t *testing.T) {
 		t,
 		"brands", "update",
 		"--id", "id",
+		"--description", "description",
 		"--image-id", "182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e",
 		"--name", "name",
 		"--statement-descriptor", "statement_descriptor",
 		"--support-email", "support_email",
+		"--url", "url",
 	)
 }
 
