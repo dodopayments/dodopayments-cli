@@ -5,11 +5,43 @@ import { input, select } from '@inquirer/prompts';
 import open from 'open';
 import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
 
+type DodoPaymentsAPIError = {
+    error: {
+        code: string;
+        message: string;
+    }
+}
 
-const usage = {
+function isDodoPaymentsAPIError(e: unknown): e is DodoPaymentsAPIError {
+    return (
+        typeof e === "object" &&
+        e !== null &&
+        "error" in e &&
+        typeof (e as any).error?.code === "string"
+    );
+}
+
+const link = (text: string, url: string) =>
+    `\u001b]8;;${url}\u001b\\${text}\u001b]8;;\u001b\\`;
+
+const usage: {
+    [key: string]: {
+        command: string,
+        description: string
+    }[]
+} = {
     products: [
         { command: 'list', description: 'List your products' },
-        { command: 'create', description: 'Create a new product' }
+        { command: 'create', description: 'Create a new product' },
+        { command: 'info', description: 'Get info about a product' }
+    ],
+    payments: [
+        { command: 'list', description: 'List your payments' },
+    ],
+    customers: [
+        { command: 'list', description: 'List your customers' },
+        { command: 'create', description: 'Create a customer' },
+        { command: 'update', description: 'Update a customer' },
     ]
 }
 
@@ -21,6 +53,7 @@ const homedir = os.homedir();
 
 // Added this to the top so that it can bypass all further auth that happens for the login route
 if (category === 'login') {
+    open('https://app.dodopayments.com/developer/api-keys');
     const API_KEY = await input({ message: 'Enter your Dodo Payments API Key:', required: true });
     const MODE = await select({
         choices: [{ name: "Test Mode", value: 'test_mode' }, { name: "Live Mode", value: 'live_mode' }],
@@ -127,33 +160,62 @@ if (category === 'products') {
     } else if (subCommand === 'create') {
         open('https://app.dodopayments.com/products/create');
     } else if (subCommand === 'info') {
-        const product_id = await input({
-            message: "Enter product ID:",
-            validate: (e => e.startsWith('pdt_') || 'Please enter a valid product ID!')
-        });
+        try {
+            const product_id = await input({
+                message: "Enter product ID:",
+                validate: (e => e.startsWith('pdt_') || 'Please enter a valid product ID!')
+            });
 
-        const info = await DodoClient.products.retrieve('pdt_0NWiB9avqk0kGf2rAf6k9');
-        console.table({
-            product_id: product_id,
-            name: info.name,
-            description: info.description,
-            created_at: info.created_at,
-            ...info.is_recurring ? {
-                price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${info.price.price * 0.01}/${info.price.payment_frequency_interval}`,
-            } : {
-                price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${info.price.price * 0.01} (One Time)`,
-            },
-            tax_category: info.tax_category,
-            edit_url: `https://app.dodopayments.com/products/edit?id=${info.product_id}`
-        });
+            const info = await DodoClient.products.retrieve(product_id);
+            console.table({
+                product_id: info.product_id,
+                name: info.name,
+                description: info.description,
+                created_at: info.created_at,
+                ...info.is_recurring ? {
+                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${info.price.price * 0.01}/${info.price.payment_frequency_interval}`,
+                } : {
+                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${info.price.price * 0.01} (One Time)`,
+                },
+                tax_category: info.tax_category,
+                edit_url: link('CTRL + Click to open', `https://app.dodopayments.com/products/edit?id=${info.product_id}`)
+            });
+        } catch (e) {
+            if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
+                console.log("Incorrect product ID!");
+            } else {
+                console.error(e);
+            }
+        }
     } else {
-        usage.products.forEach(e => {
+        usage.products!.forEach(e => {
             console.log(`dodo products ${e.command} - ${e.description}`)
         });
     }
 } else if (category === 'payments') {
     if (subCommand === 'list') {
-        // Work
+        const page = await input({
+            message: 'Enter page:',
+            default: "1",
+            validate: (e => e.trim() !== '')
+        });
+        const payments = (await DodoClient.payments.list({ page_number: parseInt(page) - 1, page_size: 100 })).items;
+        const paymentsTable = payments.map(payment => {
+            return {
+                payment_id: payment.payment_id,
+                created_at: new Date(payment.created_at).toLocaleString(),
+                subscription_id: payment.subscription_id,
+                total_amount: payment.total_amount,
+                currency: payment.currency,
+                status: payment.status,
+                more_info: link('CTRL + Click to open', `https://app.dodopayments.com/transactions/payments/${payment.payment_id}`)
+            };
+        });
+        console.table(paymentsTable);
+    } else {
+        usage.payments!.forEach(e => {
+            console.log(`dodo payments ${e.command} - ${e.description}`)
+        });
     }
 } else if (category === 'customers') {
     if (subCommand === 'list') {
@@ -192,8 +254,8 @@ if (category === 'products') {
             validate: (e => e.startsWith('cus_') || 'Please enter a valid customer ID!')
         });
 
-        const existingInfo = await DodoClient.customers.retrieve(customer_id);
-        if (existingInfo) {
+        try {
+            const existingInfo = await DodoClient.customers.retrieve(customer_id);
             const name = await input({
                 message: "Enter customer name:",
                 default: existingInfo.name
@@ -206,13 +268,21 @@ if (category === 'products') {
 
             const updated = await DodoClient.customers.update(customer_id, {
                 name: name,
-                phone_number: phone
+                phone_number: phone.trim() !== '' ? phone : null
             });
 
             console.table([updated], ['customer_id', 'name', 'email', 'phone_number']);
-        } else {
-            console.log("Incorrect customer ID!");
+        } catch (e) {
+            if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
+                console.log("Incorrect customer ID!");
+            } else {
+                console.error(e);
+            }
         }
+    } else {
+        usage.products!.forEach(e => {
+            console.log(`dodo customers ${e.command} - ${e.description}`)
+        });
     }
 } else {
     // List all available methods
@@ -223,6 +293,6 @@ if (category === 'products') {
             console.log(`dodo products ${e.command} - ${e.description}`)
         });
         // Blank space as a separator
-        console.log();
+        console.log("");
     });
 }
