@@ -8,6 +8,7 @@ import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
 type DodoPaymentsAPIError = {
     error: {
         code: string;
+        message: string;
     }
 }
 
@@ -38,6 +39,7 @@ const homedir = os.homedir();
 
 // Added this to the top so that it can bypass all further auth that happens for the login route
 if (category === 'login') {
+    open('https://app.dodopayments.com/developer/api-keys');
     const API_KEY = await input({ message: 'Enter your Dodo Payments API Key:', required: true });
     const MODE = await select({
         choices: [{ name: "Test Mode", value: 'test_mode' }, { name: "Live Mode", value: 'live_mode' }],
