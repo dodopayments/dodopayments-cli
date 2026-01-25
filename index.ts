@@ -24,10 +24,24 @@ function isDodoPaymentsAPIError(e: unknown): e is DodoPaymentsAPIError {
 const link = (text: string, url: string) =>
     `\u001b]8;;${url}\u001b\\${text}\u001b]8;;\u001b\\`;
 
-const usage = {
+const usage: {
+    [key: string]: {
+        command: string,
+        description: string
+    }[]
+} = {
     products: [
         { command: 'list', description: 'List your products' },
-        { command: 'create', description: 'Create a new product' }
+        { command: 'create', description: 'Create a new product' },
+        { command: 'info', description: 'Get info about a product' }
+    ],
+    payments: [
+        { command: 'list', description: 'List your payments' },
+    ],
+    customers: [
+        { command: 'list', description: 'List your customers' },
+        { command: 'create', description: 'Create a customer' },
+        { command: 'update', description: 'Update a customer' },
     ]
 }
 
@@ -174,7 +188,7 @@ if (category === 'products') {
             }
         }
     } else {
-        usage.products.forEach(e => {
+        usage.products!.forEach(e => {
             console.log(`dodo products ${e.command} - ${e.description}`)
         });
     }
@@ -198,6 +212,10 @@ if (category === 'products') {
             };
         });
         console.table(paymentsTable);
+    } else {
+        usage.payments!.forEach(e => {
+            console.log(`dodo payments ${e.command} - ${e.description}`)
+        });
     }
 } else if (category === 'customers') {
     if (subCommand === 'list') {
@@ -261,6 +279,10 @@ if (category === 'products') {
                 console.error(e);
             }
         }
+    } else {
+        usage.products!.forEach(e => {
+            console.log(`dodo customers ${e.command} - ${e.description}`)
+        });
     }
 } else {
     // List all available methods
@@ -271,6 +293,6 @@ if (category === 'products') {
             console.log(`dodo products ${e.command} - ${e.description}`)
         });
         // Blank space as a separator
-        console.log();
+        console.log("");
     });
 }
