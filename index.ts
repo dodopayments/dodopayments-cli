@@ -46,6 +46,11 @@ const usage: {
         { command: 'list', description: 'List your customers' },
         { command: 'create', description: 'Create a customer' },
         { command: 'update', description: 'Update a customer' },
+    ],
+    discounts: [
+        { command: 'list', description: 'List your discounts' },
+        { command: 'create', description: 'Create a discount' },
+        { command: 'delete', description: 'Remove a discount' },
     ]
 }
 
@@ -206,13 +211,13 @@ if (category === 'products') {
         const payments = (await DodoClient.payments.list({ page_number: parseInt(page) - 1, page_size: 100 })).items;
         const paymentsTable = payments.map(payment => {
             return {
-                payment_id: payment.payment_id,
-                created_at: new Date(payment.created_at).toLocaleString(),
-                subscription_id: payment.subscription_id,
-                total_amount: payment.total_amount,
+                'payment id': payment.payment_id,
+                'created at': new Date(payment.created_at).toLocaleString(),
+                'subscription id': payment.subscription_id,
+                'total amount': payment.total_amount,
                 currency: payment.currency,
                 status: payment.status,
-                more_info: link('CTRL + Click to open', `https://app.dodopayments.com/transactions/payments/${payment.payment_id}`)
+                'more info': link('CTRL + Click to open', `https://app.dodopayments.com/transactions/payments/${payment.payment_id}`)
             };
         });
         console.table(paymentsTable);
@@ -222,22 +227,22 @@ if (category === 'products') {
             const payment_info = await DodoClient.payments.retrieve(payment_id);
             console.log(payment_info);
             const payment_table = {
-                payment_id: payment_info.payment_id,
+                'payment id': payment_info.payment_id,
                 status: payment_info.status,
-                total_amount: `${CurrencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${payment_info.total_amount * 0.01}`,
-                payment_method: payment_info.payment_method,
+                'total amount': `${CurrencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${payment_info.total_amount * 0.01}`,
+                'payment method': payment_info.payment_method,
                 createdAt: new Date(payment_info.created_at).toLocaleString(),
                 customer: payment_info.customer.customer_id,
-                customer_email: payment_info.customer.email,
+                'customer email': payment_info.customer.email,
                 ...payment_info.subscription_id && {
-                    subscription_id: payment_info.subscription_id
+                    'subscription id': payment_info.subscription_id
                 },
-                billing_address_street: `${payment_info.billing.street}`,
-                billing_address_state: `${payment_info.billing.state}`,
-                billing_address_city: `${payment_info.billing.city}`,
-                billing_address_country: `${payment_info.billing.country}`,
-                billing_address_zipcode: `${payment_info.billing.zipcode}`,
-                more_info: link('Ctrl + Click to open', `https://app.dodopayments.com/transactions/payments/${payment_info.payment_id}`)
+                'billing address street': `${payment_info.billing.street}`,
+                'billing address state': `${payment_info.billing.state}`,
+                'billing address city': `${payment_info.billing.city}`,
+                'billing address country': `${payment_info.billing.country}`,
+                'billing address zipcode': `${payment_info.billing.zipcode}`,
+                'more info': link('Ctrl + Click to open', `https://app.dodopayments.com/transactions/payments/${payment_info.payment_id}`)
             }
             console.table(payment_table);
         } catch (e) {
@@ -317,6 +322,104 @@ if (category === 'products') {
     } else {
         usage.products!.forEach(e => {
             console.log(`dodo customers ${e.command} - ${e.description}`)
+        });
+    }
+} else if (category === 'discounts') {
+    if (subCommand === 'list') {
+        const page = await input({
+            message: 'Enter page:',
+            default: "1",
+            validate: (e => e.trim() !== '')
+        });
+        const discounts = await DodoClient.discounts.list({ page_number: parseInt(page) - 1, page_size: 100 });
+        const discountsTable = discounts.items.map(e => (
+            {
+                name: e.name,
+                code: e.code,
+                'discount id': e.discount_id,
+                'created at': new Date(e.created_at).toLocaleString(),
+                ...e.type === 'percentage' ? {
+                    amount: `${e.amount * 0.01}%`
+                } : {
+                    // I just added this in case of a breaking change in the future
+                    amount: e.amount
+                },
+                'more info': link('Ctrl + Click for more info', `https://app.dodopayments.com/sales/discounts/edit?id=${e.discount_id}`)
+            }
+        ));
+
+        console.table(discountsTable);
+    } else if (subCommand === 'create') {
+        const name = await input({
+            message: "Enter discount name:",
+            validate: (e => e.trim() !== '')
+        });
+
+        const percentage = await input({
+            message: "Enter discount percentage:",
+            // Make sure user enters valid value
+            validate: (e => {
+                const parsed = parseFloat(e);
+                if (!Number.isNaN(parsed) && parsed > 0 && parsed <= 100) {
+                    return true;
+                } else {
+                    return false;
+                }
+            })
+        });
+
+        const code = await input({
+            message: "Enter discount code (Optional):"
+        });
+
+        const cycles = await input({
+            message: "Enter discount cycles (Optional):"
+        });
+
+        const newDiscount = await DodoClient.discounts.create({
+            name,
+            code: code.trim() !== '' ? code : null,
+            amount: parseFloat(percentage) * 100,
+            type: 'percentage',
+            // If the subscription cycles is provided
+            ...cycles.trim() !== '' && {
+                subscription_cycles: parseInt(cycles)
+            }
+        });
+
+        console.log('Discount created successfully!');
+        console.table({
+            name: newDiscount.name,
+            code: newDiscount.code,
+            'discount id': newDiscount.discount_id,
+            ...cycles.trim() !== '' && {
+                'subscription cycles': newDiscount.subscription_cycles
+            }
+        });
+    } else if (subCommand === 'delete') {
+        await DodoClient.discounts.delete(await input({
+            message: "Enter discount ID to be deleted:",
+            validate: (e => e.startsWith('dsc_'))
+        }));
+
+        console.log("Successfully deleted discount!");
+    } else {
+        usage.discounts!.forEach(e => {
+            console.log(`dodo discounts ${e.command} - ${e.description}`)
+        });
+    }
+} else if (category === 'licences') {
+    if (subCommand === 'list') {
+        const page = await input({
+            message: 'Enter page:',
+            default: "1",
+            validate: (e => e.trim() !== '')
+        });
+        const licences = await DodoClient.licenseKeys.list({ page_number: parseInt(page) - 1, page_size: 100 });
+        console.log(licences.items);
+    } else {
+        usage.licences!.forEach(e => {
+            console.log(`dodo licences ${e.command} - ${e.description}`)
         });
     }
 } else {
