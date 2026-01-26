@@ -5,9 +5,10 @@ import { input, select } from '@inquirer/prompts';
 import open from 'open';
 import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
 
+// The below is used to check if the error is a Dodo Payments error or not in the API Request
 type DodoPaymentsAPIError = {
     error: {
-        code: string;
+        code: 'NOT_FOUND';
         message: string;
     }
 }
@@ -21,9 +22,11 @@ function isDodoPaymentsAPIError(e: unknown): e is DodoPaymentsAPIError {
     );
 }
 
+// Function to add hyperlinked text
 const link = (text: string, url: string) =>
     `\u001b]8;;${url}\u001b\\${text}\u001b]8;;\u001b\\`;
 
+// For help commands
 const usage: {
     [key: string]: {
         command: string,
@@ -37,6 +40,7 @@ const usage: {
     ],
     payments: [
         { command: 'list', description: 'List your payments' },
+        { command: 'info', description: 'Information about a payment' },
     ],
     customers: [
         { command: 'list', description: 'List your customers' },
@@ -212,6 +216,37 @@ if (category === 'products') {
             };
         });
         console.table(paymentsTable);
+    } else if (subCommand === 'info') {
+        try {
+            const payment_id = 'pay_0NWiGvZPWxeWeNWISbfat';
+            const payment_info = await DodoClient.payments.retrieve(payment_id);
+            console.log(payment_info);
+            const payment_table = {
+                payment_id: payment_info.payment_id,
+                status: payment_info.status,
+                total_amount: `${CurrencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${payment_info.total_amount * 0.01}`,
+                payment_method: payment_info.payment_method,
+                createdAt: new Date(payment_info.created_at).toLocaleString(),
+                customer: payment_info.customer.customer_id,
+                customer_email: payment_info.customer.email,
+                ...payment_info.subscription_id && {
+                    subscription_id: payment_info.subscription_id
+                },
+                billing_address_street: `${payment_info.billing.street}`,
+                billing_address_state: `${payment_info.billing.state}`,
+                billing_address_city: `${payment_info.billing.city}`,
+                billing_address_country: `${payment_info.billing.country}`,
+                billing_address_zipcode: `${payment_info.billing.zipcode}`,
+                more_info: link('Ctrl + Click to open', `https://app.dodopayments.com/transactions/payments/${payment_info.payment_id}`)
+            }
+            console.table(payment_table);
+        } catch (e) {
+            if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
+                console.log("Incorrect payment ID!")
+            } else {
+                console.error(e);
+            }
+        }
     } else {
         usage.payments!.forEach(e => {
             console.log(`dodo payments ${e.command} - ${e.description}`)
