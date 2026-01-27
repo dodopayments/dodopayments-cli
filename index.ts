@@ -51,6 +51,9 @@ const usage: {
         { command: 'list', description: 'List your discounts' },
         { command: 'create', description: 'Create a discount' },
         { command: 'delete', description: 'Remove a discount' },
+    ],
+    wh: [
+        { command: '', description: 'Send a webhook event' },
     ]
 }
 
@@ -102,6 +105,10 @@ if (category === 'login') {
     existingConfig[MODE] = API_KEY;
     console.log("Setup complete successfully!");
     process.exit(0);
+}
+
+if (category === 'wh') {
+    await import('./dodo-webhooks/index.ts');
 }
 
 
@@ -427,8 +434,8 @@ if (category === 'products') {
     // todo: Add more comments to make it clear what's being done
     Object.keys(usage).forEach(e => {
         console.log(`Category: ${e}`);
-        (usage as any)[e].forEach((e: { command: string, description: string }) => {
-            console.log(`dodo products ${e.command} - ${e.description}`)
+        (usage as any)[e].forEach((y: { command: string, description: string }) => {
+            console.log(`dodo ${e} ${y.command} - ${y.description}`)
         });
         // Blank space as a separator
         console.log("");
