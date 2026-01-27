@@ -4,6 +4,7 @@ import DodoPayments from 'dodopayments';
 import { input, select } from '@inquirer/prompts';
 import open from 'open';
 import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
+import fs from 'node:fs';
 
 // The below is used to check if the error is a Dodo Payments error or not in the API Request
 type DodoPaymentsAPIError = {
@@ -58,7 +59,7 @@ const usage: {
 }
 
 
-const args = Bun.argv;
+const args = process.argv;
 const category = args[2];
 const subCommand = args[3];
 const homedir = os.homedir();
@@ -93,13 +94,13 @@ if (category === 'login') {
     console.log("Storing / Updating existing configuration...")
     let existingConfig;
     try {
-        existingConfig = Object.create(await Bun.file(path.join(homedir, '.dodopayments', 'api-key')).json());
+        existingConfig = Object.create(JSON.parse(fs.readFileSync(path.join(homedir, '.dodopayments', 'api-key'), 'utf-8')));
     } catch {
         existingConfig = {};
     }
 
     existingConfig[MODE] = API_KEY;
-    await Bun.file(path.join(homedir, '.dodopayments', 'api-key')).write(JSON.stringify(existingConfig));
+    fs.writeFileSync(path.join(homedir, '.dodopayments', 'api-key'), JSON.stringify(existingConfig));
 
     // Mode will always be either test_mode or live_mode
     existingConfig[MODE] = API_KEY;
@@ -107,20 +108,15 @@ if (category === 'login') {
     process.exit(0);
 }
 
+// Webhook is managed completely by another file
 if (category === 'wh') {
     await import('./dodo-webhooks/index.ts');
 }
 
-
-
-
-
 // Normal functions which require the API key to be present start from here
 // Authentication part
-const ExistingAPIKeyConfigFile = Bun.file(path.join(homedir, '.dodopayments', 'api-key'));
-
 // Read the API key config
-if (!(await ExistingAPIKeyConfigFile.exists())) {
+if (!fs.existsSync(path.join(homedir, '.dodopayments', 'api-key'))) {
     console.log('Please login using `dodo login` command first!');
     process.exit(0);
 }
@@ -128,10 +124,10 @@ if (!(await ExistingAPIKeyConfigFile.exists())) {
 // Parse the API key config
 let existingAPIKeyConfigParsed;
 try {
-    existingAPIKeyConfigParsed = await ExistingAPIKeyConfigFile.json();
+    existingAPIKeyConfigParsed = JSON.parse(fs.readFileSync(path.join(homedir, '.dodopayments', 'api-key'), 'utf-8'));
 } catch {
     // Delete API config if something fails with parsing
-    await Bun.file(path.join(homedir, '.dodopayments', 'api-key')).delete();
+    fs.rmSync(path.join(homedir, '.dodopayments', 'api-key'), { force: true });
     console.log("Failed to decode API Key configuration. Your config has been reset. Please log in again using `dodo login`");
     process.exit(0);
 }
