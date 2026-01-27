@@ -1,6 +1,6 @@
 {
   "name": "dodo-cli",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "A CLI for Dodo Payments",
   "keywords": [
