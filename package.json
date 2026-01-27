@@ -23,7 +23,8 @@
     "dodo": "dist/index.js"
   },
   "scripts": {
-    "build": "bun build ./index.ts --minify --target node --outfile ./dist/index.js"
+    "build": "bun build ./index.ts --minify --target node --outfile ./dist/index.js",
+    "build-native": "bun run build-binaries.ts"
   },
   "dependencies": {
     "dodopayments": "^2.17.1",
