@@ -185,9 +185,9 @@ if (category === 'products') {
                 description: info.description,
                 created_at: info.created_at,
                 ...info.is_recurring ? {
-                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${info.price.price * 0.01}/${info.price.payment_frequency_interval}`,
+                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(info.price.price * 0.01).toFixed(2)}/${info.price.payment_frequency_interval}`,
                 } : {
-                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${info.price.price * 0.01} (One Time)`,
+                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(info.price.price * 0.01).toFixed(2)} (One Time)`,
                 },
                 tax_category: info.tax_category,
                 edit_url: link('CTRL + Click to open', `https://app.dodopayments.com/products/edit?id=${info.product_id}`)
@@ -217,8 +217,7 @@ if (category === 'products') {
                 'payment id': payment.payment_id,
                 'created at': new Date(payment.created_at).toLocaleString(),
                 'subscription id': payment.subscription_id,
-                'total amount': payment.total_amount,
-                currency: payment.currency,
+                'total amount': `${CurrencyToSymbolMap[payment.currency] || (payment.currency + ' ')}${(payment.total_amount * 0.01).toFixed(2)}`,
                 status: payment.status,
                 'more info': link('CTRL + Click to open', `https://app.dodopayments.com/transactions/payments/${payment.payment_id}`)
             };
@@ -232,7 +231,7 @@ if (category === 'products') {
             const payment_table = {
                 'payment id': payment_info.payment_id,
                 status: payment_info.status,
-                'total amount': `${CurrencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${payment_info.total_amount * 0.01}`,
+                'total amount': `${CurrencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${(payment_info.total_amount * 0.01).toFixed(2)}`,
                 'payment method': payment_info.payment_method,
                 createdAt: new Date(payment_info.created_at).toLocaleString(),
                 customer: payment_info.customer.customer_id,
@@ -342,7 +341,7 @@ if (category === 'products') {
                 'discount id': e.discount_id,
                 'created at': new Date(e.created_at).toLocaleString(),
                 ...e.type === 'percentage' ? {
-                    amount: `${e.amount * 0.01}%`
+                    amount: `${(e.amount * 0.01).toFixed(2)}%`
                 } : {
                     // I just added this in case of a breaking change in the future
                     amount: e.amount
