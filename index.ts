@@ -387,7 +387,7 @@ if (category === 'products') {
             }
         }
     } else {
-        usage.products!.forEach(e => {
+        usage.customers!.forEach(e => {
             console.log(`dodo customers ${e.command} - ${e.description}`)
         });
     }
