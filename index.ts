@@ -128,7 +128,7 @@ if (category === 'login') {
     }
 
     existingConfig[MODE] = API_KEY;
-    // Make the ~/.dodopayments directory if it's presents
+    // Make the ~/.dodopayments directory if it's not present
     if (!fs.existsSync(path.join(homedir, '.dodopayments'))) {
         fs.mkdirSync(path.join(homedir, '.dodopayments'));
     }
