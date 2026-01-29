@@ -37,10 +37,6 @@ function isDodoPaymentsAPIError(e: unknown): e is DodoPaymentsAPIError {
     );
 }
 
-// Function to add hyperlinked text
-const link = (text: string, url: string) =>
-    `\u001b]8;;${url}\u001b\\${text}\u001b]8;;\u001b\\`;
-
 // For help commands
 const usage: {
     [key: string]: {
@@ -228,10 +224,10 @@ if (category === 'products') {
             } : {
                 price: `${CurrencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} (One Time)`,
             },
-            edit_url: link('CTRL + Click to open', `https://app.dodopayments.com/products/edit?id=${e.product_id}`),
         }));
 
         console.table(table);
+        console.log("To edit a product, go to https://app.dodopayments.com/products/edit?id={product_id}")
     } else if (subCommand === 'create') {
         open('https://app.dodopayments.com/products/create');
     } else if (subCommand === 'info') {
@@ -255,8 +251,8 @@ if (category === 'products') {
                     price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${((info.price.price || info.price.fixed_price) * 0.01).toFixed(2)} (One Time)`,
                 },
                 tax_category: info.tax_category,
-                edit_url: link('CTRL + Click to open', `https://app.dodopayments.com/products/edit?id=${info.product_id}`)
             });
+            console.log(`To edit the product, go to https://app.dodopayments.com/products/edit?id=${info.product_id}`)
         } catch (e) {
             if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
                 console.log("Incorrect product ID!");
@@ -283,11 +279,11 @@ if (category === 'products') {
                 'created at': new Date(payment.created_at).toLocaleString(),
                 'subscription id': payment.subscription_id,
                 'total amount': `${CurrencyToSymbolMap[payment.currency] || (payment.currency + ' ')}${(payment.total_amount * 0.01).toFixed(2)}`,
-                status: payment.status,
-                'more info': link('CTRL + Click to open', `https://app.dodopayments.com/transactions/payments/${payment.payment_id}`)
+                status: payment.status
             };
         });
         console.table(paymentsTable);
+        console.log("To view a payment, go to https://app.dodopayments.com/transactions/payments/{payment_id}")
     } else if (subCommand === 'info') {
         try {
             const payment_id = 'pay_0NWiGvZPWxeWeNWISbfat';
@@ -309,9 +305,9 @@ if (category === 'products') {
                 'billing address city': `${payment_info.billing.city}`,
                 'billing address country': `${payment_info.billing.country}`,
                 'billing address zipcode': `${payment_info.billing.zipcode}`,
-                'more info': link('Ctrl + Click to open', `https://app.dodopayments.com/transactions/payments/${payment_info.payment_id}`)
             }
             console.table(payment_table);
+            console.log(`To view the payment, go to https://app.dodopayments.com/transactions/payments/${payment_info.payment_id}`)
         } catch (e) {
             if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
                 console.log("Incorrect payment ID!")
@@ -411,11 +407,11 @@ if (category === 'products') {
                     // I just added this in case of a breaking change in the future
                     amount: e.amount
                 },
-                'more info': link('Ctrl + Click for more info', `https://app.dodopayments.com/sales/discounts/edit?id=${e.discount_id}`)
             }
         ));
 
         console.table(discountsTable);
+        console.log(`To view a discount, go to https://app.dodopayments.com/sales/discounts/edit?id={discount_id}`)
     } else if (subCommand === 'create') {
         const name = await input({
             message: "Enter discount name:",
