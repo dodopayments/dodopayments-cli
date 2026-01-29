@@ -8,26 +8,26 @@ Note: If you have Node or Bun installed, it's highly recommended to use that ins
 
 Use NPM:
 ```bash
-npm install -g dodo-cli
+npm install -g dodopayments-cli
 ```
 
 Or
 
 Use Bun:
 ```bash
-bun install -g dodo-cli
+bun install -g dodopayments-cli
 ```
 
 Or
 
 Install manually:
-- Download the latest release from [GitHub](https://github.com/dodopayments/dodo-cli/releases) that matches your system.
+- Download the latest release from [GitHub](https://github.com/dodopayments/dodopayments-cli/releases) that matches your system.
 
 - Extract the downloaded file to a directory of your choice and open a terminal in that directory.
 
 - Rename the binary file to `dodo`:  
-Linux: `mv ./dodo-cli-* ./dodo`  
-Windows: `ren ./dodo-cli-* ./dodo`
+Linux: `mv ./dodopayments-cli-* ./dodo`  
+Windows: `ren ./dodopayments-cli-* ./dodo`
 
 - Move the binary file to a directory in your system's PATH environment variable.
 On Linux, you can use `sudo mv ./dodo /usr/local/bin/`.

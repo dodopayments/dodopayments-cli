@@ -1,5 +1,5 @@
 {
-  "name": "dodo-cli",
+  "name": "dodopayments-cli",
   "version": "0.1.0",
   "private": true,
   "description": "A CLI for Dodo Payments",
@@ -7,13 +7,13 @@
     "dodopayments",
     "cli"
   ],
-  "homepage": "https://github.com/dodopayments/dodo-cli#readme",
+  "homepage": "https://github.com/dodopayments/dodopayments-cli#readme",
   "bugs": {
-    "url": "https://github.com/dodopayments/dodo-cli/issues"
+    "url": "https://github.com/dodopayments/dodopayments-cli/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dodopayments/dodo-cli.git"
+    "url": "git+https://github.com/dodopayments/dodopayments-cli.git"
   },
   "license": "ISC",
   "author": "Dodo Payments",
