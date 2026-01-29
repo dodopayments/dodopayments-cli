@@ -8,20 +8,11 @@
   <a href="https://www.npmjs.com/package/dodopayments-cli">
     <img src="https://img.shields.io/npm/v/dodopayments-cli?color=cb3837&label=npm&logo=npm" alt="npm version" />
   </a>
-  <a href="https://www.npmjs.com/package/dodopayments-cli">
-    <img src="https://img.shields.io/npm/dm/dodopayments-cli?color=blue&logo=npm" alt="npm downloads" />
-  </a>
-  <a href="https://github.com/dodopayments/dodopayments-cli/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/dodopayments/dodopayments-cli/release.yml?branch=main&logo=github" alt="Build Status" />
-  </a>
   <a href="https://discord.gg/bYqAp4ayYh">
     <img src="https://img.shields.io/discord/1305511580854779984?label=Discord&logo=discord&color=5865F2" alt="Discord" />
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
-  </a>
-  <a href="https://github.com/dodopayments/dodopayments-cli/stargazers">
-    <img src="https://img.shields.io/github/stars/dodopayments/dodopayments-cli?style=social" alt="GitHub Stars" />
   </a>
 </p>
 
