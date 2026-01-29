@@ -7,6 +7,19 @@ import open from 'open';
 import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
 import fs from 'node:fs';
 
+const DodoCliLogo = `
+ /$$$$$$$                  /$$                  /$$$$$$  /$$       /$$$$$$
+| $$__  $$                | $$                 /$$__  $$| $$      |_  $$_/
+| $$  \\ $$  /$$$$$$   /$$$$$$$  /$$$$$$       | $$  \\__/| $$        | $$  
+| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$      | $$      | $$        | $$  
+| $$  | $$| $$  \\ $$| $$  | $$| $$  \\ $$      | $$      | $$        | $$  
+| $$  | $$| $$  | $$| $$  | $$| $$  | $$      | $$    $$| $$        | $$  
+| $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$/      |  $$$$$$/| $$$$$$$$ /$$$$$$
+|_______/  \\______/  \\_______/ \\______/        \\______/ |________/|______/
+
+The CLI to manage Dodo Payments!
+`;
+
 // The below is used to check if the error is a Dodo Payments error or not in the API Request
 type DodoPaymentsAPIError = {
     error: {
@@ -65,6 +78,20 @@ const category = args[2];
 const subCommand = args[3];
 const homedir = os.homedir();
 
+const RenderHelp = () => {
+    console.log(DodoCliLogo);
+    // List all available methods
+    // todo: Add more comments to make it clear what's being done
+    Object.keys(usage).forEach(e => {
+        console.log(`Category: ${e}`);
+        (usage as any)[e].forEach((y: { command: string, description: string }) => {
+            console.log(`dodo ${e} ${y.command} - ${y.description}`)
+        });
+        // Blank space as a separator
+        console.log("");
+    });
+}
+
 // Added this to the top so that it can bypass all further auth that happens for the login route
 if (category === 'login') {
     open('https://app.dodopayments.com/developer/api-keys');
@@ -122,8 +149,25 @@ if (category === 'wh') {
 // Authentication part
 // Read the API key config
 if (!fs.existsSync(path.join(homedir, '.dodopayments', 'api-key'))) {
-    console.log('Please login using `dodo login` command first!');
-    process.exit(0);
+    if (category && subCommand) {
+        console.log('Please login using `dodo login` command first!');
+        process.exit(0);
+    } else if (category) {
+        if (category in usage) {
+            console.log(`Category: ${category}`);
+            (usage as any)[category]!.forEach((e: { command: string, description: string }) => {
+                console.log(`dodo ${category} ${e.command} - ${e.description}`)
+            });
+            console.log('\nPlease login using `dodo login` command first!');
+        } else {
+            RenderHelp();
+        }
+        process.exit(0);
+    } else {
+        RenderHelp();
+        console.log('Please login using `dodo login` command first!');
+        process.exit(0);
+    }
 }
 
 // Parse the API key config
@@ -446,14 +490,5 @@ if (category === 'products') {
         });
     }
 } else {
-    // List all available methods
-    // todo: Add more comments to make it clear what's being done
-    Object.keys(usage).forEach(e => {
-        console.log(`Category: ${e}`);
-        (usage as any)[e].forEach((y: { command: string, description: string }) => {
-            console.log(`dodo ${e} ${y.command} - ${y.description}`)
-        });
-        // Blank space as a separator
-        console.log("");
-    });
+    RenderHelp();
 }
