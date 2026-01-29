@@ -101,6 +101,10 @@ if (category === 'login') {
     }
 
     existingConfig[MODE] = API_KEY;
+    // Make the ~/.dodopayments directory if it's presents
+    if (!fs.existsSync(path.join(homedir, '.dodopayments'))) {
+        fs.mkdirSync(path.join(homedir, '.dodopayments'));
+    }
     fs.writeFileSync(path.join(homedir, '.dodopayments', 'api-key'), JSON.stringify(existingConfig));
 
     // Mode will always be either test_mode or live_mode
@@ -169,7 +173,21 @@ if (category === 'products') {
             default: "1",
             validate: (e => e.trim() !== '')
         });
-        console.table((await DodoClient.products.list({ page_number: parseInt(page) - 1, page_size: 100 })).items, ['name', 'product_id', 'updated_at', 'price']);
+
+        const fetchedData = await DodoClient.products.list({ page_number: parseInt(page) - 1, page_size: 100 });
+        const table = fetchedData.items.map(e => ({
+            name: e.name,
+            product_id: e.product_id,
+            created_at: new Date(e.created_at).toLocaleString(),
+            ...e.is_recurring ? {
+                price: `${CurrencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} Every ${e.price_detail?.payment_frequency_count} ${e.price_detail?.payment_frequency_interval}`,
+            } : {
+                price: `${CurrencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} (One Time)`,
+            },
+            edit_url: link('CTRL + Click to open', `https://app.dodopayments.com/products/edit?id=${e.product_id}`),
+        }));
+
+        console.table(table);
     } else if (subCommand === 'create') {
         open('https://app.dodopayments.com/products/create');
     } else if (subCommand === 'info') {
@@ -183,12 +201,14 @@ if (category === 'products') {
             console.table({
                 product_id: info.product_id,
                 name: info.name,
-                description: info.description,
-                created_at: info.created_at,
+                ...info.description?.trim() !== '' && { description: info.description },
+                created_at: new Date(info.created_at).toLocaleString(),
+                updated_at: new Date(info.updated_at).toLocaleString(),
                 ...info.is_recurring ? {
-                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(info.price.price * 0.01).toFixed(2)}/${info.price.payment_frequency_interval}`,
+                    // .fixed_price for usage based billing
+                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${((info.price.price || info.price.fixed_price) * 0.01).toFixed(2)} Every ${info.price.payment_frequency_count} ${info.price.payment_frequency_interval}`,
                 } : {
-                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(info.price.price * 0.01).toFixed(2)} (One Time)`,
+                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${((info.price.price || info.price.fixed_price) * 0.01).toFixed(2)} (One Time)`,
                 },
                 tax_category: info.tax_category,
                 edit_url: link('CTRL + Click to open', `https://app.dodopayments.com/products/edit?id=${info.product_id}`)
