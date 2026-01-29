@@ -4,4 +4,4 @@ bun.lock
 bun.lockb
 
 # Ignore binaries just in case
-dist/dodopayments-cli-*
+dist/dodo-cli-*

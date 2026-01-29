@@ -21,7 +21,7 @@
   "main": "index.ts",
   "bin": {
     "dodo": "dist/index.js",
-    "dodopayments-cli": "dist/index.js"
+    "dodopayments": "dist/index.js"
   },
   "scripts": {
     "build": "bun build ./index.ts --minify --target node --outfile ./dist/index.js",
