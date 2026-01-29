@@ -117,7 +117,7 @@ if (category === 'wh') {
 // Authentication part
 // Read the API key config
 if (!fs.existsSync(path.join(homedir, '.dodopayments', 'api-key'))) {
-    console.log('Please login using `dodo login` command first!');
+    console.log('Please login using `dodopayments-cli login` command first!');
     process.exit(0);
 }
 
@@ -128,7 +128,7 @@ try {
 } catch {
     // Delete API config if something fails with parsing
     fs.rmSync(path.join(homedir, '.dodopayments', 'api-key'), { force: true });
-    console.log("Failed to decode API Key configuration. Your config has been reset. Please log in again using `dodo login`");
+    console.log("Failed to decode API Key configuration. Your config has been reset. Please log in again using `dodopayments-cli login`");
     process.exit(0);
 }
 
@@ -201,7 +201,7 @@ if (category === 'products') {
         }
     } else {
         usage.products!.forEach(e => {
-            console.log(`dodo products ${e.command} - ${e.description}`)
+            console.log(`dodopayments-cli products ${e.command} - ${e.description}`)
         });
     }
 } else if (category === 'payments') {
@@ -256,7 +256,7 @@ if (category === 'products') {
         }
     } else {
         usage.payments!.forEach(e => {
-            console.log(`dodo payments ${e.command} - ${e.description}`)
+            console.log(`dodopayments-cli payments ${e.command} - ${e.description}`)
         });
     }
 } else if (category === 'customers') {
@@ -323,7 +323,7 @@ if (category === 'products') {
         }
     } else {
         usage.products!.forEach(e => {
-            console.log(`dodo customers ${e.command} - ${e.description}`)
+            console.log(`dodopayments-cli customers ${e.command} - ${e.description}`)
         });
     }
 } else if (category === 'discounts') {
@@ -407,7 +407,7 @@ if (category === 'products') {
         console.log("Successfully deleted discount!");
     } else {
         usage.discounts!.forEach(e => {
-            console.log(`dodo discounts ${e.command} - ${e.description}`)
+            console.log(`dodopayments-cli discounts ${e.command} - ${e.description}`)
         });
     }
 } else if (category === 'licences') {
@@ -421,7 +421,7 @@ if (category === 'products') {
         console.log(licences.items);
     } else {
         usage.licences!.forEach(e => {
-            console.log(`dodo licences ${e.command} - ${e.description}`)
+            console.log(`dodopayments-cli licences ${e.command} - ${e.description}`)
         });
     }
 } else {
@@ -430,7 +430,7 @@ if (category === 'products') {
     Object.keys(usage).forEach(e => {
         console.log(`Category: ${e}`);
         (usage as any)[e].forEach((y: { command: string, description: string }) => {
-            console.log(`dodo ${e} ${y.command} - ${y.description}`)
+            console.log(`dodopayments-cli ${e} ${y.command} - ${y.description}`)
         });
         // Blank space as a separator
         console.log("");

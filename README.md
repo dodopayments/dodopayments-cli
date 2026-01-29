@@ -8,37 +8,37 @@ Note: If you have Node or Bun installed, it's highly recommended to use that ins
 
 Use NPM:
 ```bash
-npm install -g dodo-cli
+npm install -g dodopayments-cli
 ```
 
 Or
 
 Use Bun:
 ```bash
-bun install -g dodo-cli
+bun install -g dodopayments-cli
 ```
 
 Or
 
 Install manually:
-- Download the latest release from [GitHub](https://github.com/dodopayments/dodo-cli/releases) that matches your system.
+- Download the latest release from [GitHub](https://github.com/dodopayments/dodopayments-cli/releases) that matches your system.
 
 - Extract the downloaded file to a directory of your choice and open a terminal in that directory.
 
-- Rename the binary file to `dodo`:  
-Linux: `mv ./dodo-cli-* ./dodo`  
-Windows: `ren ./dodo-cli-* ./dodo`
+- Rename the binary file to `dodopayments-cli`:  
+Linux: `mv ./dodopayments-cli-* ./dodopayments-cli`  
+Windows: `ren ./dodopayments-cli-* ./dodopayments-cli`
 
 - Move the binary file to a directory in your system's PATH environment variable.
-On Linux, you can use `sudo mv ./dodo /usr/local/bin/`.
-On Windows, you can use `move .\dodo C:\Windows\System32\dodo` (This may require admin mode).
+On Linux, you can use `sudo mv ./dodopayments-cli /usr/local/bin/`.
+On Windows, you can use `move .\dodopayments-cli C:\Windows\System32\dodo` (This may require admin mode).
 
 ## Authentication
 
 Before using the CLI, you must authenticate.
 
 ```bash
-dodo login
+dodopayments-cli login
 ```
 
 This command will:
@@ -52,7 +52,7 @@ This command will:
 The general syntax is:
 
 ```bash
-dodo <category> <sub-command>
+dodopayments-cli <category> <sub-command>
 ```
 
 ### Products
@@ -61,17 +61,17 @@ Manage your products catalog.
 
 - **List Products**:
   ```bash
-  dodo products list
+  dodopayments-cli products list
   ```
 - **Create Product**:
   Opens the Dodo Payments dashboard to create a new product.
   ```bash
-  dodo products create
+  dodopayments-cli products create
   ```
 - **Get Product Info**:
   View details for a specific product.
   ```bash
-  dodo products info
+  dodopayments-cli products info
   ```
 
 ### Payments
@@ -80,12 +80,12 @@ View payment transactions.
 
 - **List Payments**:
   ```bash
-  dodo payments list
+  dodopayments-cli payments list
   ```
 - **Payment Info**:
   Get information about a specific payment.
   ```bash
-  dodo payments info
+  dodopayments-cli payments info
   ```
 
 ### Customers
@@ -94,17 +94,17 @@ Manage your customer base.
 
 - **List Customers**:
   ```bash
-  dodo customers list
+  dodopayments-cli customers list
   ```
 - **Create Customer**:
   Create a new customer profile.
   ```bash
-  dodo customers create
+  dodopayments-cli customers create
   ```
 - **Update Customer**:
   Update an existing customer's details.
   ```bash
-  dodo customers update
+  dodopayments-cli customers update
   ```
 
 ### Discounts
@@ -113,17 +113,17 @@ Manage coupons and discounts.
 
 - **List Discounts**:
   ```bash
-  dodo discounts list
+  dodopayments-cli discounts list
   ```
 - **Create Discount**:
   Create a new percentage-based discount.
   ```bash
-  dodo discounts create
+  dodopayments-cli discounts create
   ```
 - **Delete Discount**:
   Remove a discount by ID.
   ```bash
-  dodo discounts delete
+  dodopayments-cli discounts delete
   ```
 
 ### Licenses
@@ -132,7 +132,7 @@ Manage software licenses.
 
 - **List Licenses**:
   ```bash
-  dodo licences list
+  dodopayments-cli licences list
   ```
 
 ### Webhook Testing
@@ -142,7 +142,7 @@ The CLI includes a robust tool for testing webhooks by simulating events.
 Note: The webhook testing tool doesn't support signing requests yet. Please disable webhook signature verification while testing. A simple way of doing this would be using `unsafe_unwrap()` instead of just `unwrap` in the webhook endpoint DURING TESTING ONLY.
 
 ```bash
-dodo wh
+dodopayments-cli wh
 ```
 
 This interactive tool guides you through:
