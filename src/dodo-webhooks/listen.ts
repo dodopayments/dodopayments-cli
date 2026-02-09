@@ -13,8 +13,8 @@ export default async function WebhookListener({
     });
 
     let targetedEndpoint: string;
-    if (process.env.TEST_SERVER_URL) {
-        targetedEndpoint = `https://${process.env.TEST_SERVER_URL}/`
+    if (process.env.DODO_WH_TEST_SERVER_URL) {
+        targetedEndpoint = `https://${process.env.DODO_WH_TEST_SERVER_URL}/`
     } else {
         targetedEndpoint = 'https://dodo-test-webhook.dodopayments.com/'
     }
@@ -37,8 +37,8 @@ export default async function WebhookListener({
 
 
     let wss_url: string;
-    if (process.env.TEST_SERVER_URL) {
-        wss_url = `wss://${process.env.TEST_SERVER_URL}/connect`
+    if (process.env.DODO_WH_TEST_SERVER_URL) {
+        wss_url = `wss://${process.env.DODO_WH_TEST_SERVER_URL}/connect`
     } else {
         wss_url = 'wss://dodo-test-webhook.dodopayments.com/connect'
     }
