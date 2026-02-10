@@ -10,7 +10,7 @@ const targets: any = [
 for (const target of targets) {
     await Bun.build({
         entrypoints: ["./index.ts"],
-        outdir: `./dist/dodo-cli-${target.replace('bun-', '')}`,
+        outdir: `./dist/dodopayments-cli-${target.replace('bun-', '')}`,
         target: "bun",
         compile: {
             // `as any` cause Bun doesn't provide type of exact platforms

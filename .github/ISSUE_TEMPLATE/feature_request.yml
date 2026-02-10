@@ -1,0 +1,88 @@
+name: Feature Request
+description: Suggest a new feature or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting a feature! Please fill out the form below to help us understand your request.
+
+  - type: checkboxes
+    id: existing-issue
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if a feature request already exists.
+      options:
+        - label: I have searched the existing issues
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature is this?
+      options:
+        - New CLI command
+        - Enhancement to existing command
+        - New webhook event support
+        - Output/formatting improvement
+        - Documentation
+        - Performance improvement
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem? Please describe.
+      placeholder: A clear description of what the problem is. Ex. I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution you'd like
+      placeholder: A clear description of what you want to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or features you've considered.
+
+  - type: dropdown
+    id: command
+    attributes:
+      label: Related Command (if applicable)
+      description: Is this feature related to a specific command?
+      options:
+        - Not command-specific
+        - dodo login
+        - dodo products
+        - dodo payments
+        - dodo customers
+        - dodo discounts
+        - dodo licences
+        - dodo wh (webhooks)
+        - New command
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or examples about the feature request here.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      description: Would you be willing to contribute this feature?
+      options:
+        - label: I would be willing to submit a PR for this feature

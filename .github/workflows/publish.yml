@@ -1,0 +1,63 @@
+name: Publish to npm on tag
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 'latest'
+
+      - name: Update package.json version from release tag
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          echo "TAG_NAME=${TAG_NAME}"
+          TAG_STRIPPED="${TAG_NAME#v}"
+          echo "Updating package.json version to: ${TAG_STRIPPED}"
+          
+          # Update package.json version using node
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+            pkg.version = '${TAG_STRIPPED}';
+            fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+            console.log('Updated package.json version to:', pkg.version);
+          "
+          
+          # Verify the update
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          echo "package.json version after update: ${PKG_VERSION}"
+          if [ "${TAG_STRIPPED}" != "${PKG_VERSION}" ]; then
+            echo "::error::Failed to update package.json version"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
