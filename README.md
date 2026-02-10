@@ -135,24 +135,63 @@ Manage software licenses.
   dodo licences list
   ```
 
-### Webhook Testing
+### Addons
 
-The CLI includes a robust tool for testing webhooks by simulating events.
+Manage your addons.
 
-Note: The webhook testing tool doesn't support signing requests yet. Please disable webhook signature verification while testing. A simple way of doing this would be using `unsafe_unwrap()` instead of just `unwrap` in the webhook endpoint DURING TESTING ONLY.
+- **List Addons**:
+  ```bash
+  dodo addons list
+  ```
+- **Create Addon**:
+  Opens the Dodo Payments dashboard to create a new addon.
+  ```bash
+  dodo addons create
+  ```
+- **Get Addon Info**:
+  View details for a specific addon.
+  ```bash
+  dodo addons info
+  ```
 
-```bash
-dodo wh
-```
+### Refunds
 
-This interactive tool guides you through:
-1. Setting a destination **endpoint URL**.
-2. Configuring **Business ID**, **Product ID**, and **Metadata** (Interactive prompts).
-3. Selecting a specific **Event** to trigger.
+View refund transactions.
 
-**Supported Webhook Events:**
-- **Subscription**: `active`, `updated`, `on_hold`, `renewed`, `plan_changed`, `cancelled`, `failed`, `expired`
-- **Payment**: `success`, `failed`, `processing`, `cancelled`
-- **Refund**: `success`, `failed`
-- **Dispute**: `opened`, `expired`, `accepted`, `cancelled`, `challenged`, `won`, `lost`
-- **Licence**: `created`
+- **List Refunds**:
+  ```bash
+  dodo refund list
+  ```
+- **Refund Info**:
+  Get information about a specific refund.
+  ```bash
+  dodo refund info
+  ```
+
+### Webhooks
+
+Test and manage webhooks.
+
+- **Listen to Webhooks**:
+  Listen to webhook events directly from Dodo Payments. This forwards events to your local server.
+  ```bash
+  dodo wh listen
+  ```
+
+- **Trigger Webhooks**:
+  Simulate webhook events for testing purposes.
+  ```bash
+  dodo wh trigger
+  ```
+
+  This interactive tool guides you through:
+  1. Setting a destination **endpoint URL**.
+  2. Configuring **Business ID**, **Product ID**, and **Metadata** (Interactive prompts).
+  3. Selecting a specific **Event** to trigger.
+
+  **Supported Webhook Events:**
+  - **Subscription**: `active`, `updated`, `on_hold`, `renewed`, `plan_changed`, `cancelled`, `failed`, `expired`
+  - **Payment**: `success`, `failed`, `processing`, `cancelled`
+  - **Refund**: `success`, `failed`
+  - **Dispute**: `opened`, `expired`, `accepted`, `cancelled`, `challenged`, `won`, `lost`
+  - **Licence**: `created`
