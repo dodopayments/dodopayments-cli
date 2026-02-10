@@ -129,19 +129,40 @@ Manage software licenses.
 |---------|-------------|
 | `dodo licences list` | List all licenses |
 
-## Webhook Testing
+### Addons
 
-The CLI includes a robust tool for testing webhooks by simulating events.
+Manage your add-ons.
 
-```bash
-dodo wh
-```
+| Command | Description |
+|---------|-------------|
+| `dodo addons list` | List all addons |
+| `dodo addons create` | Open dashboard to create an addon |
+| `dodo addons info` | View details for a specific addon |
 
-> **Note:** The webhook testing tool doesn't support signing requests yet. Please disable webhook signature verification while testing. A simple way to do this is using `unsafe_unwrap()` instead of `unwrap()` in the webhook endpoint **during testing only**.
+### Refunds
+
+Manage your refunds.
+
+| Command | Description |
+|---------|-------------|
+| `dodo refund list` | List all refunds |
+| `dodo refund info` | View details for a specific refund |
+
+### Webhooks
+
+Manage and test webhooks directly from the CLI.
+
+| Command | Description |
+|---------|-------------|
+| `dodo wh listen` | Listen for webhooks from Dodo Payments in real time and forward them to your local dev server |
+| `dodo wh trigger` | Trigger a test webhook event interactively |
+
+> **Note:** The webhook triggering doesn't support signing requests yet. Please disable webhook signature verification while triggering. A simple way to do this is using `unsafe_unwrap()` instead of `unwrap()` in the webhook endpoint **during testing only**.
+
+> **Note:** The webhook listening tool will only work with a test mode API key. If you use a live mode API key, it won't work.
 
 This interactive tool guides you through:
 1. Setting a destination **endpoint URL**
-2. Configuring **Business ID**, **Product ID**, and **Metadata**
 3. Selecting a specific **Event** to trigger
 
 ### Supported Webhook Events
