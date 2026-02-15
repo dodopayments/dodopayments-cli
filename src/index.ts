@@ -562,6 +562,82 @@ if (category === 'products') {
             console.log(`dodo wh ${e.command} - ${e.description}`)
         });
     }
+} else if (category === 'checkout') {
+    if (subCommand === 'new') {
+        let config: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
+            product_cart: []
+        };
+
+        const product = await input({
+            message: 'Enter product: ',
+            validate: (e) => {
+                return e.startsWith('pdt_')
+            }
+        });
+
+        config.product_cart = [{ product_id: product, quantity: 1 }];
+
+        // Ask user if he wants to enable advanced options
+        if (await select({
+            message: 'Use advanced options?',
+            choices: [
+                { name: 'Yes', value: true },
+                { name: 'No', value: false }
+            ],
+            default: false
+        })) {
+            // Minimal Address
+            config.minimal_address = await select({
+                message: 'Enable minimal Address:',
+                choices: [
+                    { name: 'Yes', value: true },
+                    { name: 'No', value: false }
+                ],
+                default: false
+            });
+
+            // Return URL
+            const return_url = await input({
+                message: 'Enter return URL (Optional):'
+            });
+
+            if (return_url.trim() !== '') {
+                config.return_url = return_url;
+            }
+
+            // Discount code
+            const disc_code = await input({
+                message: 'Enter discount code (Optional):',
+            });
+
+            if (disc_code.trim() !== '') {
+                config.discount_code = disc_code;
+            }
+
+            // Metadata
+            const metadata = await input({
+                message: 'Enter metadata (Optional, JSON stringified):'
+            });
+
+            if (metadata.trim() !== '') {
+                config.metadata = JSON.parse(metadata);
+            }
+        }
+
+        try {
+            const session = await DodoClient.checkoutSessions.create(config);
+            console.log('Checkout Session URL:', session.checkout_url);
+        } catch (e) {
+            // This is the only possible error here. I have used isDodoPaymentsAPIError() to infer types support.
+            if (isDodoPaymentsAPIError(e)) {
+                console.log(`Error: ${e.error.message}`);
+            }
+        }
+    } else {
+        usage.checkout!.forEach(e => {
+            console.log(`dodo checkout ${e.command} - ${e.description}`)
+        });
+    }
 } else {
     RenderHelp();
 }
