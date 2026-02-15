@@ -605,6 +605,14 @@ if (category === 'products') {
                 config.return_url = return_url;
             }
 
+            config.force_3ds = await select({
+                message: 'Force 3DS?',
+                choices: [
+                    { name: 'Yes', value: true },
+                    { name: 'No', value: false }
+                ]
+            });
+
             // Discount code
             const disc_code = await input({
                 message: 'Enter discount code (Optional):',
