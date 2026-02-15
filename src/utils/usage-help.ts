@@ -39,5 +39,8 @@ export const usage: {
     wh: [
         { command: 'listen', description: 'Listen to webhook events directly from Dodo Payments' },
         { command: 'trigger', description: 'Trigger a webhook event' },
+    ],
+    checkout: [
+        { command: 'new', description: 'Create a checkout session' }
     ]
 }
