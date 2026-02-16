@@ -82,15 +82,14 @@ if (category === 'login') {
         await newDodoClient.products.list({ page_size: 1 });
         console.log('Successfully verified your Dodo Payments API Key!');
     } catch (err) {
-        console.log("Something went wrong while authenticating:", err);
+        console.log("Something went wrong while authenticating, please check your API key!");
         process.exit(1);
     };
-
 
     console.log("Storing / Updating existing configuration...")
     let existingConfig;
     try {
-        existingConfig = Object.create(JSON.parse(fs.readFileSync(path.join(homedir, '.dodopayments', 'api-key'), 'utf-8')));
+        existingConfig = JSON.parse(fs.readFileSync(path.join(homedir, '.dodopayments', 'api-key'), 'utf-8'));
     } catch {
         existingConfig = {};
     }
@@ -102,8 +101,6 @@ if (category === 'login') {
     }
     fs.writeFileSync(path.join(homedir, '.dodopayments', 'api-key'), JSON.stringify(existingConfig));
 
-    // Mode will always be either test_mode or live_mode
-    existingConfig[MODE] = API_KEY;
     console.log("Setup complete successfully!");
     process.exit(0);
 }
