@@ -16,7 +16,7 @@ export default async function WebhookListener({
     if (process.env.DODO_WH_TEST_SERVER_URL) {
         targetedEndpoint = `https://${process.env.DODO_WH_TEST_SERVER_URL}/`
     } else {
-        targetedEndpoint = 'https://dodo-test-webhook.dodopayments.com/'
+        targetedEndpoint = 'https://wsserver.dodopayments.tech/'
     }
 
     // This will check if the webhook is already added. If not added, it will add it.
@@ -40,7 +40,7 @@ export default async function WebhookListener({
     if (process.env.DODO_WH_TEST_SERVER_URL) {
         wss_url = `wss://${process.env.DODO_WH_TEST_SERVER_URL}/connect`
     } else {
-        wss_url = 'wss://dodo-test-webhook.dodopayments.com/connect'
+        wss_url = 'wss://wsserver.dodopayments.tech/connect'
     }
 
     const ws = new WebSocket(wss_url, {
