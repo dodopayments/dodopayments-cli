@@ -74,6 +74,8 @@ This command will:
 3. Ask you to select the environment (**Test Mode** or **Live Mode**)
 4. Store your credentials locally to `~/.dodopayments/api-key`
 
+Note: Upto 1 Test Mode & 1 Live Mode can be used at the same time
+
 ## Usage
 
 The general syntax is:
