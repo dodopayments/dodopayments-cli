@@ -9,13 +9,13 @@ const targets: any = [
 // Loop through all targets and build them
 for (const target of targets) {
     await Bun.build({
-        entrypoints: ["./index.ts"],
+        entrypoints: ["./src/index.ts"],
         outdir: `./dist/dodo-cli-${target.replace('bun-', '')}`,
         target: "bun",
         compile: {
             // `as any` cause Bun doesn't provide type of exact platforms
             target: target as any,
-        }
+        },
     });
 }
 
