@@ -5,4 +5,4 @@ bun.lockb
 src
 
 # Ignore binaries just in case
-dist/dodo-cli-*
+dist/dodopayments-cli-*

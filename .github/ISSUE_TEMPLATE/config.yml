@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discord Community
+    url: https://discord.gg/bYqAp4ayYh
+    about: Join our Discord for questions, help, and community discussions
+  - name: Dodo Payments Documentation
+    url: https://docs.dodopayments.com
+    about: Check out our documentation for guides and API reference
+  - name: Security Vulnerability
+    url: https://github.com/dodopayments/dodopayments-cli/security/advisories/new
+    about: Report a security vulnerability privately
