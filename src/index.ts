@@ -6,16 +6,16 @@ import { input, select } from '@inquirer/prompts';
 import open from 'open';
 import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
 import fs from 'node:fs';
-import WebhookListener from './dodo-webhooks/listen';
+import WebhookListener from './commands/webhook/listen';
 import type { Price } from 'dodopayments/resources';
 import { usage } from './utils/usage-help';
 
 const DodoCliLogo = `
  /$$$$$$$                  /$$                  /$$$$$$  /$$       /$$$$$$
 | $$__  $$                | $$                 /$$__  $$| $$      |_  $$_/
-| $$  \\ $$  /$$$$$$   /$$$$$$$  /$$$$$$       | $$  \\__/| $$        | $$  
+| $$  \\ $$  /$$$$$$   /$$$$$$$  /$$$$$$      | $$  \\__/| $$        | $$  
 | $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$      | $$      | $$        | $$  
-| $$  | $$| $$  \\ $$| $$  | $$| $$  \\ $$      | $$      | $$        | $$  
+| $$  | $$| $$  \\ $$| $$  | $$| $$  \\ $$    | $$      | $$        | $$  
 | $$  | $$| $$  | $$| $$  | $$| $$  | $$      | $$    $$| $$        | $$  
 | $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$/      |  $$$$$$/| $$$$$$$$ /$$$$$$
 |_______/  \\______/  \\_______/ \\______/        \\______/ |________/|______/
@@ -37,7 +37,7 @@ function isDodoPaymentsAPIError(e: unknown): e is DodoPaymentsAPIError {
         e !== null &&
         "error" in e &&
         typeof (e as any).error?.code === "string"
-    );
+    ); 
 }
 
 
@@ -76,7 +76,7 @@ if (category === 'login') {
     });
 
     console.log("Verifying Dodo Payments API Key");
-
+ 
     try {
         // Make this request just to confirm whether API key is correct or not
         await newDodoClient.products.list({ page_size: 1 });
@@ -108,6 +108,7 @@ if (category === 'login') {
 // Normal functions which require the API key to be present start from here
 // Authentication part
 // Read the API key config
+
 if (!fs.existsSync(path.join(homedir, '.dodopayments', 'api-key'))) {
     if (category && subCommand) {
         console.log('Please login using `dodo login` command first!');
@@ -550,10 +551,10 @@ if (category === 'products') {
     if (subCommand === 'listen') {
         WebhookListener({
             API_KEY: API_KEY,
-            DodoClient: DodoClient
+            dodoClient: DodoClient
         });
     } else if (subCommand === 'trigger') {
-        import('./dodo-webhooks/trigger');
+        import('./commands/webhook/trigger');
     } else {
         usage.wh!.forEach(e => {
             console.log(`dodo wh ${e.command} - ${e.description}`)

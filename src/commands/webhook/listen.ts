@@ -3,10 +3,10 @@ import type DodoPayments from 'dodopayments';
 
 export default async function WebhookListener({
     API_KEY,
-    DodoClient
+    dodoClient
 }: {
     API_KEY: string,
-    DodoClient: DodoPayments
+    dodoClient: DodoPayments
 }) {
     const endpoint = await input({
         message: 'Enter the endpoint URL: ',
@@ -21,7 +21,7 @@ export default async function WebhookListener({
 
     // This will check if the webhook is already added. If not added, it will add it.
     let doesSetupExist = false;
-    const checkSetup = await DodoClient.webhooks.list({ limit: 100 });
+    const checkSetup = await dodoClient.webhooks.list({ limit: 100 });
     checkSetup.data.forEach((e) => {
         if (e.url === targetedEndpoint) {
             doesSetupExist = true;
@@ -29,7 +29,7 @@ export default async function WebhookListener({
     });
 
     if (!doesSetupExist) {
-        await DodoClient.webhooks.create({
+        await dodoClient.webhooks.create({
             url: targetedEndpoint,
             description: 'This webhook as been automatically added by Dodo Payments CLI for testing webhooks',
         });
