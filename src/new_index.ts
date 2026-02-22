@@ -13,7 +13,7 @@ import { handleLicences } from './commands/licences';
 import { handleAddons } from './commands/addons';
 import { handleRefund } from './commands/refund';
 import { handleCheckout } from './commands/checkout';
-import WebhookListener from './commands/webhook/listen';
+import { handleWebhook } from './commands/webhook';
 
 const args = process.argv;
 const category = args[2];
@@ -80,17 +80,8 @@ switch (category) {
         await handleCheckout(dodoClient, subCommand);
         break;
 
-    case 'wh':
-        switch (subCommand) {
-            case 'listen':
-                WebhookListener({ API_KEY: apiKey, dodoClient });
-                break;
-            case 'trigger':
-                import('./commands/webhook/trigger');
-                break;
-            default:
-                usage.wh!.forEach(e => console.log(`dodo wh ${e.command} - ${e.description}`));
-        }
+     case 'wh':
+        await handleWebhook(dodoClient, apiKey, subCommand);
         break;
 
     default:

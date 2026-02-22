@@ -1,4 +1,4 @@
-export const CurrencyToSymbolMap: {
+export const currencyToSymbolMap: {
     [key: string]: string
 } = {
     "USD": "$",

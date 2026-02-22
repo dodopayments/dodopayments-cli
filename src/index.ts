@@ -4,7 +4,7 @@ import path from 'node:path';
 import DodoPayments from 'dodopayments';
 import { input, select } from '@inquirer/prompts';
 import open from 'open';
-import { CurrencyToSymbolMap } from './utils/currency-to-symbol-map';
+import { currencyToSymbolMap } from './utils/currency-to-symbol-map';
 import fs from 'node:fs';
 import WebhookListener from './commands/webhook/listen';
 import type { Price } from 'dodopayments/resources';
@@ -185,9 +185,9 @@ if (category === 'products') {
             'product id': e.product_id,
             created_at: new Date(e.created_at).toLocaleString(),
             ...e.is_recurring ? {
-                price: `${CurrencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} Every ${(e.price_detail as Price.RecurringPrice).payment_frequency_count} ${(e.price_detail as Price.RecurringPrice)?.payment_frequency_interval}`,
+                price: `${currencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} Every ${(e.price_detail as Price.RecurringPrice).payment_frequency_count} ${(e.price_detail as Price.RecurringPrice)?.payment_frequency_interval}`,
             } : {
-                price: `${CurrencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} (One Time)`,
+                price: `${currencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} (One Time)`,
             },
         }));
 
@@ -211,9 +211,9 @@ if (category === 'products') {
                 updated_at: new Date(info.updated_at).toLocaleString(),
                 ...info.is_recurring ? {
                     // .fixed_price for usage based billing
-                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(((info.price as Price.RecurringPrice).price || (info.price as Price.UsageBasedPrice).fixed_price) * 0.01).toFixed(2)} Every ${(info.price as Price.RecurringPrice).payment_frequency_count} ${(info.price as Price.RecurringPrice).payment_frequency_interval}`,
+                    price: `${currencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(((info.price as Price.RecurringPrice).price || (info.price as Price.UsageBasedPrice).fixed_price) * 0.01).toFixed(2)} Every ${(info.price as Price.RecurringPrice).payment_frequency_count} ${(info.price as Price.RecurringPrice).payment_frequency_interval}`,
                 } : {
-                    price: `${CurrencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${((info.price as Price.OneTimePrice).price * 0.01).toFixed(2)} (One Time)`,
+                    price: `${currencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${((info.price as Price.OneTimePrice).price * 0.01).toFixed(2)} (One Time)`,
                 },
                 tax_category: info.tax_category,
             });
@@ -243,7 +243,7 @@ if (category === 'products') {
                 'payment id': payment.payment_id,
                 'created at': new Date(payment.created_at).toLocaleString(),
                 'subscription id': payment.subscription_id,
-                'total amount': `${CurrencyToSymbolMap[payment.currency] || (payment.currency + ' ')}${(payment.total_amount * 0.01).toFixed(2)}`,
+                'total amount': `${currencyToSymbolMap[payment.currency] || (payment.currency + ' ')}${(payment.total_amount * 0.01).toFixed(2)}`,
                 status: payment.status
             };
         });
@@ -257,7 +257,7 @@ if (category === 'products') {
             const payment_table = {
                 'payment id': payment_info.payment_id,
                 status: payment_info.status,
-                'total amount': `${CurrencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${(payment_info.total_amount * 0.01).toFixed(2)}`,
+                'total amount': `${currencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${(payment_info.total_amount * 0.01).toFixed(2)}`,
                 'payment method': payment_info.payment_method,
                 createdAt: new Date(payment_info.created_at).toLocaleString(),
                 customer: payment_info.customer.customer_id,
@@ -468,7 +468,7 @@ if (category === 'products') {
         const addonsList = addons.items.map(e => ({
             id: e.id,
             name: e.name,
-            price: `${CurrencyToSymbolMap[e.currency] || e.currency + ' '}${e.price * 0.01}`,
+            price: `${currencyToSymbolMap[e.currency] || e.currency + ' '}${e.price * 0.01}`,
             'created on': new Date(e.created_at).toLocaleString()
         }));
         console.table(addonsList);
@@ -483,7 +483,7 @@ if (category === 'products') {
             console.table({
                 'addon id': info.id,
                 name: info.name,
-                price: `${CurrencyToSymbolMap[info.currency] || info.currency + ' '}${info.price * 0.01}`,
+                price: `${currencyToSymbolMap[info.currency] || info.currency + ' '}${info.price * 0.01}`,
                 ...info.description?.trim() !== '' && { description: info.description },
                 created_at: new Date(info.created_at).toLocaleString(),
                 updated_at: new Date(info.updated_at).toLocaleString(),
@@ -513,7 +513,7 @@ if (category === 'products') {
         const refundsList = refunds.items.map(e => ({
             id: e.refund_id,
             'payment id': e.payment_id,
-            price: `${CurrencyToSymbolMap[e.currency || ''] || e.currency + ' '}${(e.amount || 0) * 0.01}`,
+            price: `${currencyToSymbolMap[e.currency || ''] || e.currency + ' '}${(e.amount || 0) * 0.01}`,
             'created on': new Date(e.created_at).toLocaleString()
         }));
         console.table(refundsList);
@@ -531,7 +531,7 @@ if (category === 'products') {
                 ...Object.keys(info.metadata).length > 0 && { metadata: info.metadata },
                 'customer id': info.customer.email,
                 'refund type': info.is_partial ? 'Partial' : 'Full',
-                price: `${CurrencyToSymbolMap[info.currency || ''] || info.currency + ' '}${(info.amount || 0) * 0.01}`,
+                price: `${currencyToSymbolMap[info.currency || ''] || info.currency + ' '}${(info.amount || 0) * 0.01}`,
                 ...info.reason?.trim() !== '' && { reason: info.reason },
                 created_at: new Date(info.created_at).toLocaleString(),
             });
