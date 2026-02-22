@@ -3,88 +3,87 @@ import { input, select } from '@inquirer/prompts';
 import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 
-export async function handleCheckout( client: DodoPayments,subCommand?: string) {
-    if (subCommand === 'new') {
-        let config: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
-            product_cart: []
-        };
+export async function handleCheckout(
+  client: DodoPayments,
+  subCommand?: string,
+) {
+  if (subCommand === 'new') {
+    let config: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
+      product_cart: [],
+    };
 
-        const product = await input({
-            message: 'Enter product: ',
-            validate: (e) => {
-                return e.startsWith('pdt_')
-            }
-        });
+    const product = await input({
+      message: 'Enter product:',
+      validate: (e) => e.startsWith('pdt_'),
+    });
 
-        config.product_cart = [{ product_id: product, quantity: 1 }];
+    config.product_cart = [{ product_id: product, quantity: 1 }];
 
-        // Ask user if he wants to enable advanced options
-        if (await select({
-            message: 'Use advanced options?',
-            choices: [
-                { name: 'Yes', value: true },
-                { name: 'No', value: false }
-            ],
-            default: false
-        })) {
-            // Minimal Address
-            config.minimal_address = await select({
-                message: 'Enable minimal Address:',
-                choices: [
-                    { name: 'Yes', value: true },
-                    { name: 'No', value: false }
-                ],
-                default: false
-            });
+    const useAdvanced = await select({
+      message: 'Use advanced options?',
+      choices: [
+        { name: 'Yes', value: true },
+        { name: 'No', value: false },
+      ],
+      default: false,
+    });
 
-            // Return URL
-            const return_url = await input({
-                message: 'Enter return URL (Optional):'
-            });
+    if (useAdvanced) {
+      config.minimal_address = await select({
+        message: 'Enable minimal address:',
+        choices: [
+          { name: 'Yes', value: true },
+          { name: 'No', value: false },
+        ],
+        default: false,
+      });
 
-            if (return_url.trim() !== '') {
-                config.return_url = return_url;
-            }
+      const return_url = await input({
+        message: 'Enter return URL (Optional):',
+      });
 
-            config.force_3ds = await select({
-                message: 'Force 3DS?',
-                choices: [
-                    { name: 'Yes', value: true },
-                    { name: 'No', value: false }
-                ]
-            });
+      if (return_url.trim() !== '') {
+        config.return_url = return_url;
+      }
 
-            // Discount code
-            const disc_code = await input({
-                message: 'Enter discount code (Optional):',
-            });
+      config.force_3ds = await select({
+        message: 'Force 3DS?',
+        choices: [
+          { name: 'Yes', value: true },
+          { name: 'No', value: false },
+        ],
+      });
 
-            if (disc_code.trim() !== '') {
-                config.discount_code = disc_code;
-            }
+      const disc_code = await input({
+        message: 'Enter discount code (Optional):',
+      });
 
-            // Metadata
-            const metadata = await input({
-                message: 'Enter metadata (Optional, JSON stringified):'
-            });
+      if (disc_code.trim() !== '') {
+        config.discount_code = disc_code;
+      }
 
-            if (metadata.trim() !== '') {
-                config.metadata = JSON.parse(metadata);
-            }
-        }
+      const metadata = await input({
+        message: 'Enter metadata (Optional, JSON stringified):',
+      });
 
-        try {
-            const session = await client.checkoutSessions.create(config);
-            console.log('Checkout Session URL:', session.checkout_url);
-        } catch (e) {
-            // This is the only possible error here. I have used isDodoPaymentsAPIError() to infer types support.
-            if (isDodoPaymentsAPIError(e)) {
-                console.log(`Error: ${e.error.message}`);
-            }
-        }
-    } else {
-        usage.checkout!.forEach(e => {
-            console.log(`dodo checkout ${e.command} - ${e.description}`)
-        });
+      if (metadata.trim() !== '') {
+        config.metadata = JSON.parse(metadata);
+      }
     }
+    try {
+      const session = await client.checkoutSessions.create(config);
+      console.log('Checkout Session URL:', session.checkout_url);
+    } catch (e) {
+      // This is the only possible error here. I have used isDodoPaymentsAPIError() to infer types support.
+      if (isDodoPaymentsAPIError(e)) {
+        console.log(`Error: ${e.error.message}`);
+      } else {
+        console.error(e);
+      }
+    }
+  } else {
+    usage.checkout!.forEach((e) =>
+      console.log(`dodo checkout ${e.command} - ${e.description}`),
+    );
+  }
 }

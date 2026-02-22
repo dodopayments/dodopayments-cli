@@ -1,649 +1,78 @@
 #!/usr/bin/env node
-import os from 'node:os';
-import path from 'node:path';
 import DodoPayments from 'dodopayments';
-import { input, select } from '@inquirer/prompts';
-import open from 'open';
-import { currencyToSymbolMap } from './utils/currency-to-symbol-map';
-import fs from 'node:fs';
-import WebhookListener from './commands/webhook/listen';
-import type { Price } from 'dodopayments/resources';
+import { renderHelp } from './ui';
 import { usage } from './utils/usage-help';
+import { configExists, resolveCredentials } from './utils/auth';
 
-const DodoCliLogo = `
- /$$$$$$$                  /$$                  /$$$$$$  /$$       /$$$$$$
-| $$__  $$                | $$                 /$$__  $$| $$      |_  $$_/
-| $$  \\ $$  /$$$$$$   /$$$$$$$  /$$$$$$      | $$  \\__/| $$        | $$  
-| $$  | $$ /$$__  $$ /$$__  $$ /$$__  $$      | $$      | $$        | $$  
-| $$  | $$| $$  \\ $$| $$  | $$| $$  \\ $$    | $$      | $$        | $$  
-| $$  | $$| $$  | $$| $$  | $$| $$  | $$      | $$    $$| $$        | $$  
-| $$$$$$$/|  $$$$$$/|  $$$$$$$|  $$$$$$/      |  $$$$$$/| $$$$$$$$ /$$$$$$
-|_______/  \\______/  \\_______/ \\______/        \\______/ |________/|______/
+import { handleLogin } from './commands/login';
+import { handleProducts } from './commands/products';
+import { handlePayments } from './commands/payments';
+import { handleCustomers } from './commands/customers';
+import { handleDiscounts } from './commands/discounts';
+import { handleLicences } from './commands/licences';
+import { handleAddons } from './commands/addons';
+import { handleRefund } from './commands/refund';
+import { handleCheckout } from './commands/checkout';
+import { handleWebhook } from './commands/webhook';
 
-The CLI to manage Dodo Payments!
-`;
+process.on('SIGINT', () => process.exit(0));
+process.on('SIGTERM', () => process.exit(0));
 
-// The below is used to check if the error is a Dodo Payments error or not in the API Request
-type DodoPaymentsAPIError = {
-    error: {
-        code: 'NOT_FOUND';
-        message: string;
-    }
-}
+const category = process.argv[2];
+const subCommand = process.argv[3];
 
-function isDodoPaymentsAPIError(e: unknown): e is DodoPaymentsAPIError {
-    return (
-        typeof e === "object" &&
-        e !== null &&
-        "error" in e &&
-        typeof (e as any).error?.code === "string"
-    ); 
-}
-
-
-const args = process.argv;
-const category = args[2];
-const subCommand = args[3];
-const homedir = os.homedir();
-
-const RenderHelp = () => {
-    console.log(DodoCliLogo);
-    // List all available methods
-    // todo: Add more comments to make it clear what's being done
-    Object.keys(usage).forEach(e => {
-        console.log(`Category: ${e}`);
-        (usage as any)[e].forEach((y: { command: string, description: string }) => {
-            console.log(`dodo ${e} ${y.command} - ${y.description}`)
-        });
-        // Blank space as a separator
-        console.log("");
-    });
-}
-
-// Added this to the top so that it can bypass all further auth that happens for the login route
-if (category === 'login') {
-    open('https://app.dodopayments.com/developer/api-keys');
-    const API_KEY = await input({ message: 'Enter your Dodo Payments API Key:', required: true });
-    const MODE = await select({
-        choices: [{ name: "Test Mode", value: 'test_mode' }, { name: "Live Mode", value: 'live_mode' }],
-        message: 'Choose the environment:'
-    });
-
-    // Initialize the Dodo Payment client to test the API key
-    const newDodoClient = new DodoPayments({
-        bearerToken: API_KEY,
-        environment: (MODE as 'test_mode' | 'live_mode') // as 'test_mode' | 'live_mode' used to bypass ts error
-    });
-
-    console.log("Verifying Dodo Payments API Key");
- 
-    try {
-        // Make this request just to confirm whether API key is correct or not
-        await newDodoClient.products.list({ page_size: 1 });
-        console.log('Successfully verified your Dodo Payments API Key!');
-    } catch (err) {
-        console.log("Something went wrong while authenticating, please check your API key!");
-        process.exit(1);
-    };
-
-    console.log("Storing / Updating existing configuration...")
-    let existingConfig;
-    try {
-        existingConfig = JSON.parse(fs.readFileSync(path.join(homedir, '.dodopayments', 'api-key'), 'utf-8'));
-    } catch {
-        existingConfig = {};
-    }
-
-    existingConfig[MODE] = API_KEY;
-    // Make the ~/.dodopayments directory if it's not present
-    if (!fs.existsSync(path.join(homedir, '.dodopayments'))) {
-        fs.mkdirSync(path.join(homedir, '.dodopayments'));
-    }
-    fs.writeFileSync(path.join(homedir, '.dodopayments', 'api-key'), JSON.stringify(existingConfig));
-
-    console.log("Setup complete successfully!");
-    process.exit(0);
-}
-
-// Normal functions which require the API key to be present start from here
-// Authentication part
-// Read the API key config
-
-if (!fs.existsSync(path.join(homedir, '.dodopayments', 'api-key'))) {
-    if (category && subCommand) {
-        console.log('Please login using `dodo login` command first!');
-        process.exit(0);
-    } else if (category) {
-        if (category in usage) {
-            console.log(`Category: ${category}`);
-            (usage as any)[category]!.forEach((e: { command: string, description: string }) => {
-                console.log(`dodo ${category} ${e.command} - ${e.description}`)
-            });
-            console.log('\nPlease login using `dodo login` command first!');
-        } else {
-            RenderHelp();
-        }
-        process.exit(0);
-    } else {
-        RenderHelp();
-        console.log('Please login using `dodo login` command first!');
-        process.exit(0);
-    }
-}
-
-// Parse the API key config
-let existingAPIKeyConfigParsed;
 try {
-    existingAPIKeyConfigParsed = JSON.parse(fs.readFileSync(path.join(homedir, '.dodopayments', 'api-key'), 'utf-8'));
-} catch {
-    // Delete API config if something fails with parsing
-    fs.rmSync(path.join(homedir, '.dodopayments', 'api-key'), { force: true });
-    console.log("Failed to decode API Key configuration. Your config has been reset. Please log in again using `dodo login`");
+  if (category === 'login') {
+    await handleLogin();
     process.exit(0);
-}
+  }
 
+  if (!configExists()) {
+    renderHelp(category);
+    console.log('\nPlease login using `dodo login` command first!');
+    process.exit(0);
+  }
 
-// Final variables
-let API_KEY;
-let MODE;
+  const { apiKey, mode } = await resolveCredentials();
 
-// Retrive the keys of the parsed API key config to auto determine the environment if possible.
-const existingAPIKeyConfigParsedKeys = Object.keys(existingAPIKeyConfigParsed);
+  const dodoClient = new DodoPayments({
+    bearerToken: apiKey,
+    environment: mode,
+  });
 
-// If there is only one mode auth mehtod then 
-if (existingAPIKeyConfigParsedKeys.length === 1) {
-    MODE = existingAPIKeyConfigParsedKeys[0]
-    API_KEY = existingAPIKeyConfigParsed[MODE!];
-}
-else {
-    // If there are multiple modes (i.e. both test mode & live mode) then prompt the user to select one environment to continue
-    MODE = await select({
-        choices: [{ name: "Test Mode", value: 'test_mode' }, { name: "Live Mode", value: 'live_mode' }],
-        message: 'Choose the environment:'
-    });
-    API_KEY = existingAPIKeyConfigParsed[MODE];
-}
-
-// Initialize the Dodo Payments SDK to be used from now on
-const DodoClient = new DodoPayments({
-    bearerToken: API_KEY,
-    environment: (MODE as 'test_mode' | 'live_mode') // as 'test_mode' | 'live_mode' used to bypass ts error
-});
-
-// Continuation of other functions that require api key
-if (category === 'products') {
-    if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-
-        const fetchedData = await DodoClient.products.list({ page_number: parseInt(page) - 1, page_size: 100 });
-        const table = fetchedData.items.map(e => ({
-            name: e.name,
-            'product id': e.product_id,
-            created_at: new Date(e.created_at).toLocaleString(),
-            ...e.is_recurring ? {
-                price: `${currencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} Every ${(e.price_detail as Price.RecurringPrice).payment_frequency_count} ${(e.price_detail as Price.RecurringPrice)?.payment_frequency_interval}`,
-            } : {
-                price: `${currencyToSymbolMap[e.price_detail!.currency] || (e.price_detail!.currency + ' ')}${(e.price! * 0.01).toFixed(2)} (One Time)`,
-            },
-        }));
-
-        console.table(table);
-        console.log("To edit a product, go to https://app.dodopayments.com/products/edit?id={product_id}")
-    } else if (subCommand === 'create') {
-        open('https://app.dodopayments.com/products/create');
-    } else if (subCommand === 'info') {
-        try {
-            const product_id = await input({
-                message: "Enter product ID:",
-                validate: (e => e.startsWith('pdt_') || 'Please enter a valid product ID!')
-            });
-
-            const info = await DodoClient.products.retrieve(product_id);
-            console.table({
-                'product id': info.product_id,
-                name: info.name,
-                ...info.description?.trim() !== '' && { description: info.description },
-                created_at: new Date(info.created_at).toLocaleString(),
-                updated_at: new Date(info.updated_at).toLocaleString(),
-                ...info.is_recurring ? {
-                    // .fixed_price for usage based billing
-                    price: `${currencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${(((info.price as Price.RecurringPrice).price || (info.price as Price.UsageBasedPrice).fixed_price) * 0.01).toFixed(2)} Every ${(info.price as Price.RecurringPrice).payment_frequency_count} ${(info.price as Price.RecurringPrice).payment_frequency_interval}`,
-                } : {
-                    price: `${currencyToSymbolMap[info.price.currency] || (info.price.currency + ' ')}${((info.price as Price.OneTimePrice).price * 0.01).toFixed(2)} (One Time)`,
-                },
-                tax_category: info.tax_category,
-            });
-            console.log(`To edit the product, go to https://app.dodopayments.com/products/edit?id=${info.product_id}`)
-        } catch (e) {
-            if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
-                console.log("Incorrect product ID!");
-            } else {
-                console.error(e);
-            }
-        }
-    } else {
-        usage.products!.forEach(e => {
-            console.log(`dodo products ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'payments') {
-    if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-        const payments = (await DodoClient.payments.list({ page_number: parseInt(page) - 1, page_size: 100 })).items;
-        const paymentsTable = payments.map(payment => {
-            return {
-                'payment id': payment.payment_id,
-                'created at': new Date(payment.created_at).toLocaleString(),
-                'subscription id': payment.subscription_id,
-                'total amount': `${currencyToSymbolMap[payment.currency] || (payment.currency + ' ')}${(payment.total_amount * 0.01).toFixed(2)}`,
-                status: payment.status
-            };
-        });
-        console.table(paymentsTable);
-        console.log("To view a payment, go to https://app.dodopayments.com/transactions/payments/{payment_id}")
-    } else if (subCommand === 'info') {
-        try {
-            const payment_id = 'pay_0NWiGvZPWxeWeNWISbfat';
-            const payment_info = await DodoClient.payments.retrieve(payment_id);
-            console.log(payment_info);
-            const payment_table = {
-                'payment id': payment_info.payment_id,
-                status: payment_info.status,
-                'total amount': `${currencyToSymbolMap[payment_info.currency] || payment_info.currency + ' '}${(payment_info.total_amount * 0.01).toFixed(2)}`,
-                'payment method': payment_info.payment_method,
-                createdAt: new Date(payment_info.created_at).toLocaleString(),
-                customer: payment_info.customer.customer_id,
-                'customer email': payment_info.customer.email,
-                ...payment_info.subscription_id && {
-                    'subscription id': payment_info.subscription_id
-                },
-                'billing address street': `${payment_info.billing.street}`,
-                'billing address state': `${payment_info.billing.state}`,
-                'billing address city': `${payment_info.billing.city}`,
-                'billing address country': `${payment_info.billing.country}`,
-                'billing address zipcode': `${payment_info.billing.zipcode}`,
-            }
-            console.table(payment_table);
-            console.log(`To view the payment, go to https://app.dodopayments.com/transactions/payments/${payment_info.payment_id}`)
-        } catch (e) {
-            if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-                console.log("Incorrect payment ID!")
-            } else {
-                console.error(e);
-            }
-        }
-    } else {
-        usage.payments!.forEach(e => {
-            console.log(`dodo payments ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'customers') {
-    if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-        console.table((await DodoClient.customers.list({ page_number: parseInt(page) - 1, page_size: 100 })).items, ['customer_id', 'name', 'email', 'phone_number']);
-    } else if (subCommand === 'create') {
-        const name = await input({
-            message: "Enter Name: ",
-            validate: (e => e.trim() !== '')
-        });
-
-        const email = await input({
-            message: "Enter Email: ",
-            validate: (e => e.trim() !== '')
-        });
-
-        const phone = await input({
-            message: "Enter Phone Number: ",
-        });
-
-        const creation = await DodoClient.customers.create({
-            name,
-            email,
-            phone_number: phone.trim() !== '' ? phone : null
-        });
-
-        console.log('Customer Successfully Created!');
-        console.table([creation], ['customer_id', 'name', 'email', 'phone_number']);
-    } else if (subCommand === 'update') {
-        const customer_id = await input({
-            message: "Enter customer ID:",
-            validate: (e => e.startsWith('cus_') || 'Please enter a valid customer ID!')
-        });
-
-        try {
-            const existingInfo = await DodoClient.customers.retrieve(customer_id);
-            const name = await input({
-                message: "Enter customer name:",
-                default: existingInfo.name
-            });
-
-            const phone = await input({
-                message: "Enter customer phone:",
-                default: existingInfo.phone_number?.toString()
-            });
-
-            const updated = await DodoClient.customers.update(customer_id, {
-                name: name,
-                phone_number: phone.trim() !== '' ? phone : null
-            });
-
-            console.table([updated], ['customer_id', 'name', 'email', 'phone_number']);
-        } catch (e) {
-            if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
-                console.log("Incorrect customer ID!");
-            } else {
-                console.error(e);
-            }
-        }
-    } else {
-        usage.customers!.forEach(e => {
-            console.log(`dodo customers ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'discounts') {
-    if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-        const discounts = await DodoClient.discounts.list({ page_number: parseInt(page) - 1, page_size: 100 });
-        const discountsTable = discounts.items.map(e => (
-            {
-                name: e.name,
-                code: e.code,
-                'discount id': e.discount_id,
-                'created at': new Date(e.created_at).toLocaleString(),
-                ...e.type === 'percentage' ? {
-                    amount: `${(e.amount * 0.01).toFixed(2)}%`
-                } : {
-                    // I just added this in case of a breaking change in the future
-                    amount: e.amount
-                },
-            }
-        ));
-
-        console.table(discountsTable);
-        console.log(`To view a discount, go to https://app.dodopayments.com/sales/discounts/edit?id={discount_id}`)
-    } else if (subCommand === 'create') {
-        const name = await input({
-            message: "Enter discount name:",
-            validate: (e => e.trim() !== '')
-        });
-
-        const percentage = await input({
-            message: "Enter discount percentage:",
-            // Make sure user enters valid value
-            validate: (e => {
-                const parsed = parseFloat(e);
-                if (!Number.isNaN(parsed) && parsed > 0 && parsed <= 100) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })
-        });
-
-        const code = await input({
-            message: "Enter discount code (Optional):"
-        });
-
-        const cycles = await input({
-            message: "Enter discount cycles (Optional):"
-        });
-
-        const newDiscount = await DodoClient.discounts.create({
-            name,
-            code: code.trim() !== '' ? code : null,
-            amount: parseFloat(percentage) * 100,
-            type: 'percentage',
-            // If the subscription cycles is provided
-            ...cycles.trim() !== '' && {
-                subscription_cycles: parseInt(cycles)
-            }
-        });
-
-        console.log('Discount created successfully!');
-        console.table({
-            name: newDiscount.name,
-            code: newDiscount.code,
-            'discount id': newDiscount.discount_id,
-            ...cycles.trim() !== '' && {
-                'subscription cycles': newDiscount.subscription_cycles
-            }
-        });
-    } else if (subCommand === 'delete') {
-        await DodoClient.discounts.delete(await input({
-            message: "Enter discount ID to be deleted:",
-            validate: (e => e.startsWith('dsc_'))
-        }));
-
-        console.log("Successfully deleted discount!");
-    } else {
-        usage.discounts!.forEach(e => {
-            console.log(`dodo discounts ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'licences') {
-    if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-
-        // WORK ON THIS
-        const licences = await DodoClient.licenseKeys.list({ page_number: parseInt(page) - 1, page_size: 100 });
-        console.log(licences.items);
-    } else {
-        usage.licences!.forEach(e => {
-            console.log(`dodo licences ${e.command} - ${e.description}`)
-        });
-    }
-
-
-    // Webhook is managed completely by another file
-} else if (category === 'addons') {
-    if (subCommand === 'create') {
-        open('https://app.dodopayments.com/products/create/add-on');
-    } else if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-        const addons = await DodoClient.addons.list({ page_number: parseInt(page) - 1, page_size: 100 });
-        const addonsList = addons.items.map(e => ({
-            id: e.id,
-            name: e.name,
-            price: `${currencyToSymbolMap[e.currency] || e.currency + ' '}${e.price * 0.01}`,
-            'created on': new Date(e.created_at).toLocaleString()
-        }));
-        console.table(addonsList);
-    } else if (subCommand === 'info') {
-        try {
-            const addon_id = await input({
-                message: "Enter addon ID:",
-                validate: (e => e.startsWith('adn_') || 'Please enter a valid addon ID!')
-            });
-
-            const info = await DodoClient.addons.retrieve(addon_id);
-            console.table({
-                'addon id': info.id,
-                name: info.name,
-                price: `${currencyToSymbolMap[info.currency] || info.currency + ' '}${info.price * 0.01}`,
-                ...info.description?.trim() !== '' && { description: info.description },
-                created_at: new Date(info.created_at).toLocaleString(),
-                updated_at: new Date(info.updated_at).toLocaleString(),
-                tax_category: info.tax_category,
-            });
-            console.log(`To edit the addon, go to https://app.dodopayments.com/products/edit/add-on?id=${info.id}`)
-        } catch (e) {
-            if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
-                console.log("Incorrect addon ID!");
-            } else {
-                console.error(e);
-            }
-        }
-    } else {
-        usage.addons!.forEach(e => {
-            console.log(`dodo addons ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'refund') {
-    if (subCommand === 'list') {
-        const page = await input({
-            message: 'Enter page:',
-            default: "1",
-            validate: (e => e.trim() !== '')
-        });
-        const refunds = await DodoClient.refunds.list({ page_number: parseInt(page) - 1, page_size: 100 });
-        const refundsList = refunds.items.map(e => ({
-            id: e.refund_id,
-            'payment id': e.payment_id,
-            price: `${currencyToSymbolMap[e.currency || ''] || e.currency + ' '}${(e.amount || 0) * 0.01}`,
-            'created on': new Date(e.created_at).toLocaleString()
-        }));
-        console.table(refundsList);
-    } else if (subCommand === 'info') {
-        try {
-            const refund_id = await input({
-                message: "Enter refund ID:",
-                validate: (e => e.startsWith('ref_') || 'Please enter a valid refund ID!')
-            });
-
-            const info = await DodoClient.refunds.retrieve(refund_id);
-            console.table({
-                'refund id': info.refund_id,
-                'payment id': info.payment_id,
-                ...Object.keys(info.metadata).length > 0 && { metadata: info.metadata },
-                'customer id': info.customer.email,
-                'refund type': info.is_partial ? 'Partial' : 'Full',
-                price: `${currencyToSymbolMap[info.currency || ''] || info.currency + ' '}${(info.amount || 0) * 0.01}`,
-                ...info.reason?.trim() !== '' && { reason: info.reason },
-                created_at: new Date(info.created_at).toLocaleString(),
-            });
-        } catch (e) {
-            if (isDodoPaymentsAPIError(e) && e.error.code === "NOT_FOUND") {
-                console.log("Incorrect refund ID!");
-            } else {
-                console.error(e);
-            }
-        }
-    } else {
-        usage.refunds!.forEach(e => {
-            console.log(`dodo refunds ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'wh') {
-    if (subCommand === 'listen') {
-        WebhookListener({
-            API_KEY: API_KEY,
-            dodoClient: DodoClient
-        });
-    } else if (subCommand === 'trigger') {
-        import('./commands/webhook/trigger');
-    } else {
-        usage.wh!.forEach(e => {
-            console.log(`dodo wh ${e.command} - ${e.description}`)
-        });
-    }
-} else if (category === 'checkout') {
-    if (subCommand === 'new') {
-        let config: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
-            product_cart: []
-        };
-
-        const product = await input({
-            message: 'Enter product: ',
-            validate: (e) => {
-                return e.startsWith('pdt_')
-            }
-        });
-
-        config.product_cart = [{ product_id: product, quantity: 1 }];
-
-        // Ask user if he wants to enable advanced options
-        if (await select({
-            message: 'Use advanced options?',
-            choices: [
-                { name: 'Yes', value: true },
-                { name: 'No', value: false }
-            ],
-            default: false
-        })) {
-            // Minimal Address
-            config.minimal_address = await select({
-                message: 'Enable minimal Address:',
-                choices: [
-                    { name: 'Yes', value: true },
-                    { name: 'No', value: false }
-                ],
-                default: false
-            });
-
-            // Return URL
-            const return_url = await input({
-                message: 'Enter return URL (Optional):'
-            });
-
-            if (return_url.trim() !== '') {
-                config.return_url = return_url;
-            }
-
-            config.force_3ds = await select({
-                message: 'Force 3DS?',
-                choices: [
-                    { name: 'Yes', value: true },
-                    { name: 'No', value: false }
-                ]
-            });
-
-            // Discount code
-            const disc_code = await input({
-                message: 'Enter discount code (Optional):',
-            });
-
-            if (disc_code.trim() !== '') {
-                config.discount_code = disc_code;
-            }
-
-            // Metadata
-            const metadata = await input({
-                message: 'Enter metadata (Optional, JSON stringified):'
-            });
-
-            if (metadata.trim() !== '') {
-                config.metadata = JSON.parse(metadata);
-            }
-        }
-
-        try {
-            const session = await DodoClient.checkoutSessions.create(config);
-            console.log('Checkout Session URL:', session.checkout_url);
-        } catch (e) {
-            // This is the only possible error here. I have used isDodoPaymentsAPIError() to infer types support.
-            if (isDodoPaymentsAPIError(e)) {
-                console.log(`Error: ${e.error.message}`);
-            }
-        }
-    } else {
-        usage.checkout!.forEach(e => {
-            console.log(`dodo checkout ${e.command} - ${e.description}`)
-        });
-    }
-} else {
-    RenderHelp();
+  switch (category) {
+    case 'products':
+      await handleProducts(dodoClient, subCommand);
+      break;
+    case 'payments':
+      await handlePayments(dodoClient, subCommand);
+      break;
+    case 'customers':
+      await handleCustomers(dodoClient, subCommand);
+      break;
+    case 'discounts':
+      await handleDiscounts(dodoClient, subCommand);
+      break;
+    case 'licences':
+      await handleLicences(dodoClient, subCommand);
+      break;
+    case 'addons':
+      await handleAddons(dodoClient, subCommand);
+      break;
+    case 'refund':
+      await handleRefund(dodoClient, subCommand);
+      break;
+    case 'checkout':
+      await handleCheckout(dodoClient, subCommand);
+      break;
+    case 'wh':
+      await handleWebhook(dodoClient, apiKey, subCommand);
+      break;
+    default:
+      renderHelp();
+  }
+} catch (e: any) {
+  if (e?.name === 'ExitPromptError') process.exit(0);
+  console.error('An unexpected error occurred:', e);
+  process.exit(1);
 }
