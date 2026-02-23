@@ -67,7 +67,7 @@ try {
     case 'addons':
       await handleAddons(dodoClient, subCommand);
       break;
-    case 'refund':
+    case 'refunds':
       await handleRefund(dodoClient, subCommand);
       break;
     case 'checkout':
