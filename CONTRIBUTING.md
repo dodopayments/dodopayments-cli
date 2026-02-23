@@ -61,17 +61,38 @@ This project and everyone participating in it is governed by our [Code of Conduc
 
 ```
 dodopayments-cli/
-├── index.ts              # Main CLI entrypoint
-├── utils/                # Utility functions
-├── dodo-webhooks/        # Webhook testing functionality
+├── src/                              # All CLI source code
+│   ├── index.ts                      # Main CLI entrypoint (command router)
+│   │
+│   ├── commands/                     # Domain-based command modules
+│   │   ├── addons/                   # Add-on related commands
+│   │   ├── checkout/                 # Checkout commands
+│   │   ├── customer/                 # Customer management commands
+│   │   ├── discount/                 # Discount/coupon commands
+│   │   ├── licenses/                 # License management commands
+│   │   ├── login/                    # Authentication/login commands
+│   │   ├── payment/                  # Payment-related commands
+│   │   ├── product/                  # Product management commands
+│   │   ├── refund/                   # Refund commands
+│   │   └── webhook/                  # Webhook-related commands
+│   │
+│   ├── ui/                           # CLI presentation layer (output/help/logo)
+│   │   ├── help.ts                   # Help rendering
+│   │   ├── index.ts                  # Barrel export for UI utilities
+│   │   └── logo.ts                   # CLI logo/banner
+│   │
+│   └── utils/                        # Shared utilities (config, client, helpers)
+│
+├── build-binaries.ts                 # Script to generate distributable binaries
 ├── .github/
-│   ├── ISSUE_TEMPLATE/   # Issue templates
+│   ├── ISSUE_TEMPLATE/
 │   ├── PULL_REQUEST_TEMPLATE.md
-│   └── workflows/        # CI/CD workflows
-├── CONTRIBUTING.md       # This file
+│   └── workflows/
+│
+├── CONTRIBUTING.md
 ├── CODE_OF_CONDUCT.md
 ├── LICENSE
-└── README.md
+├── README.md
 ```
 
 ## How to Contribute
