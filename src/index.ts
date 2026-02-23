@@ -28,8 +28,16 @@ try {
   }
 
   if (!configExists()) {
-    renderHelp(category);
-    console.log('\nPlease login using `dodo login` command first!');
+    if (category && !subCommand) {
+      renderHelp(category);
+      // Blank line
+      console.log();
+    } else if (!category && !subCommand) {
+      renderHelp();
+      // Blank line
+      console.log();
+    }
+    console.log('Please login using `dodo login` command first!');
     process.exit(0);
   }
 
