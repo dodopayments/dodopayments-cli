@@ -20,7 +20,7 @@
   <a href="#installation">Installation</a> •
   <a href="#authentication">Authentication</a> •
   <a href="#usage">Usage</a> •
-  <a href="#webhook-testing">Webhooks</a> •
+  <a href="#webhooks">Webhooks</a> •
   <a href="#contributing">Contributing</a>
 </p>
 
