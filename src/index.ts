@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import DodoPayments from 'dodopayments';
 import { renderHelp } from './ui';
-import { usage } from './utils/usage-help';
 import { configExists, resolveCredentials } from './utils/auth';
 
 import { handleLogin } from './commands/login';
