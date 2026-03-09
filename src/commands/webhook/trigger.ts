@@ -73,6 +73,16 @@ const metadata = await input({
     default: '{}'
 });
 
+const email = await input({
+    message: 'What is the customer\'s email? (Optional)',
+    default: 'john.doe@example.com'
+});
+
+const customer_id = await input({
+    message: 'What is the customer\'s id? (Optional)',
+    default: 'cus_test'
+});
+
 while (true) {
     const event = await select({
         message: 'Select an event to send:',
@@ -93,7 +103,9 @@ while (true) {
         const params = {
             business_id,
             product_id,
-            metadata: metadataParsed
+            metadata: metadataParsed,
+            email: email,
+            customer_id: customer_id
         };
 
         if (event === 'subscription.active') {
@@ -120,7 +132,9 @@ while (true) {
         const params = {
             business_id,
             product_id,
-            metadata: metadataParsed
+            metadata: metadataParsed,
+            email: email,
+            customer_id: customer_id
         };
 
         if (event === 'payment.success') {
@@ -137,7 +151,9 @@ while (true) {
     // Parameters based on refund event
     if (event.startsWith('refund.')) {
         const params = {
-            business_id
+            business_id,
+            email: email,
+            customer_id: customer_id
         };
 
         if (event === 'refund.success') {
@@ -150,7 +166,9 @@ while (true) {
     // Parameters based on dispute event
     if (event.startsWith('dispute.')) {
         const params = {
-            business_id
+            business_id,
+            email: email,
+            customer_id: customer_id
         };
 
         if (event === 'dispute.opened') {
@@ -174,7 +192,9 @@ while (true) {
     if (event.startsWith('licence.')) {
         const params = {
             business_id,
-            product_id
+            product_id,
+            email: email,
+            customer_id: customer_id
         };
 
         if (event === 'licence.created') {

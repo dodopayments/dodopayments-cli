@@ -1,7 +1,9 @@
 import { type baseArgs } from "../types/baseArgs"
 
 const genBaseRefundData = ({
-    business_id = 'bus_test'
+    business_id = 'bus_test',
+    email,
+    customer_id
 }: baseArgs) => {
     return {
         "business_id": business_id,
@@ -11,8 +13,8 @@ const genBaseRefundData = ({
             "created_at": new Date().toISOString(),
             "currency": "USD",
             "customer": {
-                "customer_id": "cus_test",
-                "email": "test@acme.com",
+                "customer_id": customer_id,
+                "email": email,
                 "name": "Test user",
                 "phone_number": null
             },

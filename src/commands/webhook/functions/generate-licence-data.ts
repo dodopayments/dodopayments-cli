@@ -3,7 +3,8 @@ import { type baseArgs } from "../types/baseArgs";
 const genBaseLicenceData = ({
     business_id = 'bus_test',
     product_id = 'pdt_test',
-    subscription_id
+    subscription_id,
+    customer_id
 }: baseArgs) => {
     return {
         "business_id": business_id,
@@ -11,7 +12,7 @@ const genBaseLicenceData = ({
             "activations_limit": null,
             "business_id": business_id,
             "created_at": new Date().toISOString(),
-            "customer_id": "cus_test",
+            "customer_id": customer_id,
             "expires_at": null,
             "id": "lic_test",
             "instances_count": 0,
