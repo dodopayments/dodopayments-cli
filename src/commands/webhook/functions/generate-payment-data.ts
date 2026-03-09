@@ -4,7 +4,8 @@ import { type baseArgs } from "../types/baseArgs";
 const genBasePaymentData = ({
     business_id = 'bus_test',
     product_id = 'pdt_test',
-    qty = 1
+    qty = 1,
+    email
 }: baseArgs) => {
     return {
         "business_id": business_id,
@@ -27,7 +28,7 @@ const genBasePaymentData = ({
             "currency": "USD",
             "customer": {
                 "customer_id": "cus_test",
-                "email": "test@acme.com",
+                "email": email,
                 "metadata": {},
                 "name": "Test user",
                 "phone_number": "+15555550100"

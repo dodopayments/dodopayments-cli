@@ -5,5 +5,6 @@ export type baseArgs = {
     qty?: number,
     metadata?: {
         [key: string]: string
-    }
+    },
+    email?: string
 }

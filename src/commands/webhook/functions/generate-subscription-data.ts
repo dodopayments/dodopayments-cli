@@ -6,7 +6,8 @@ const genBaseSubscriptionData = ({
     product_id = 'pdt_test',
     subscription_id = 'sub_test',
     qty = 1,
-    metadata
+    metadata,
+    email
 }: baseArgs) => {
     return {
         "business_id": business_id,
@@ -24,8 +25,8 @@ const genBaseSubscriptionData = ({
             "created_at": new Date().toISOString(),
             "currency": "USD",
             "customer": {
-                "customer_id": "cus_123456",
-                "email": "test@acme.com",
+                "customer_id": "cus_test",
+                "email": email,
                 "name": "Test user",
                 "phone_number": null
             },

@@ -73,6 +73,11 @@ const metadata = await input({
     default: '{}'
 });
 
+const email = await input({
+    message: 'What\'s the email of the test user?',
+    default: 'john.doe@example.com'
+});
+
 while (true) {
     const event = await select({
         message: 'Select an event to send:',
@@ -93,7 +98,8 @@ while (true) {
         const params = {
             business_id,
             product_id,
-            metadata: metadataParsed
+            metadata: metadataParsed,
+            email: email
         };
 
         if (event === 'subscription.active') {

@@ -1,7 +1,8 @@
 import { type baseArgs } from "../types/baseArgs";
 
 const genBaseDisputeData = ({
-    business_id = 'bus_test'
+    business_id = 'bus_test',
+    email
 }: baseArgs) => {
     return {
         "business_id": business_id,
@@ -12,7 +13,7 @@ const genBaseDisputeData = ({
             "currency": "USD",
             "customer": {
                 "customer_id": "cus_test",
-                "email": "test@acme.com",
+                "email": email,
                 "name": "Test user",
                 "phone_number": "+447700900123"
             },
