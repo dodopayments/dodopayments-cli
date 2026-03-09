@@ -7,7 +7,8 @@ const genBaseSubscriptionData = ({
     subscription_id = 'sub_test',
     qty = 1,
     metadata,
-    email
+    email,
+    customer_id
 }: baseArgs) => {
     return {
         "business_id": business_id,
@@ -25,7 +26,7 @@ const genBaseSubscriptionData = ({
             "created_at": new Date().toISOString(),
             "currency": "USD",
             "customer": {
-                "customer_id": "cus_test",
+                "customer_id": customer_id,
                 "email": email,
                 "name": "Test user",
                 "phone_number": null

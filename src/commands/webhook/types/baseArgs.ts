@@ -6,5 +6,6 @@ export type baseArgs = {
     metadata?: {
         [key: string]: string
     },
-    email?: string
+    email: string,
+    customer_id: string
 }
