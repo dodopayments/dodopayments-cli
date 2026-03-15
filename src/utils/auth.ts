@@ -9,12 +9,39 @@ export type ResolvedCredentials = {
   apiKey: string;
   mode: Mode;
 };
+export type LogoutTarget = Mode | 'all';
 
 const CONFIG_DIR = path.join(os.homedir(), '.dodopayments');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'api-key');
+const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
 
 function ensureConfigDir(): void {
   fs.mkdirSync(CONFIG_DIR, { recursive: true });
+}
+
+function getConfiguredModesFromConfig(config: Config): Mode[] {
+  return ALL_MODES.filter((mode) => {
+    const apiKey = config[mode];
+    return typeof apiKey === 'string' && apiKey.length > 0;
+  });
+}
+
+function writeConfig(config: Config): void {
+  const configuredModes = getConfiguredModesFromConfig(config);
+
+  if (configuredModes.length === 0) {
+    resetConfig();
+    return;
+  }
+
+  ensureConfigDir();
+
+  const sanitizedConfig = configuredModes.reduce<Config>((result, mode) => {
+    result[mode] = config[mode];
+    return result;
+  }, {});
+
+  fs.writeFileSync(CONFIG_PATH, JSON.stringify(sanitizedConfig, null, 2), 'utf-8');
 }
 
 export function configExists(): boolean {
@@ -40,28 +67,57 @@ export function readConfig(): Config {
 }
 
 export function saveConfig(mode: Mode, apiKey: string): void {
-  ensureConfigDir();
-
   let existingConfig: Config = {};
 
   if (configExists()) {
     try {
-      existingConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
+      existingConfig = readConfig();
     } catch {
       existingConfig = {};
     }
   }
 
   existingConfig[mode] = apiKey;
-  fs.writeFileSync(
-    CONFIG_PATH,
-    JSON.stringify(existingConfig, null, 2),
-    'utf-8',
-  );
+  writeConfig(existingConfig);
 }
 
 export function resetConfig(): void {
   fs.rmSync(CONFIG_PATH, { force: true });
+}
+
+export function clearConfig(target: LogoutTarget): {
+  hadInvalidConfig: boolean;
+  removedModes: Mode[];
+} {
+  if (!configExists()) {
+    return { hadInvalidConfig: false, removedModes: [] };
+  }
+
+  let config: Config;
+  try {
+    config = readConfig();
+  } catch {
+    resetConfig();
+    return { hadInvalidConfig: true, removedModes: [] };
+  }
+
+  const configuredModes = getConfiguredModesFromConfig(config);
+
+  if (target === 'all') {
+    resetConfig();
+    return { hadInvalidConfig: false, removedModes: configuredModes };
+  }
+
+  const hasStoredMode = Object.prototype.hasOwnProperty.call(config, target);
+
+  if (!hasStoredMode) {
+    return { hadInvalidConfig: false, removedModes: [] };
+  }
+
+  delete config[target];
+  writeConfig(config);
+
+  return { hadInvalidConfig: false, removedModes: [target] };
 }
 
 export async function resolveCredentials(): Promise<ResolvedCredentials> {
@@ -79,10 +135,11 @@ export async function resolveCredentials(): Promise<ResolvedCredentials> {
     process.exit(1);
   }
 
-  const modes = Object.keys(config) as Mode[];
+  const modes = getConfiguredModesFromConfig(config);
 
   if (modes.length === 0) {
     console.error('No valid credentials found. Please login again.');
+    resetConfig();
     process.exit(1);
   }
 

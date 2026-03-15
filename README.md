@@ -76,6 +76,14 @@ This command will:
 
 Note: Upto 1 Test Mode & 1 Live Mode can be used at the same time
 
+To clear stored credentials, run:
+
+```bash
+dodo logout
+```
+
+The logout flow lets you choose between **All accounts**, **Test Mode**, and **Live Mode**.
+
 ## Usage
 
 The general syntax is:
@@ -157,9 +165,11 @@ Manage and test webhooks directly from the CLI.
 | Command | Description |
 |---------|-------------|
 | `dodo wh listen` | Listen for webhooks from Dodo Payments in real time and forward them to your local dev server |
-| `dodo wh trigger` | Trigger a test webhook event interactively |
+| `dodo wh trigger` | Trigger a test webhook event interactively, even while logged out |
 
 > **Note:** The webhook triggering doesn't support signing requests yet. Please disable webhook signature verification while triggering. A simple way to do this is using `unsafe_unwrap()` instead of `unwrap()` in the webhook endpoint **during testing only**.
+
+> **Note:** `dodo wh trigger` does not require `dodo login`. It can be used as a local/offline webhook payload generator.
 
 > **Note:** The webhook listening tool will only work with a test mode API key. If you use a live mode API key, it won't work.
 
