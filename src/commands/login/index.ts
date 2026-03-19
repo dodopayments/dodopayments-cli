@@ -27,13 +27,13 @@ export async function handleLogin(): Promise<void> {
     console.log('Successfully verified your Dodo Payments API Key!');
   } catch {
     console.log(
-      'Something went wrong while authenticating, please check your API key!',
+      'Something went wrong while authenticating. Please check your API key and selected environment.',
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   console.log('Storing / Updating existing configuration...');
   saveConfig(mode, apiKey);
   console.log('Setup complete successfully!');
-  process.exit(0);
 }

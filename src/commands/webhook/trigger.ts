@@ -1,227 +1,179 @@
-import { input, password as passwordPrompt, select } from '@inquirer/prompts';
-import { supportedEvents } from './functions/supported-events';
-
-// Subscription Events
+import { input, select } from '@inquirer/prompts';
+import type { baseArgs } from './types/baseArgs';
 import {
-    genSubscriptionActive,
-    genSubscriptionUpdated,
-    genSubscriptionOnHold,
-    genSubscriptionRenewed,
-    genSubscriptionPlanChanged,
-    genSubscriptionCancelled,
-    genSubscriptionFailed,
-    genSubscriptionExpired
+  supportedEvents,
+  type SupportedEvent,
+} from './functions/supported-events';
+
+import {
+  genSubscriptionActive,
+  genSubscriptionUpdated,
+  genSubscriptionOnHold,
+  genSubscriptionRenewed,
+  genSubscriptionPlanChanged,
+  genSubscriptionCancelled,
+  genSubscriptionFailed,
+  genSubscriptionExpired,
 } from './functions/generate-subscription-data';
 
-// Payment events
 import {
-    genPaymentSuccess,
-    genPaymentFailed,
-    genPaymentProcessing,
-    genPaymentCancelled
+  genPaymentSuccess,
+  genPaymentFailed,
+  genPaymentProcessing,
+  genPaymentCancelled,
 } from './functions/generate-payment-data';
 
-// Refund events
-import {
-    genRefundSuccess,
-    genRefundFailed
-} from './functions/generate-refund-data';
+import { genRefundSuccess, genRefundFailed } from './functions/generate-refund-data';
 
-// Dispute events
 import {
-    genDisputeOpened,
-    genDisputeExpired,
-    genDisputeAccepted,
-    genDisputeCancelled,
-    genDisputeChallenged,
-    genDisputeWon,
-    genDisputeLost
+  genDisputeOpened,
+  genDisputeExpired,
+  genDisputeAccepted,
+  genDisputeCancelled,
+  genDisputeChallenged,
+  genDisputeWon,
+  genDisputeLost,
 } from './functions/generate-dispute-data';
 
-// Licence events
-import {
-    genLicenceCreated
-} from './functions/generate-licence-data';
+import { genLicenceCreated } from './functions/generate-licence-data';
 
-const endpoint = await input({
-    message: 'What is your endpoint?',
-    validate: (input) => {
-        if (!input.startsWith('http')) {
-            return 'Please enter a valid URL starting with http or https';
-        }
-        return true;
+type PayloadGenerator = (args: baseArgs) => unknown;
+
+const eventGenerators: Record<SupportedEvent, PayloadGenerator> = {
+  'subscription.active': genSubscriptionActive,
+  'subscription.updated': genSubscriptionUpdated,
+  'subscription.on_hold': genSubscriptionOnHold,
+  'subscription.renewed': genSubscriptionRenewed,
+  'subscription.plan_changed': genSubscriptionPlanChanged,
+  'subscription.cancelled': genSubscriptionCancelled,
+  'subscription.failed': genSubscriptionFailed,
+  'subscription.expired': genSubscriptionExpired,
+  'payment.success': genPaymentSuccess,
+  'payment.failed': genPaymentFailed,
+  'payment.processing': genPaymentProcessing,
+  'payment.cancelled': genPaymentCancelled,
+  'licence.created': genLicenceCreated,
+  'refund.success': genRefundSuccess,
+  'refund.failed': genRefundFailed,
+  'dispute.opened': genDisputeOpened,
+  'dispute.expired': genDisputeExpired,
+  'dispute.accepted': genDisputeAccepted,
+  'dispute.cancelled': genDisputeCancelled,
+  'dispute.challenged': genDisputeChallenged,
+  'dispute.won': genDisputeWon,
+  'dispute.lost': genDisputeLost,
+};
+
+function parseMetadata(metadataInput: string): Record<string, unknown> {
+  try {
+    const parsed = JSON.parse(metadataInput);
+
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+      throw new Error('INVALID_METADATA');
     }
-});
 
-// const webhook_secret = await passwordPrompt({
-//     message: 'What is your Dodo Payments webhook secret? (Optional)',
-//     mask: true
-// });
+    return parsed as Record<string, unknown>;
+  } catch {
+    throw new Error('INVALID_METADATA');
+  }
+}
 
-const business_id = await input({
+export async function handleWebhookTrigger(): Promise<void> {
+  const endpoint = await input({
+    message: 'What is your endpoint?',
+    validate: (value) => {
+      if (!value.startsWith('http://') && !value.startsWith('https://')) {
+        return 'Please enter a valid URL starting with http:// or https://';
+      }
+
+      return true;
+    },
+  });
+
+  const businessId = await input({
     message: 'What is your Dodo Payments business ID? (Optional)',
-    default: 'bus_test'
-});
+    default: 'bus_test',
+  });
 
-const product_id = await input({
+  const productId = await input({
     message: 'What is your product ID? (Optional)',
-    default: 'pdt_test'
-});
+    default: 'pdt_test',
+  });
 
-const metadata = await input({
+  const metadataInput = await input({
     message: 'What is your metadata? (JSON stringified, Optional)',
-    default: '{}'
-});
+    default: '{}',
+    validate: (value) => {
+      try {
+        parseMetadata(value);
+        return true;
+      } catch {
+        return 'Please enter a valid JSON object.';
+      }
+    },
+  });
 
-const email = await input({
-    message: 'What is the customer\'s email? (Optional)',
-    default: 'john.doe@example.com'
-});
+  const email = await input({
+    message: "What is the customer's email? (Optional)",
+    default: 'john.doe@example.com',
+  });
 
-const customer_id = await input({
-    message: 'What is the customer\'s id? (Optional)',
-    default: 'cus_test'
-});
+  const customerId = await input({
+    message: "What is the customer's id? (Optional)",
+    default: 'cus_test',
+  });
 
-while (true) {
-    const event = await select({
-        message: 'Select an event to send:',
-        choices: [...supportedEvents, 'exit'].map(e => ({ value: e, name: e })),
-        loop: false,
+  const metadata = parseMetadata(metadataInput);
+  const eventChoices: Array<{ name: string; value: SupportedEvent | 'exit' }> = [
+    ...supportedEvents.map((value) => ({
+      name: value,
+      value,
+    })),
+    {
+      name: 'exit',
+      value: 'exit',
+    },
+  ];
+
+  while (true) {
+    const event = await select<SupportedEvent | 'exit'>({
+      message: 'Select an event to send:',
+      choices: eventChoices,
+      loop: false,
     });
 
     if (event === 'exit') {
-        console.log('Exiting...');
-        process.exit();
+      console.log('Exiting webhook trigger.');
+      return;
     }
 
-    let data;
-    const metadataParsed: { [key: string]: string } = JSON.parse(metadata);
+    const generator = eventGenerators[event];
+    const data = generator({
+      business_id: businessId,
+      product_id: productId,
+      metadata,
+      email,
+      customer_id: customerId,
+    });
 
-    // Parameters based on subscription event
-    if (event.startsWith('subscription.')) {
-        const params = {
-            business_id,
-            product_id,
-            metadata: metadataParsed,
-            email: email,
-            customer_id: customer_id
-        };
-
-        if (event === 'subscription.active') {
-            data = genSubscriptionActive(params);
-        } else if (event === 'subscription.updated') {
-            data = genSubscriptionUpdated(params);
-        } else if (event === 'subscription.on_hold') {
-            data = genSubscriptionOnHold(params);
-        } else if (event === 'subscription.renewed') {
-            data = genSubscriptionRenewed(params);
-        } else if (event === 'subscription.plan_changed') {
-            data = genSubscriptionPlanChanged(params);
-        } else if (event === 'subscription.cancelled') {
-            data = genSubscriptionCancelled(params);
-        } else if (event === 'subscription.failed') {
-            data = genSubscriptionFailed(params);
-        } else if (event === 'subscription.expired') {
-            data = genSubscriptionExpired(params);
-        }
-    }
-
-    // Parameters based on payment event
-    if (event.startsWith('payment.')) {
-        const params = {
-            business_id,
-            product_id,
-            metadata: metadataParsed,
-            email: email,
-            customer_id: customer_id
-        };
-
-        if (event === 'payment.success') {
-            data = genPaymentSuccess(params);
-        } else if (event === 'payment.failed') {
-            data = genPaymentFailed(params);
-        } else if (event === 'payment.processing') {
-            data = genPaymentProcessing(params);
-        } else if (event === 'payment.cancelled') {
-            data = genPaymentCancelled(params);
-        }
-    }
-
-    // Parameters based on refund event
-    if (event.startsWith('refund.')) {
-        const params = {
-            business_id,
-            email: email,
-            customer_id: customer_id
-        };
-
-        if (event === 'refund.success') {
-            data = genRefundSuccess(params);
-        } else if (event === 'refund.failed') {
-            data = genRefundFailed(params);
-        }
-    }
-
-    // Parameters based on dispute event
-    if (event.startsWith('dispute.')) {
-        const params = {
-            business_id,
-            email: email,
-            customer_id: customer_id
-        };
-
-        if (event === 'dispute.opened') {
-            data = genDisputeOpened(params);
-        } else if (event === 'dispute.expired') {
-            data = genDisputeExpired(params);
-        } else if (event === 'dispute.accepted') {
-            data = genDisputeAccepted(params);
-        } else if (event === 'dispute.cancelled') {
-            data = genDisputeCancelled(params);
-        } else if (event === 'dispute.challenged') {
-            data = genDisputeChallenged(params);
-        } else if (event === 'dispute.won') {
-            data = genDisputeWon(params);
-        } else if (event === 'dispute.lost') {
-            data = genDisputeLost(params);
-        }
-    }
-
-    // Parameters based on licence event
-    if (event.startsWith('licence.')) {
-        const params = {
-            business_id,
-            product_id,
-            email: email,
-            customer_id: customer_id
-        };
-
-        if (event === 'licence.created') {
-            data = genLicenceCreated(params);
-        }
-    }
-
-    // const timestamp = new Date();
-    // const webhookId = crypto.randomUUID();
-    // const webhookInstance = new Webhook(webhook_secret);
-    // const payloadString = JSON.stringify(data);
-    // const signature = webhookInstance.sign(webhookId, timestamp, payloadString);
-
-    await fetch(endpoint, {
+    try {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            // "webhook-id": webhookId,
-            // "webhook-timestamp": Math.floor(timestamp.getTime() / 1000).toString(),
-            // "webhook-signature": signature,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data)
-    }).then(async res => {
-        console.log(`✅ Webhook Event Sent!\nReceived Response Code: ${res.status}\nReceived Response Body: ${await res.text()}`);
-        console.log();
-    }).catch(error => {
-        console.error('❌ Webhook Event Failed:', error);
-        console.log();
-    });
+        body: JSON.stringify(data),
+      });
+
+      const responseBody = await response.text();
+
+      console.log('Webhook event sent successfully.');
+      console.log(`Response status: ${response.status}`);
+      console.log(`Response body: ${responseBody}`);
+      console.log();
+    } catch (error) {
+      console.error('Webhook event failed:', error);
+      console.log();
+    }
+  }
 }

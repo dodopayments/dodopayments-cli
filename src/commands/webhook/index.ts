@@ -1,18 +1,31 @@
-import DodoPayments from 'dodopayments';
+import type DodoPayments from 'dodopayments';
 import { usage } from '../../utils/usage-help';
 import WebhookListener from './listen';
+import { handleWebhookTrigger } from './trigger';
+
+type AuthenticatedWebhookContext = {
+  apiKey: string;
+  client: DodoPayments;
+};
 
 export async function handleWebhook(
-  client: DodoPayments,
-  apiKey: string,
   subCommand?: string,
+  context?: AuthenticatedWebhookContext,
 ) {
   switch (subCommand) {
     case 'listen':
-      WebhookListener({ API_KEY: apiKey, dodoClient: client });
+      if (!context) {
+        console.error('Please run `dodo login` first.');
+        process.exit(1);
+      }
+
+      await WebhookListener({
+        API_KEY: context.apiKey,
+        dodoClient: context.client,
+      });
       break;
     case 'trigger':
-      import('./trigger');
+      await handleWebhookTrigger();
       break;
     default:
       usage.wh!.forEach((e) =>
