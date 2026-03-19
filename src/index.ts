@@ -37,7 +37,7 @@ try {
     }
 
     console.log(
-      'Login with `dodo login` to use authenticated commands. `dodo logout` and `dodo wh trigger` are available without login.',
+      'Please login with `dodo login` to use authenticated commands!',
     );
     process.exit(0);
   } else {
