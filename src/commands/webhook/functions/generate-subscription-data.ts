@@ -114,6 +114,7 @@ const genSubscriptionCancelled = (args: baseArgs) => {
         data: {
             ...base.data,
             cancel_at_next_billing_date: true,
+            cancelled_at: new Date().toISOString(),
             status: 'cancelled'
         }
     };
