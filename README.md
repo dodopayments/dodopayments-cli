@@ -72,9 +72,11 @@ This command will:
 1. Open your browser to the Dodo Payments API Keys page
 2. Prompt you to enter your API Key
 3. Ask you to select the environment (**Test Mode** or **Live Mode**)
-4. Store your credentials locally to `~/.dodopayments/api-key`
+4. Store your credentials securely to OS secure storage (Credential Vault, Keychain, etc.)
 
-Note: Upto 1 Test Mode & 1 Live Mode can be used at the same time
+Notes:
+- Upto 1 Test Mode & 1 Live Mode can be used at the same time.
+- You may be prompted to enter your password since we're using your OS secure storage.
 
 To clear stored credentials, run:
 
