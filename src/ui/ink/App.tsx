@@ -8,6 +8,9 @@ import { resolveCredentials, setSessionMode } from '../../utils/auth';
 import type { Message, BlockType, BlockVariant } from './types';
 import type { CommandContext } from './CommandContext';
 import { handleCommand } from './router';
+import { checkForUpdates } from '../../utils/update';
+import { version } from '../../../package.json';
+import { UpdateNotification } from './UpdateNotification';
 
 export const App = () => {
   const { exit } = useApp();
@@ -16,6 +19,17 @@ export const App = () => {
   const [showBanner, setShowBanner] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [authInfo, setAuthInfo] = useState<{ mode: string; key: string } | null>(null);
+  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkUpdate = async () => {
+      const latest = await checkForUpdates(version);
+      if (latest) {
+        setUpdateVersion(latest);
+      }
+    };
+    checkUpdate();
+  }, []);
 
   useEffect(() => {
     const init = async () => {
@@ -110,7 +124,7 @@ export const App = () => {
     });
   };
 
-  const promptSelect = (label: string, options: {label: string, value: string}[]): Promise<string> => {
+  const promptSelect = (label: string, options: { label: string, value: string }[]): Promise<string> => {
     return new Promise((resolve) => {
       const blockId = addBlockToLatestSystemMessage({
         type: 'inline-select',
@@ -181,6 +195,7 @@ export const App = () => {
   return (
     <Box flexDirection="column" minHeight={10}>
       {showBanner && <WelcomeBanner />}
+      {updateVersion && <UpdateNotification latestVersion={updateVersion} />}
       {isInitialized && <StatusBar authInfo={authInfo} />}
       <MessageList messages={messages} />
       <InputBar

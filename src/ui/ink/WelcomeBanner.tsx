@@ -1,4 +1,5 @@
 import { Box, Text } from 'ink';
+import { version } from '../../../package.json';
 
 const LOGO_TEXT = [
   `  ______          _        ______                                _       `,
@@ -20,8 +21,9 @@ export const WelcomeBanner = () => {
           {LOGO_TEXT.map((line, i) => (
             <Text key={`logo-${i}`} color="#07BC70" bold wrap="truncate">{line}</Text>
           ))}
-          <Box marginTop={1}>
+          <Box marginTop={1} flexDirection="row" justifyContent="space-between" width="100%">
             <Text color="gray" wrap="truncate">  The official CLI to manage Dodo Payments!</Text>
+            <Text color="gray">v{version}</Text>
           </Box>
         </Box>
       </Box>
