@@ -1,24 +1,32 @@
 #!/usr/bin/env node
 import { renderHelp } from './ui';
 import { configExists, resolveCredentials } from './utils/auth';
+import { defaultContext } from './ui/ink/DefaultContext';
+import { render } from 'ink';
+import { App } from './ui/ink/App';
+import React from 'react';
 
 process.on('SIGINT', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));
 
 const category = process.argv[2];
 const subCommand = process.argv[3];
+const extraArgs = process.argv.slice(4);
 
-try {
-  if (category === 'login') {
-    const { handleLogin } = await import('./commands/login');
-    await handleLogin();
-  } else if (category === 'logout') {
-    const { handleLogout } = await import('./commands/logout');
-    await handleLogout();
-  } else if (category === 'wh' && subCommand === 'trigger') {
-    const { handleWebhook } = await import('./commands/webhook');
-    await handleWebhook(subCommand);
-  } else if (!configExists()) {
+if (process.stdout.isTTY && !category) {
+  render(React.createElement(App));
+} else {
+  try {
+    if (category === 'login') {
+      const { handleLogin } = await import('./commands/login');
+      await handleLogin(defaultContext);
+    } else if (category === 'logout') {
+      const { handleLogout } = await import('./commands/logout');
+      await handleLogout(defaultContext);
+    } else if (category === 'wh' && subCommand === 'trigger') {
+      const { handleWebhook } = await import('./commands/webhook');
+      await handleWebhook(subCommand, defaultContext);
+    } else if (!(await configExists())) {
     if (category === 'wh' && !subCommand) {
       renderHelp(category);
       console.log();
@@ -41,7 +49,7 @@ try {
     );
     process.exit(0);
   } else {
-    const { apiKey, mode } = await resolveCredentials();
+    const { apiKey, mode } = await resolveCredentials(defaultContext);
     const { default: DodoPayments } = await import('dodopayments');
 
     const dodoClient = new DodoPayments({
@@ -52,47 +60,47 @@ try {
     switch (category) {
       case 'products': {
         const { handleProducts } = await import('./commands/products');
-        await handleProducts(dodoClient, subCommand);
+        await handleProducts(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'payments': {
         const { handlePayments } = await import('./commands/payments');
-        await handlePayments(dodoClient, subCommand);
+        await handlePayments(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'customers': {
         const { handleCustomers } = await import('./commands/customers');
-        await handleCustomers(dodoClient, subCommand);
+        await handleCustomers(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'discounts': {
         const { handleDiscounts } = await import('./commands/discounts');
-        await handleDiscounts(dodoClient, subCommand);
+        await handleDiscounts(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'licences': {
         const { handleLicences } = await import('./commands/licences');
-        await handleLicences(dodoClient, subCommand);
+        await handleLicences(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'addons': {
         const { handleAddons } = await import('./commands/addons');
-        await handleAddons(dodoClient, subCommand);
+        await handleAddons(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'refunds': {
         const { handleRefund } = await import('./commands/refund');
-        await handleRefund(dodoClient, subCommand);
+        await handleRefund(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'checkout': {
         const { handleCheckout } = await import('./commands/checkout');
-        await handleCheckout(dodoClient, subCommand);
+        await handleCheckout(dodoClient, subCommand, defaultContext, extraArgs);
         break;
       }
       case 'wh': {
         const { handleWebhook } = await import('./commands/webhook');
-        await handleWebhook(subCommand, { apiKey, client: dodoClient });
+        await handleWebhook(subCommand, defaultContext, { apiKey, client: dodoClient });
         break;
       }
       default:
@@ -103,4 +111,5 @@ try {
   if (e?.name === 'ExitPromptError') process.exit(0);
   console.error('An unexpected error occurred:', e);
   process.exit(1);
+}
 }

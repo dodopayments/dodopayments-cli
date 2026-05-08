@@ -34,7 +34,7 @@ We provide various ways to install the CLI:
 
 > **Note:** If you have Node or Bun installed, it's highly recommended to use that installation method.
 
-### Using npm (Recommended)
+### Using npm
 
 ```bash
 npm install -g dodopayments-cli
@@ -65,7 +65,7 @@ bun install -g dodopayments-cli
 Before using the CLI, you must authenticate:
 
 ```bash
-dodo login
+/login
 ```
 
 This command will:
@@ -79,7 +79,7 @@ Note: Upto 1 Test Mode & 1 Live Mode can be used at the same time
 To clear stored credentials, run:
 
 ```bash
-dodo logout
+/logout
 ```
 
 The logout flow lets you choose between **All accounts**, **Test Mode**, and **Live Mode**.
@@ -89,8 +89,16 @@ The logout flow lets you choose between **All accounts**, **Test Mode**, and **L
 The general syntax is:
 
 ```bash
-dodo <category> <sub-command>
+/<category> <sub-command>
 ```
+
+### AI Assistant
+
+Interact with the built-in AI assistant to query your payments, customers, and other data using natural language.
+
+| Command | Description |
+|---------|-------------|
+| `/ai <query>` | Ask the AI assistant a question (or type your question directly) |
 
 ### Products
 
@@ -98,9 +106,9 @@ Manage your products catalog.
 
 | Command | Description |
 |---------|-------------|
-| `dodo products list` | List all products |
-| `dodo products create` | Open dashboard to create a product |
-| `dodo products info` | View details for a specific product |
+| `/products list <page>` | List products |
+| `/products create` | Open dashboard to create a product |
+| `/products info <id>` | View details for a specific product |
 
 ### Payments
 
@@ -108,8 +116,8 @@ View payment transactions.
 
 | Command | Description |
 |---------|-------------|
-| `dodo payments list` | List all payments |
-| `dodo payments info` | Get information about a specific payment |
+| `/payments list <page>` | List payments |
+| `/payments info <id>` | Get information about a specific payment |
 
 ### Customers
 
@@ -117,9 +125,9 @@ Manage your customer base.
 
 | Command | Description |
 |---------|-------------|
-| `dodo customers list` | List all customers |
-| `dodo customers create` | Create a new customer profile |
-| `dodo customers update` | Update an existing customer's details |
+| `/customers list <page>` | List customers |
+| `/customers create` | Create a new customer profile |
+| `/customers update <id>` | Update an existing customer's details |
 
 ### Discounts
 
@@ -127,9 +135,9 @@ Manage coupons and discounts.
 
 | Command | Description |
 |---------|-------------|
-| `dodo discounts list` | List all discounts |
-| `dodo discounts create` | Create a new percentage-based discount |
-| `dodo discounts delete` | Remove a discount by ID |
+| `/discounts list <page>` | List discounts |
+| `/discounts create` | Create a new percentage-based discount |
+| `/discounts delete <id>` | Remove a discount by ID |
 
 ### Licenses
 
@@ -137,7 +145,7 @@ Manage software licenses.
 
 | Command | Description |
 |---------|-------------|
-| `dodo licences list` | List all licenses |
+| `/licences list <page>` | List licenses |
 
 ### Addons
 
@@ -145,9 +153,9 @@ Manage your add-ons.
 
 | Command | Description |
 |---------|-------------|
-| `dodo addons list` | List all addons |
-| `dodo addons create` | Open dashboard to create an addon |
-| `dodo addons info` | View details for a specific addon |
+| `/addons list <page>` | List addons |
+| `/addons create` | Open dashboard to create an addon |
+| `/addons info <id>` | View details for a specific addon |
 
 ### Refunds
 
@@ -155,8 +163,8 @@ Manage your refunds.
 
 | Command | Description |
 |---------|-------------|
-| `dodo refund list` | List all refunds |
-| `dodo refund info` | View details for a specific refund |
+| `/refund list` | List refunds |
+| `/refund info <id>` | View details for a specific refund |
 
 ### Webhooks
 
@@ -164,12 +172,12 @@ Manage and test webhooks directly from the CLI.
 
 | Command | Description |
 |---------|-------------|
-| `dodo wh listen` | Listen for webhooks from Dodo Payments in real time and forward them to your local dev server |
-| `dodo wh trigger` | Trigger a test webhook event interactively, even while logged out |
+| `/wh listen` | Listen for webhooks from Dodo Payments in real time and forward them to your local dev server |
+| `/wh trigger` | Trigger a test webhook event interactively, even while logged out |
 
 > **Note:** The webhook triggering doesn't support signing requests yet. Please disable webhook signature verification while triggering. A simple way to do this is using `unsafe_unwrap()` instead of `unwrap()` in the webhook endpoint **during testing only**.
 
-> **Note:** `dodo wh trigger` does not require `dodo login`. It can be used as a local/offline webhook payload generator.
+> **Note:** `/wh trigger` does not require `/login`. It can be used as a local/offline webhook payload generator.
 
 > **Note:** The webhook listening tool will only work with a test mode API key. If you use a live mode API key, it won't work.
 

@@ -1,9 +1,9 @@
-import { input, select } from '@inquirer/prompts';
 import type { baseArgs } from './types/baseArgs';
 import {
   supportedEvents,
   type SupportedEvent,
 } from './functions/supported-events';
+import type { CommandContext } from '../../ui/ink/CommandContext';
 
 import {
   genSubscriptionActive,
@@ -78,72 +78,57 @@ function parseMetadata(metadataInput: string): Record<string, unknown> {
   }
 }
 
-export async function handleWebhookTrigger(): Promise<void> {
-  const endpoint = await input({
-    message: 'What is your endpoint?',
-    validate: (value) => {
-      if (!value.startsWith('http://') && !value.startsWith('https://')) {
-        return 'Please enter a valid URL starting with http:// or https://';
-      }
+export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
+  let endpoint = '';
+  while (!endpoint) {
+    const value = await ctx.promptInput('What is your endpoint?');
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      endpoint = value;
+    } else {
+      ctx.addBlock({ type: 'error', message: 'Please enter a valid URL starting with http:// or https://' });
+    }
+  }
 
-      return true;
-    },
-  });
+  const businessIdRaw = await ctx.promptInput('What is your Dodo Payments business ID? (Optional)');
+  const businessId = businessIdRaw.trim() || 'bus_test';
 
-  const businessId = await input({
-    message: 'What is your Dodo Payments business ID? (Optional)',
-    default: 'bus_test',
-  });
+  const productIdRaw = await ctx.promptInput('What is your product ID? (Optional)');
+  const productId = productIdRaw.trim() || 'pdt_test';
 
-  const productId = await input({
-    message: 'What is your product ID? (Optional)',
-    default: 'pdt_test',
-  });
+  let metadata = {};
+  while (true) {
+    const metadataInputRaw = await ctx.promptInput('What is your metadata? (JSON stringified, Optional)');
+    const metadataInput = metadataInputRaw.trim() || '{}';
+    try {
+      metadata = parseMetadata(metadataInput);
+      break;
+    } catch {
+      ctx.addBlock({ type: 'error', message: 'Please enter a valid JSON object.' });
+    }
+  }
 
-  const metadataInput = await input({
-    message: 'What is your metadata? (JSON stringified, Optional)',
-    default: '{}',
-    validate: (value) => {
-      try {
-        parseMetadata(value);
-        return true;
-      } catch {
-        return 'Please enter a valid JSON object.';
-      }
-    },
-  });
+  const emailRaw = await ctx.promptInput("What is the customer's email? (Optional)");
+  const email = emailRaw.trim() || 'john.doe@example.com';
 
-  const email = await input({
-    message: "What is the customer's email? (Optional)",
-    default: 'john.doe@example.com',
-  });
+  const customerIdRaw = await ctx.promptInput("What is the customer's id? (Optional)");
+  const customerId = customerIdRaw.trim() || 'cus_test';
 
-  const customerId = await input({
-    message: "What is the customer's id? (Optional)",
-    default: 'cus_test',
-  });
-
-  const metadata = parseMetadata(metadataInput);
-  const eventChoices: Array<{ name: string; value: SupportedEvent | 'exit' }> = [
+  const eventChoices: Array<{ label: string; value: SupportedEvent | 'exit' }> = [
     ...supportedEvents.map((value) => ({
-      name: value,
+      label: value,
       value,
     })),
     {
-      name: 'exit',
+      label: 'exit',
       value: 'exit',
     },
   ];
 
   while (true) {
-    const event = await select<SupportedEvent | 'exit'>({
-      message: 'Select an event to send:',
-      choices: eventChoices,
-      loop: false,
-    });
+    const event = await ctx.promptSelect('Select an event to send:', eventChoices) as SupportedEvent | 'exit';
 
     if (event === 'exit') {
-      console.log('Exiting webhook trigger.');
+      ctx.addBlock({ type: 'success', message: 'Exiting webhook trigger.' });
       return;
     }
 
@@ -167,13 +152,16 @@ export async function handleWebhookTrigger(): Promise<void> {
 
       const responseBody = await response.text();
 
-      console.log('Webhook event sent successfully.');
-      console.log(`Response status: ${response.status}`);
-      console.log(`Response body: ${responseBody}`);
-      console.log();
-    } catch (error) {
-      console.error('Webhook event failed:', error);
-      console.log();
+      ctx.addBlock({ type: 'success', message: 'Webhook event sent successfully.' });
+      ctx.addBlock({
+        type: 'detail',
+        data: {
+          'Status': response.status,
+          'Response': responseBody
+        }
+      });
+    } catch (error: any) {
+      ctx.addBlock({ type: 'error', message: `Webhook event failed: ${error.message}` });
     }
   }
 }

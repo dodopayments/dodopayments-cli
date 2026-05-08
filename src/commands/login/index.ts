@@ -1,39 +1,35 @@
 import DodoPayments from 'dodopayments';
-import { input, select } from '@inquirer/prompts';
 import open from 'open';
 import { saveConfig } from '../../utils/auth';
+import type { CommandContext } from '../../ui/ink/CommandContext';
 
-export async function handleLogin(): Promise<void> {
+export async function handleLogin(ctx: CommandContext): Promise<void> {
   await open('https://app.dodopayments.com/developer/api-keys');
 
-  const apiKey = await input({
-    message: 'Enter your Dodo Payments API Key:',
-    required: true,
-  });
+  const apiKey = await ctx.promptInput('Enter your Dodo Payments API Key:');
 
-  const mode = (await select({
-    choices: [
-      { name: 'Test Mode', value: 'test_mode' },
-      { name: 'Live Mode', value: 'live_mode' },
-    ],
-    message: 'Choose the environment:',
-  })) as 'test_mode' | 'live_mode';
+  const mode = (await ctx.promptSelect('Choose the environment:', [
+    { label: 'Test Mode', value: 'test_mode' },
+    { label: 'Live Mode', value: 'live_mode' },
+  ])) as 'test_mode' | 'live_mode';
 
   const client = new DodoPayments({ bearerToken: apiKey, environment: mode });
 
-  console.log('Verifying Dodo Payments API Key');
+  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Verifying Dodo Payments API Key...' });
   try {
     await client.products.list({ page_size: 1 });
-    console.log('Successfully verified your Dodo Payments API Key!');
+    ctx.removeBlock(spinnerId);
+    ctx.addBlock({ type: 'success', message: 'Successfully verified your Dodo Payments API Key!' });
   } catch {
-    console.log(
-      'Something went wrong while authenticating. Please check your API key and selected environment.',
-    );
+    ctx.removeBlock(spinnerId);
+    ctx.addBlock({
+      type: 'error',
+      message: 'Something went wrong while authenticating. Please check your API key and selected environment.',
+    });
     process.exitCode = 1;
     return;
   }
 
-  console.log('Storing / Updating existing configuration...');
-  saveConfig(mode, apiKey);
-  console.log('Setup complete successfully!');
+  await saveConfig(mode, apiKey);
+  ctx.addBlock({ type: 'success', message: 'Setup complete successfully!' });
 }
