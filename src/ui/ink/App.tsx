@@ -11,6 +11,7 @@ import { handleCommand } from './router';
 import { checkForUpdates } from '../../utils/update';
 import { version } from '../../../package.json';
 import { UpdateNotification } from './UpdateNotification';
+import { colors } from '../theme';
 
 export const App = () => {
   const { exit } = useApp();
@@ -194,9 +195,14 @@ export const App = () => {
 
   return (
     <Box flexDirection="column" minHeight={10}>
-      {showBanner && <WelcomeBanner />}
+      {showBanner && (
+        <Box flexDirection="column" borderStyle="round" borderColor={colors.brand} paddingX={1} paddingY={0}>
+          <WelcomeBanner />
+          {isInitialized && <StatusBar authInfo={authInfo} />}
+        </Box>
+      )}
       {updateVersion && <UpdateNotification latestVersion={updateVersion} />}
-      {isInitialized && <StatusBar authInfo={authInfo} />}
+      {!showBanner && isInitialized && <StatusBar authInfo={authInfo} />}
       <MessageList messages={messages} />
       <InputBar
         onSubmit={handleSubmit}
