@@ -126,7 +126,7 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
   return (
     <Box flexDirection="column" marginTop={1}>
       {historyIndex === -1 && <Autocomplete input={input} selectedIndex={selectedIndex} />}
-      <Box backgroundColor={colors.brandForest} paddingX={1} width="100%">
+      <Box backgroundColor={colors.brandBlack} paddingX={1} width="100%">
         <Box marginRight={1}>
           <Text color={colors.accentLime}>{glyphs.prompt}</Text>
         </Box>
