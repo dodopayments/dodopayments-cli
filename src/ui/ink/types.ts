@@ -4,6 +4,7 @@ export type BlockVariant =
   | { type: 'detail'; data: Record<string, any> }
   | { type: 'error'; message: string }
   | { type: 'success'; message: string }
+  | { type: 'info'; message: string }
   | { type: 'link'; text: string; url: string }
   | { type: 'empty' }
   | { type: 'streaming'; text: string }

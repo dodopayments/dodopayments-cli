@@ -238,6 +238,13 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
           <Text color={colors.textPrimary}>{block.message}</Text>
         </Box>
       );
+    case 'info':
+      return (
+        <Box>
+          <Text color={colors.info}>{glyphs.bullet} </Text>
+          <Text color={colors.textPrimary}>{block.message}</Text>
+        </Box>
+      );
     case 'link':
       return (
         <Box>
