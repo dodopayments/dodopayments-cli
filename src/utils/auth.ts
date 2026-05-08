@@ -1,7 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
-import { select } from '@inquirer/prompts';
+import keytar from 'keytar';
 
 export type Mode = 'test_mode' | 'live_mode';
 export type Config = Partial<Record<Mode, string>>;
@@ -11,12 +11,38 @@ export type ResolvedCredentials = {
 };
 export type LogoutTarget = Mode | 'all';
 
+const SERVICE_NAME = 'dodopayments-cli';
 const CONFIG_DIR = path.join(os.homedir(), '.dodopayments');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'api-key');
 const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
 
-function ensureConfigDir(): void {
-  fs.mkdirSync(CONFIG_DIR, { recursive: true });
+let sessionMode: Mode | null = null;
+
+export function setSessionMode(mode: Mode) {
+  sessionMode = mode;
+}
+
+export function getSessionMode(): Mode | null {
+  return sessionMode;
+}
+
+async function migrate(): Promise<void> {
+  if (fs.existsSync(CONFIG_PATH)) {
+    try {
+      const content = fs.readFileSync(CONFIG_PATH, 'utf-8');
+      const config = JSON.parse(content) as Config;
+      for (const mode of ALL_MODES) {
+        const apiKey = config[mode];
+        if (apiKey) {
+          await keytar.setPassword(SERVICE_NAME, mode, apiKey);
+        }
+      }
+    } catch {
+      // Ignore migration errors
+    } finally {
+      fs.rmSync(CONFIG_PATH, { force: true });
+    }
+  }
 }
 
 function getConfiguredModesFromConfig(config: Config): Mode[] {
@@ -26,85 +52,94 @@ function getConfiguredModesFromConfig(config: Config): Mode[] {
   });
 }
 
-function writeConfig(config: Config): void {
+async function writeConfig(config: Config): Promise<void> {
   const configuredModes = getConfiguredModesFromConfig(config);
 
   if (configuredModes.length === 0) {
-    resetConfig();
+    await resetConfig();
     return;
   }
 
-  ensureConfigDir();
-
-  const sanitizedConfig = configuredModes.reduce<Config>((result, mode) => {
-    result[mode] = config[mode];
-    return result;
-  }, {});
-
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(sanitizedConfig, null, 2), 'utf-8');
+  for (const mode of ALL_MODES) {
+    const apiKey = config[mode];
+    if (apiKey) {
+      await keytar.setPassword(SERVICE_NAME, mode, apiKey);
+    } else {
+      await keytar.deletePassword(SERVICE_NAME, mode);
+    }
+  }
 }
 
-export function configExists(): boolean {
-  return fs.existsSync(CONFIG_PATH);
+export async function configExists(): Promise<boolean> {
+  await migrate();
+  for (const mode of ALL_MODES) {
+    const password = await keytar.getPassword(SERVICE_NAME, mode);
+    if (password) return true;
+  }
+  return false;
 }
 
-export function readConfig(): Config {
-  if (!configExists()) {
+export async function readConfig(): Promise<Config> {
+  await migrate();
+  const config: Config = {};
+  let hasAny = false;
+
+  for (const mode of ALL_MODES) {
+    const password = await keytar.getPassword(SERVICE_NAME, mode);
+    if (password) {
+      config[mode] = password;
+      hasAny = true;
+    }
+  }
+
+  if (!hasAny) {
     throw new Error('CONFIG_NOT_FOUND');
   }
 
-  try {
-    const parsed = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
-
-    if (typeof parsed !== 'object' || parsed === null) {
-      throw new Error('INVALID_CONFIG');
-    }
-
-    return parsed as Config;
-  } catch {
-    throw new Error('INVALID_CONFIG');
-  }
+  return config;
 }
 
-export function saveConfig(mode: Mode, apiKey: string): void {
+export async function saveConfig(mode: Mode, apiKey: string): Promise<void> {
   let existingConfig: Config = {};
 
-  if (configExists()) {
+  if (await configExists()) {
     try {
-      existingConfig = readConfig();
+      existingConfig = await readConfig();
     } catch {
       existingConfig = {};
     }
   }
 
   existingConfig[mode] = apiKey;
-  writeConfig(existingConfig);
+  await writeConfig(existingConfig);
 }
 
-export function resetConfig(): void {
-  fs.rmSync(CONFIG_PATH, { force: true });
+export async function resetConfig(): Promise<void> {
+  for (const mode of ALL_MODES) {
+    await keytar.deletePassword(SERVICE_NAME, mode);
+  }
 }
 
-export function clearConfig(target: LogoutTarget): {
+export async function clearConfig(target: LogoutTarget): Promise<{
   hadInvalidConfig: boolean;
   removedModes: Mode[];
-} {
-  if (!configExists()) {
+}> {
+  if (!(await configExists())) {
     return { hadInvalidConfig: false, removedModes: [] };
   }
 
   let config: Config;
   try {
-    config = readConfig();
+    config = await readConfig();
   } catch {
-    resetConfig();
+    await resetConfig();
     return { hadInvalidConfig: true, removedModes: [] };
   }
 
   const configuredModes = getConfiguredModesFromConfig(config);
 
   if (target === 'all') {
-    resetConfig();
+    await resetConfig();
     return { hadInvalidConfig: false, removedModes: configuredModes };
   }
 
@@ -115,46 +150,51 @@ export function clearConfig(target: LogoutTarget): {
   }
 
   delete config[target];
-  writeConfig(config);
+  await writeConfig(config);
 
   return { hadInvalidConfig: false, removedModes: [target] };
 }
 
-export async function resolveCredentials(): Promise<ResolvedCredentials> {
-  if (!configExists()) {
-    console.error('Please run `dodo login` first.');
-    process.exit(1);
+import type { CommandContext } from '../ui/ink/CommandContext';
+
+export async function resolveCredentials(ctx?: CommandContext, prompt: boolean = true): Promise<ResolvedCredentials> {
+  if (sessionMode) {
+    const config = await readConfig();
+    return { mode: sessionMode, apiKey: config[sessionMode]! };
+  }
+
+  if (!(await configExists())) {
+    throw new Error('Please run `dodo login` first.');
   }
 
   let config: Config;
   try {
-    config = readConfig();
+    config = await readConfig();
   } catch {
-    console.error('Failed to load credentials. Please try login again.');
-    resetConfig();
-    process.exit(1);
+    await resetConfig();
+    throw new Error('Failed to load credentials. Please try login again.');
   }
 
   const modes = getConfiguredModesFromConfig(config);
 
   if (modes.length === 0) {
-    console.error('No valid credentials found. Please login again.');
-    resetConfig();
-    process.exit(1);
+    await resetConfig();
+    throw new Error('No valid credentials found. Please login again.');
   }
 
-  if (modes.length === 1) {
+  if (modes.length === 1 || !prompt) {
     const mode = modes[0] as Mode;
     return { mode, apiKey: config[mode]! };
   }
 
-  const selectedMode = await select<Mode>({
-    message: 'Choose the environment:',
-    choices: modes.map((mode) => ({
-      name: mode === 'test_mode' ? 'Test Mode' : 'Live Mode',
-      value: mode,
-    })),
-  });
+  if (!ctx) {
+    throw new Error('Multiple environments found. Please use the interactive shell to select.');
+  }
+
+  const selectedMode = await ctx.promptSelect('Choose the environment:', modes.map((mode) => ({
+    label: mode === 'test_mode' ? 'Test Mode' : 'Live Mode',
+    value: mode,
+  }))) as Mode;
 
   return { mode: selectedMode, apiKey: config[selectedMode]! };
 }

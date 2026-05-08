@@ -1,23 +1,29 @@
 import DodoPayments from 'dodopayments';
-import { input } from '@inquirer/prompts';
+import chalk from 'chalk';
 import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleDiscounts(
   client: DodoPayments,
-  subCommand?: string,
+  subCommand: string | undefined,
+  ctx: CommandContext,
+  args: string[] = [],
 ) {
   if (subCommand === 'list') {
-    const page = await input({
-      message: 'Enter page:',
-      default: '1',
-      validate: (e) => e.trim() !== '',
-    });
+    const pageNum = parseInt(args[0] ?? '1') || 1;
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching discounts...' });
     try {
       const discounts = await client.discounts.list({
-        page_number: parseInt(page) - 1,
+        page_number: pageNum - 1,
         page_size: 100,
       });
+      ctx.removeBlock(spinnerId);
+
+      if (discounts.items.length === 0) {
+        ctx.addBlock({ type: 'empty' });
+        return;
+      }
 
       const discountsTable = discounts.items.map((e) => ({
         name: e.name,
@@ -29,91 +35,87 @@ export async function handleDiscounts(
               amount: `${(e.amount * 0.01).toFixed(2)}%`,
             }
           : {
-              // I just added this in case of a breaking change in the future
               amount: e.amount,
             }),
       }));
 
-      console.table(discountsTable);
-      console.log(
-        'To view a discount, go to https://app.dodopayments.com/sales/discounts/edit?id={discount_id}',
-      );
-    } catch (e) {
+      ctx.addBlock({ type: 'table', data: discountsTable });
+      ctx.addBlock({ type: 'link', text: 'To view a discount, go to', url: 'https://app.dodopayments.com/sales/discounts/edit?id={discount_id}' });
+      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/discounts list <page>') + chalk.dim(' to see more pages.') });
+    } catch (e: any) {
+      ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        console.log('Failed to fetch discounts:', e.error.message);
+        ctx.addBlock({ type: 'error', message: `Failed to fetch discounts: ${e.error.message}` });
       } else {
-        console.error(e);
+        ctx.addBlock({ type: 'error', message: e.message });
       }
     }
   } else if (subCommand === 'create') {
-    const name = await input({
-      message: 'Enter discount name:',
-      validate: (e) => e.trim() !== '',
-    });
-
-    const percentage = await input({
-      message: 'Enter discount percentage:',
-      validate: (e) => {
-        const parsed = parseFloat(e);
-        return !Number.isNaN(parsed) && parsed > 0 && parsed <= 100;
-      },
-    });
-
-    const code = await input({
-      message: 'Enter discount code (Optional):',
-    });
-
-    const cycles = await input({
-      message: 'Enter discount cycles (Optional):',
-    });
+    const name = await ctx.promptInput('Enter discount name:');
+    const percentage = await ctx.promptInput('Enter discount percentage:');
+    const code = await ctx.promptInput('Enter discount code (Optional):');
+    const cycles = await ctx.promptInput('Enter discount cycles (Optional):');
+    
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Creating discount...' });
     try {
       const newDiscount = await client.discounts.create({
         name,
         code: code.trim() !== '' ? code : null,
         amount: parseFloat(percentage) * 100,
         type: 'percentage',
-        // If the subscription cycles is provided
         ...(cycles.trim() !== '' && { subscription_cycles: parseInt(cycles) }),
       });
 
-      console.log('Discount created successfully!');
-      console.table({
-        name: newDiscount.name,
-        code: newDiscount.code,
-        'discount id': newDiscount.discount_id,
-        ...(cycles.trim() !== '' && {
-          'subscription cycles': newDiscount.subscription_cycles,
-        }),
+      ctx.removeBlock(spinnerId);
+      ctx.addBlock({ type: 'success', message: 'Discount created successfully!' });
+      ctx.addBlock({
+        type: 'detail',
+        data: {
+          name: newDiscount.name,
+          code: newDiscount.code,
+          'discount id': newDiscount.discount_id,
+          ...(cycles.trim() !== '' && {
+            'subscription cycles': newDiscount.subscription_cycles,
+          }),
+        }
       });
-    } catch (e) {
+    } catch (e: any) {
+      ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        console.log('Failed to create discount:', e.error.message);
+        ctx.addBlock({ type: 'error', message: `Failed to create discount: ${e.error.message}` });
       } else {
-        console.error(e);
+        ctx.addBlock({ type: 'error', message: e.message });
       }
     }
   } else if (subCommand === 'delete') {
-    try {
-      const discount_id = await input({
-        message: 'Enter discount ID to be deleted:',
-        validate: (e) =>
-          e.startsWith('dsc_') || 'Please enter a valid discount ID!',
-      });
+    const discount_id = args[0];
+    if (!discount_id) {
+      ctx.addBlock({ type: 'error', message: 'Please provide a discount ID! (Usage: /discounts delete <id>)' });
+      return;
+    }
+    
+    const confirmed = await ctx.promptConfirm(`Are you sure you want to delete discount ${discount_id}?`);
+    if (!confirmed) {
+      ctx.addBlock({ type: 'error', message: 'Deletion cancelled.' });
+      return;
+    }
 
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Deleting discount...' });
+    try {
       await client.discounts.delete(discount_id);
-      console.log('Successfully deleted discount!');
-    } catch (e) {
+      ctx.removeBlock(spinnerId);
+      ctx.addBlock({ type: 'success', message: 'Successfully deleted discount!' });
+    } catch (e: any) {
+      ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-        console.log('Incorrect discount ID!');
+        ctx.addBlock({ type: 'error', message: 'Incorrect discount ID!' });
       } else if (isDodoPaymentsAPIError(e)) {
-        console.log('Failed to delete discount:', e.error.message);
+        ctx.addBlock({ type: 'error', message: `Failed to delete discount: ${e.error.message}` });
       } else {
-        console.error(e);
+        ctx.addBlock({ type: 'error', message: e.message });
       }
     }
   } else {
-    usage.discounts!.forEach((e) =>
-      console.log(`dodo discounts ${e.command} - ${e.description}`),
-    );
+    ctx.addBlock({ type: 'help' });
   }
 }

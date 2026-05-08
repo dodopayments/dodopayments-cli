@@ -1,89 +1,76 @@
 import DodoPayments from 'dodopayments';
-import { input, select } from '@inquirer/prompts';
 import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleCheckout(
   client: DodoPayments,
-  subCommand?: string,
+  subCommand: string | undefined,
+  ctx: CommandContext,
+  args: string[] = [],
 ) {
   if (subCommand === 'new') {
     let config: DodoPayments.CheckoutSessions.CheckoutSessionCreateParams = {
       product_cart: [],
     };
 
-    const product = await input({
-      message: 'Enter product:',
-      validate: (e) => e.startsWith('pdt_'),
-    });
-
+    const product = await ctx.promptInput('Enter product:');
     config.product_cart = [{ product_id: product, quantity: 1 }];
 
-    const useAdvanced = await select({
-      message: 'Use advanced options?',
-      choices: [
-        { name: 'Yes', value: true },
-        { name: 'No', value: false },
-      ],
-      default: false,
-    });
+    const useAdvancedStr = await ctx.promptSelect('Use advanced options?', [
+      { label: 'Yes', value: 'yes' },
+      { label: 'No', value: 'no' },
+    ]);
+    const useAdvanced = useAdvancedStr === 'yes';
 
     if (useAdvanced) {
-      config.minimal_address = await select({
-        message: 'Enable minimal address:',
-        choices: [
-          { name: 'Yes', value: true },
-          { name: 'No', value: false },
-        ],
-        default: false,
-      });
+      const minAddress = await ctx.promptSelect('Enable minimal address:', [
+        { label: 'Yes', value: 'yes' },
+        { label: 'No', value: 'no' },
+      ]);
+      config.minimal_address = minAddress === 'yes';
 
-      const return_url = await input({
-        message: 'Enter return URL (Optional):',
-      });
-
+      const return_url = await ctx.promptInput('Enter return URL (Optional):');
       if (return_url.trim() !== '') {
         config.return_url = return_url;
       }
 
-      config.force_3ds = await select({
-        message: 'Force 3DS?',
-        choices: [
-          { name: 'Yes', value: true },
-          { name: 'No', value: false },
-        ],
-      });
+      const force3ds = await ctx.promptSelect('Force 3DS?', [
+        { label: 'Yes', value: 'yes' },
+        { label: 'No', value: 'no' },
+      ]);
+      config.force_3ds = force3ds === 'yes';
 
-      const disc_code = await input({
-        message: 'Enter discount code (Optional):',
-      });
-
+      const disc_code = await ctx.promptInput('Enter discount code (Optional):');
       if (disc_code.trim() !== '') {
         config.discount_code = disc_code;
       }
 
-      const metadata = await input({
-        message: 'Enter metadata (Optional, JSON stringified):',
-      });
-
+      const metadata = await ctx.promptInput('Enter metadata (Optional, JSON stringified):');
       if (metadata.trim() !== '') {
-        config.metadata = JSON.parse(metadata);
+        try {
+          config.metadata = JSON.parse(metadata);
+        } catch {
+          ctx.addBlock({ type: 'error', message: 'Invalid JSON for metadata.' });
+          return;
+        }
       }
     }
+    
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Creating checkout session...' });
     try {
       const session = await client.checkoutSessions.create(config);
-      console.log('Checkout Session URL:', session.checkout_url);
-    } catch (e) {
-      // This is the only possible error here. I have used isDodoPaymentsAPIError() to infer types support.
+      ctx.removeBlock(spinnerId);
+      ctx.addBlock({ type: 'link', text: 'Checkout Session URL:', url: session.checkout_url ?? '' });
+    } catch (e: any) {
+      ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        console.log(`Error: ${e.error.message}`);
+        ctx.addBlock({ type: 'error', message: `Error: ${e.error.message}` });
       } else {
-        console.error(e);
+        ctx.addBlock({ type: 'error', message: e.message });
       }
     }
   } else {
-    usage.checkout!.forEach((e) =>
-      console.log(`dodo checkout ${e.command} - ${e.description}`),
-    );
+    ctx.addBlock({ type: 'help' });
   }
 }

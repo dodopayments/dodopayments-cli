@@ -66,13 +66,15 @@ dodopayments-cli/
 │   │
 │   ├── commands/                     # Domain-based command modules
 │   │   ├── addons/                   # Add-on related commands
+│   │   ├── ai/                       # AI agent related commands
 │   │   ├── checkout/                 # Checkout commands
-│   │   ├── customer/                 # Customer management commands
-│   │   ├── discount/                 # Discount/coupon commands
-│   │   ├── licenses/                 # License management commands
+│   │   ├── customers/                # Customer management commands
+│   │   ├── discounts/                # Discount/coupon commands
+│   │   ├── licences/                 # License management commands
 │   │   ├── login/                    # Authentication/login commands
-│   │   ├── payment/                  # Payment-related commands
-│   │   ├── product/                  # Product management commands
+│   │   ├── logout/                   # Authentication/logout commands
+│   │   ├── payments/                 # Payment-related commands
+│   │   ├── products/                 # Product management commands
 │   │   ├── refund/                   # Refund commands
 │   │   └── webhook/                  # Webhook-related commands
 │   │

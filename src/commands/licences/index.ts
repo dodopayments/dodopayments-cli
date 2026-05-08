@@ -1,36 +1,43 @@
 import DodoPayments from 'dodopayments';
-import { input } from '@inquirer/prompts';
+import chalk from 'chalk';
 import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleLicences(
   client: DodoPayments,
-  subCommand?: string,
+  subCommand: string | undefined,
+  ctx: CommandContext,
+  args: string[] = [],
 ) {
   if (subCommand === 'list') {
-    const page = await input({
-      message: 'Enter page:',
-      default: '1',
-      validate: (e) => e.trim() !== '',
-    });
+    const pageNum = parseInt(args[0] ?? '1') || 1;
+    
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching licences...' });
     try {
-      // WORK ON THIS
       const licences = await client.licenseKeys.list({
-        page_number: parseInt(page) - 1,
+        page_number: pageNum - 1,
         page_size: 100,
       });
 
-      console.log(licences.items);
-    } catch (e) {
+      ctx.removeBlock(spinnerId);
+
+      if (licences.items.length === 0) {
+        ctx.addBlock({ type: 'empty' });
+        return;
+      }
+
+      ctx.addBlock({ type: 'table', data: licences.items });
+      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/licences list <page>') + chalk.dim(' to see more pages.') });
+    } catch (e: any) {
+      ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        console.log('Failed to fetch licences:', e.error.message);
+        ctx.addBlock({ type: 'error', message: `Failed to fetch licences: ${e.error.message}` });
       } else {
-        console.error(e);
+        ctx.addBlock({ type: 'error', message: e.message });
       }
     }
   } else {
-    usage.licences!.forEach((e) =>
-      console.log(`dodo licences ${e.command} - ${e.description}`),
-    );
+    ctx.addBlock({ type: 'help' });
   }
 }

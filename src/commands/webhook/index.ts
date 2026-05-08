@@ -2,6 +2,7 @@ import type DodoPayments from 'dodopayments';
 import { usage } from '../../utils/usage-help';
 import WebhookListener from './listen';
 import { handleWebhookTrigger } from './trigger';
+import type { CommandContext } from '../../ui/ink/CommandContext';
 
 type AuthenticatedWebhookContext = {
   apiKey: string;
@@ -9,27 +10,27 @@ type AuthenticatedWebhookContext = {
 };
 
 export async function handleWebhook(
-  subCommand?: string,
+  subCommand: string | undefined,
+  ctx: CommandContext,
   context?: AuthenticatedWebhookContext,
 ) {
   switch (subCommand) {
     case 'listen':
       if (!context) {
-        console.error('Please run `dodo login` first.');
+        ctx.addBlock({ type: 'error', message: 'Please run `dodo login` first.' });
         process.exit(1);
       }
 
       await WebhookListener({
         API_KEY: context.apiKey,
         dodoClient: context.client,
+        ctx,
       });
       break;
     case 'trigger':
-      await handleWebhookTrigger();
+      await handleWebhookTrigger(ctx);
       break;
     default:
-      usage.wh!.forEach((e) =>
-        console.log(`dodo wh ${e.command} - ${e.description}`),
-      );
+      ctx.addBlock({ type: 'help' });
   }
 }

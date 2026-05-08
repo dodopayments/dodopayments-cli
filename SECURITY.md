@@ -6,7 +6,7 @@ We actively support the following versions with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |
+| 3.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
@@ -50,13 +50,6 @@ Please include the following information in your report:
 
 When using Dodo Payments CLI, please follow these security best practices:
 
-### API Keys
-
-- **Never share your API keys** with anyone
-- **Use test mode keys** for development and testing
-- **Rotate keys** if you suspect they may have been compromised
-- The CLI stores your API key locally at `~/.dodopayments/api-key` - ensure this file has appropriate permissions
-
 ### Running the CLI
 
 - **Download only from official sources**: npm, GitHub releases, or bun
@@ -75,9 +68,7 @@ The CLI stores the following data locally:
 
 | Data | Location | Purpose |
 |------|----------|---------|
-| API Key | `~/.dodopayments/api-key` | Authentication |
-
-Ensure your home directory has appropriate access controls to protect this sensitive data.
+| API Key | OS secret store (Credential Vault, Keychain, etc.) | Authentication |
 
 ## Vulnerability Disclosure Policy
 
