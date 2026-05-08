@@ -31,7 +31,7 @@ export const StatusBar = ({ authInfo: propAuthInfo }: StatusBarProps) => {
       <Box paddingX={1} paddingBottom={1}>
         <Text color={colors.textDim}>{glyphs.separator} </Text>
         <Text color={colors.textMuted}>Not signed in. Run </Text>
-        <Text color={colors.brand}>/login</Text>
+        <Text color={colors.accentLime}>/login</Text>
         <Text color={colors.textMuted}> to get started</Text>
       </Box>
     );

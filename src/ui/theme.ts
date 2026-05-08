@@ -22,6 +22,12 @@ export const colors = {
   warning: '#F5A623',
   info: '#38BDF8',
 
+  accentSky: '#38BDF8',
+  accentAmber: '#F5A623',
+  accentMagenta: '#E85BCF',
+  accentCyan: '#7FC4D4',
+  accentLime: '#C6FE1E',
+
   testMode: '#F5A623',
   liveMode: '#07BC70',
 } as const;
@@ -42,7 +48,8 @@ export const boxes = {
   brand:   { borderStyle: 'round'  as const, borderColor: colors.brand },
   error:   { borderStyle: 'round'  as const, borderColor: colors.error },
   warning: { borderStyle: 'round'  as const, borderColor: colors.warning },
-  table:   { borderStyle: 'single' as const, borderColor: colors.brand },
+  table:   { borderStyle: 'single' as const, borderColor: colors.accentSky },
+  prompt:  { borderStyle: 'round'  as const, borderColor: colors.accentMagenta },
 } as const;
 
 export const spacing = { xs: 0, sm: 1, md: 2, lg: 3 } as const;

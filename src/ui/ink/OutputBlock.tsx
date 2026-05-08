@@ -11,6 +11,39 @@ import { HELP_FOOTER, HELP_GROUPS } from './help-structure';
 const MAX_COL_WIDTH = 45;
 const MIN_COL_WIDTH = 10;
 
+const NUMERIC_KEY_HINTS = /(amount|price|total|cost|value|count|quantity|cycles|percent|fee)/i;
+const DATE_KEY_HINTS = /(created|updated|deleted|timestamp|date|_at\b|on\b)/i;
+const CURRENCY_OR_NUMBER = /^[\$€£₹¥]\s*-?\d[\d,]*(\.\d+)?%?$|^-?\d[\d,]*(\.\d+)?%?$/;
+
+const isNumericColumn = (key: string, samples: any[]): boolean => {
+  if (DATE_KEY_HINTS.test(key)) return false;
+  if (NUMERIC_KEY_HINTS.test(key)) return true;
+  let numericHits = 0;
+  let nonEmpty = 0;
+  for (const v of samples) {
+    const s = String(v ?? '').trim().split(/\s/)[0] ?? '';
+    if (!s) continue;
+    nonEmpty++;
+    if (CURRENCY_OR_NUMBER.test(s)) numericHits++;
+  }
+  return nonEmpty > 0 && numericHits / nonEmpty >= 0.7;
+};
+
+const HELP_HEADING_COLORS: Record<string, string> = {
+  PRODUCTS: '#7FC4D4',
+  PAYMENTS: '#F5A623',
+  CUSTOMERS: '#E85BCF',
+  DISCOUNTS: '#C6FE1E',
+  LICENCES: '#38BDF8',
+  ADDONS: '#7FC4D4',
+  REFUNDS: '#F5A623',
+  CHECKOUT: '#C6FE1E',
+  WEBHOOKS: '#E85BCF',
+  AI: '#C6FE1E',
+  AUTH: '#38BDF8',
+  SESSION: '#737470',
+};
+
 const SimpleTable = ({ data }: { data: any[] }) => {
   if (!data || data.length === 0) return null;
   const keys = Object.keys(data[0]);
@@ -24,12 +57,17 @@ const SimpleTable = ({ data }: { data: any[] }) => {
     return acc;
   }, {} as Record<string, number>);
 
+  const numericFlags: Record<string, boolean> = {};
+  for (const k of keys) {
+    numericFlags[k] = isNumericColumn(k, data.map((row) => row[k]));
+  }
+
   return (
     <Box flexDirection="column" {...boxes.table}>
       <Box paddingX={1}>
         {keys.map((k) => (
           <Box key={k} width={columnWidths[k]}>
-            <Text bold color={colors.brand}>{k}</Text>
+            <Text bold color={colors.accentSky}>{k}</Text>
           </Box>
         ))}
       </Box>
@@ -42,7 +80,7 @@ const SimpleTable = ({ data }: { data: any[] }) => {
       </Box>
       {data.map((row, i) => {
         const isAltRow = i % 2 === 1;
-        const rowColor = isAltRow ? colors.textMuted : colors.textPrimary;
+        const baseColor = isAltRow ? colors.textMuted : colors.textPrimary;
         return (
           <Box key={i} paddingX={1}>
             {keys.map((k) => {
@@ -51,9 +89,10 @@ const SimpleTable = ({ data }: { data: any[] }) => {
               const displayStr = valStr.length > w - 1
                 ? valStr.substring(0, Math.max(0, w - 2)) + '…'
                 : valStr;
+              const cellColor = numericFlags[k] ? colors.accentAmber : baseColor;
               return (
                 <Box key={k} width={w}>
-                  <Text color={rowColor}>{displayStr}</Text>
+                  <Text color={cellColor}>{displayStr}</Text>
                 </Box>
               );
             })}
@@ -102,9 +141,9 @@ const InlineInput = ({ block }: { block: any }) => {
   };
 
   return (
-    <Box {...boxes.brand} paddingX={1} width="100%">
+    <Box {...boxes.prompt} paddingX={1} width="100%">
       <Box marginRight={1}>
-        <Text color={colors.brand}>{block.label}</Text>
+        <Text color={colors.accentMagenta}>{block.label}</Text>
       </Box>
       <Text>{renderValue()}</Text>
     </Box>
@@ -119,26 +158,29 @@ const HelpPanel = () => {
     <Box flexDirection="column">
       <Box marginBottom={1}>
         <Text color={colors.brandLime} bold>{glyphs.bullet} </Text>
-        <Text color={colors.brand} bold>Dodo Payments CLI</Text>
+        <Text color={colors.textPrimary} bold>Dodo Payments CLI</Text>
       </Box>
-      {HELP_GROUPS.map((group, gi) => (
-        <Box key={group.heading} flexDirection="column" marginBottom={gi === HELP_GROUPS.length - 1 ? 1 : 0}>
-          {group.items.map((item, ii) => (
-            <Box key={item.command}>
-              <Box width={headingWidth}>
-                <Text color={colors.brand} bold>{ii === 0 ? group.heading : ''}</Text>
+      {HELP_GROUPS.map((group, gi) => {
+        const headingColor = HELP_HEADING_COLORS[group.heading] ?? colors.textMuted;
+        return (
+          <Box key={group.heading} flexDirection="column" marginBottom={gi === HELP_GROUPS.length - 1 ? 1 : 0}>
+            {group.items.map((item, ii) => (
+              <Box key={item.command}>
+                <Box width={headingWidth}>
+                  <Text color={headingColor} bold>{ii === 0 ? group.heading : ''}</Text>
+                </Box>
+                <Box width={commandWidth}>
+                  <Text color={colors.textPrimary}>{item.command}</Text>
+                </Box>
+                <Box width={10}>
+                  <Text color={colors.textDim}>{item.args ?? ''}</Text>
+                </Box>
+                <Text color={colors.textMuted}>{item.description}</Text>
               </Box>
-              <Box width={commandWidth}>
-                <Text color={colors.textPrimary}>{item.command}</Text>
-              </Box>
-              <Box width={10}>
-                <Text color={colors.textDim}>{item.args ?? ''}</Text>
-              </Box>
-              <Text color={colors.textMuted}>{item.description}</Text>
-            </Box>
-          ))}
-        </Box>
-      ))}
+            ))}
+          </Box>
+        );
+      })}
       <Box>
         <Text color={colors.textDim}>{HELP_FOOTER}</Text>
       </Box>
@@ -151,7 +193,7 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
     case 'spinner':
       return (
         <Box>
-          <Text color={colors.brand}><Spinner type={glyphs.spinnerType} /></Text>
+          <Text color={colors.accentAmber}><Spinner type={glyphs.spinnerType} /></Text>
           <Text color={colors.textMuted}> {block.label}</Text>
         </Box>
       );
@@ -164,15 +206,22 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
     case 'detail':
       return (
         <Box flexDirection="column" paddingY={1}>
-          {Object.entries(block.data).map(([key, value]) => (
-            <Box key={key}>
-              <Box width={20} justifyContent="flex-end" paddingRight={1}>
-                <Text color={colors.textMuted}>{key}</Text>
+          {Object.entries(block.data).map(([key, value]) => {
+            const valStr = String(value);
+            const firstToken = valStr.trim().split(/\s/)[0] ?? '';
+            const isDate = DATE_KEY_HINTS.test(key);
+            const isNumeric = !isDate && (NUMERIC_KEY_HINTS.test(key) || CURRENCY_OR_NUMBER.test(firstToken));
+            const valueColor = isNumeric ? colors.accentAmber : colors.textPrimary;
+            return (
+              <Box key={key}>
+                <Box width={20} justifyContent="flex-end" paddingRight={1}>
+                  <Text color={colors.textMuted}>{key}</Text>
+                </Box>
+                <Text color={colors.textDim}>{glyphs.separator} </Text>
+                <Text color={valueColor}>{valStr}</Text>
               </Box>
-              <Text color={colors.textDim}>{glyphs.separator} </Text>
-              <Text color={colors.textPrimary}>{String(value)}</Text>
-            </Box>
-          ))}
+            );
+          })}
         </Box>
       );
     case 'error':

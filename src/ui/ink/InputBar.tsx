@@ -128,7 +128,7 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
       {historyIndex === -1 && <Autocomplete input={input} selectedIndex={selectedIndex} />}
       <Box backgroundColor={colors.brandForest} paddingX={1} width="100%">
         <Box marginRight={1}>
-          <Text color={colors.brand}>{glyphs.prompt}</Text>
+          <Text color={colors.accentLime}>{glyphs.prompt}</Text>
         </Box>
         {isActive ? renderValue() : <Text>{input}</Text>}
       </Box>
