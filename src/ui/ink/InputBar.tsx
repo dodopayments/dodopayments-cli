@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Text, useInput } from 'ink';
 import chalk from 'chalk';
 import { Autocomplete, getSuggestions } from './Autocomplete';
+import { colors, glyphs } from '../theme';
 
 interface InputBarProps {
   onSubmit: (val: string) => void;
@@ -52,7 +53,6 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
         });
       }
     } else if (key.tab || (key.rightArrow && suggestions.length > 0 && suggestions[selectedIndex] && cursorOffset === input.length)) {
-      // Only apply autocomplete on rightArrow when cursor is at the end
       if (suggestions.length > 0 && suggestions[selectedIndex]) {
         const val = suggestions[selectedIndex].command + ' ';
         setInput(val);
@@ -63,7 +63,6 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
     } else if (key.rightArrow) {
       setCursorOffset((prev) => Math.min(input.length, prev + 1));
     } else if (key.backspace) {
-      // macOS Delete key (⌫) sends backspace
       if (cursorOffset > 0) {
         setInput((prev) => prev.slice(0, cursorOffset - 1) + prev.slice(cursorOffset));
         setCursorOffset((prev) => prev - 1);
@@ -71,7 +70,6 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
         setHistoryIndex(-1);
       }
     } else if (key.delete) {
-      // Forward delete (fn+Delete on Mac)
       if (cursorOffset < input.length) {
         setInput((prev) => prev.slice(0, cursorOffset) + prev.slice(cursorOffset + 1));
         setSelectedIndex(0);
@@ -99,7 +97,6 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
     } else if (key.ctrl && ch === 'c') {
       onExit();
     } else if (ch && !key.ctrl && !key.meta) {
-      // Regular character input
       setInput((prev) => prev.slice(0, cursorOffset) + ch + prev.slice(cursorOffset));
       setCursorOffset((prev) => prev + ch.length);
       setSelectedIndex(0);
@@ -107,10 +104,14 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
     }
   });
 
-  // Render input value with fake cursor
   const renderValue = () => {
     if (input.length === 0) {
-      return chalk.inverse(' ');
+      return (
+        <Text>
+          {chalk.inverse(' ')}
+          <Text color={colors.textDim}> Type a command. /help to list all.</Text>
+        </Text>
+      );
     }
     let rendered = '';
     for (let i = 0; i < input.length; i++) {
@@ -119,17 +120,17 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
     if (cursorOffset === input.length) {
       rendered += chalk.inverse(' ');
     }
-    return rendered;
+    return <Text>{rendered}</Text>;
   };
 
   return (
     <Box flexDirection="column" marginTop={1}>
       {historyIndex === -1 && <Autocomplete input={input} selectedIndex={selectedIndex} />}
-      <Box backgroundColor={'#003F28'} paddingX={1} width="100%">
+      <Box backgroundColor={colors.brandForest} paddingX={1} width="100%">
         <Box marginRight={1}>
-          <Text color="#07BC70">❯</Text>
+          <Text color={colors.brand}>{glyphs.prompt}</Text>
         </Box>
-        <Text>{isActive ? renderValue() : input}</Text>
+        {isActive ? renderValue() : <Text>{input}</Text>}
       </Box>
     </Box>
   );

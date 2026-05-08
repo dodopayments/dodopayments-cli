@@ -18,86 +18,71 @@ export async function getAIModel(ctx: CommandContext) {
   return openrouter('openai/gpt-4o');
 }
 
-/**
- * Classify an error into a user-friendly category with diagnostic detail.
- */
 function classifyError(error: any, phase: string): string {
   const raw = error?.message ?? String(error);
   const status = error?.statusCode ?? error?.response?.status ?? error?.status;
   const code = error?.code ?? error?.cause?.code;
 
-  // Auth errors
   if (status === 401) {
-    return 'Authentication failed — your Dodo API key is invalid or expired. Run /login again.';
+    return 'Authentication failed. Your API key is invalid or expired. Run /login to refresh.';
   }
   if (status === 403) {
-    return 'Access denied — your API key does not have permission for AI features.';
+    return 'Access denied. Your API key does not have permission for the assistant.';
   }
-
-  // Rate limiting
   if (status === 429) {
-    return 'AI rate limit reached. Please wait a moment and try again.';
+    return 'Rate limit reached. Wait a moment and try again.';
   }
 
-  // Network / connection errors
   if (code === 'ECONNREFUSED') {
-    return `[${phase}] Connection refused — the AI proxy server at ai-proxy.dodopayments.tech is unreachable. Check your network connection.`;
+    return `Couldn't reach the assistant. Check your network and try again. (${phase}: connection refused)`;
   }
   if (code === 'ENOTFOUND' || code === 'EAI_AGAIN') {
-    return `[${phase}] DNS lookup failed — cannot resolve the AI proxy host. Check your internet connection.`;
+    return `Couldn't reach the assistant. Check your network and try again. (${phase}: DNS lookup failed)`;
   }
   if (code === 'ETIMEDOUT' || code === 'ESOCKETTIMEDOUT') {
-    return `[${phase}] Connection timed out — the AI proxy did not respond in time.`;
+    return `Couldn't reach the assistant. Try again in a moment. (${phase}: timeout)`;
   }
   if (code === 'ECONNRESET' || raw.includes('socket hang up')) {
-    return `[${phase}] Connection was reset by the server. This may be a temporary issue — try again.`;
+    return `Connection reset. Try again in a moment. (${phase})`;
   }
   if (/connection closed/i.test(raw)) {
-    return `[${phase}] The server closed the connection unexpectedly. This usually means the AI proxy rejected the request (invalid API key, server overloaded, or the response was too large). Verify your API key with /login and try again.`;
+    return `The server closed the connection. Verify your API key with /login and try again. (${phase})`;
   }
 
-  // HTTP errors from the proxy/LLM
   if (status && status >= 500) {
-    return `[${phase}] Server error (HTTP ${status}) — the AI proxy or upstream LLM returned an internal error. Try again later.`;
+    return `Server error (HTTP ${status}). Try again in a moment. (${phase})`;
   }
   if (status && status >= 400) {
-    return `[${phase}] Request rejected (HTTP ${status}): ${raw}`;
+    return `Request rejected (HTTP ${status}). ${raw} (${phase})`;
   }
 
-  // Parsing / JSON errors
   if (/JSON|Unexpected token|parse/i.test(raw)) {
-    return `[${phase}] Failed to parse the AI response — the server returned invalid data. Raw: ${raw.slice(0, 200)}`;
+    return `The assistant returned invalid data. Try again. (${phase})`;
   }
 
-  // MCP-specific errors
   if (raw.includes('spawn') || raw.includes('ENOENT')) {
-    return `[${phase}] Failed to start MCP subprocess — 'npx' may not be installed or not in PATH. Ensure Node.js is properly installed.`;
+    return `Couldn't start the assistant. Make sure 'npx' is installed and in your PATH. (${phase})`;
   }
   if (/MCP|transport/i.test(raw)) {
-    return `[${phase}] MCP transport error: ${raw.slice(0, 200)}`;
+    return `Communication error: ${raw.slice(0, 200)} (${phase})`;
   }
 
-  // Abort / timeout
   if (/abort|AbortError/i.test(raw)) {
-    return `[${phase}] Request was aborted: ${raw.slice(0, 200)}`;
+    return `Request aborted: ${raw.slice(0, 200)} (${phase})`;
   }
   if (/timed? ?out/i.test(raw)) {
-    return `[${phase}] ${raw}`;
+    return `Timeout. ${raw} (${phase})`;
   }
 
-  // Fallback with as much detail as possible
   const extras = [
     status ? `status=${status}` : null,
     code ? `code=${code}` : null,
     error?.cause ? `cause=${error.cause.message ?? error.cause}` : null,
   ].filter(Boolean).join(', ');
 
-  return `[${phase}] ${raw}${extras ? ` (${extras})` : ''}`;
+  return `${raw}${extras ? ` (${extras})` : ''} (${phase})`;
 }
 
-/**
- * Race a promise against a timeout. Rejects with a descriptive error if the deadline expires.
- */
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const timer = setTimeout(
@@ -116,11 +101,11 @@ const LLM_REQUEST_TIMEOUT = 60_000; // 60 seconds per LLM step
 
 export async function handleAI(query: string, ctx: CommandContext) {
   if (!query) {
-    ctx.addBlock({ type: 'error', message: 'Please provide a question. You can also just type your question directly without /ai.' });
+    ctx.addBlock({ type: 'error', message: 'Question required. You can type it directly without /ai.' });
     return;
   }
 
-  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Connecting to AI...' });
+  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Initializing assistant…' });
 
   let knowledgeClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
   let execClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
@@ -135,7 +120,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
     }
 
     // Phase 2: Initialize MCP clients (with timeouts)
-    ctx.updateBlock(spinnerId, { label: 'Starting MCP tools...' });
+    ctx.updateBlock(spinnerId, { label: 'Loading knowledge base…' });
 
     try {
       knowledgeClient = await withTimeout(
@@ -154,7 +139,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
       throw Object.assign(new Error(classifyError(e, 'MCP Knowledge Init')), { _classified: true });
     }
 
-    ctx.updateBlock(spinnerId, { label: 'Starting execution tools...' });
+    ctx.updateBlock(spinnerId, { label: 'Loading workspace…' });
 
     try {
       execClient = await withTimeout(
@@ -173,8 +158,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
       throw Object.assign(new Error(classifyError(e, 'MCP Exec Init')), { _classified: true });
     }
 
-    // Phase 3: Load tools
-    ctx.updateBlock(spinnerId, { label: 'Loading tools...' });
+    ctx.updateBlock(spinnerId, { label: 'Preparing context…' });
     let kTools, eTools;
     try {
       [kTools, eTools] = await withTimeout(
@@ -196,7 +180,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
       }
     }
 
-    ctx.updateBlock(spinnerId, { label: 'Thinking...' });
+    ctx.updateBlock(spinnerId, { label: 'Analyzing your question…' });
 
     const systemPrompt = `You are a helpful assistant for Dodo Payments.
 Answer questions about the user's payments, revenue, customers, and subscriptions.
@@ -254,7 +238,7 @@ Today is ${new Date().toDateString()}.`;
       // Append the assistant + tool result messages from the SDK (properly formatted)
       messages = [...messages, ...(result.response.messages as ModelMessage[])];
 
-      ctx.updateBlock(spinnerId, { label: `Thinking... (step ${step + 2})` });
+      ctx.updateBlock(spinnerId, { label: `Analyzing… (step ${step + 2})` });
     }
 
     ctx.removeBlock(spinnerId);
@@ -262,7 +246,7 @@ Today is ${new Date().toDateString()}.`;
     if (finalText) {
       ctx.addBlock({ type: 'streaming', text: finalText });
     } else {
-      ctx.addBlock({ type: 'error', message: 'AI did not return a response. Please try rephrasing your question.' });
+      ctx.addBlock({ type: 'error', message: 'No response from the assistant. Try rephrasing your question.' });
     }
   } catch (e: any) {
     ctx.removeBlock(spinnerId);

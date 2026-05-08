@@ -81,36 +81,36 @@ function parseMetadata(metadataInput: string): Record<string, unknown> {
 export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
   let endpoint = '';
   while (!endpoint) {
-    const value = await ctx.promptInput('What is your endpoint?');
+    const value = await ctx.promptInput('Endpoint URL');
     if (value.startsWith('http://') || value.startsWith('https://')) {
       endpoint = value;
     } else {
-      ctx.addBlock({ type: 'error', message: 'Please enter a valid URL starting with http:// or https://' });
+      ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
     }
   }
 
-  const businessIdRaw = await ctx.promptInput('What is your Dodo Payments business ID? (Optional)');
+  const businessIdRaw = await ctx.promptInput('Business ID (optional)');
   const businessId = businessIdRaw.trim() || 'bus_test';
 
-  const productIdRaw = await ctx.promptInput('What is your product ID? (Optional)');
+  const productIdRaw = await ctx.promptInput('Product ID (optional)');
   const productId = productIdRaw.trim() || 'pdt_test';
 
   let metadata = {};
   while (true) {
-    const metadataInputRaw = await ctx.promptInput('What is your metadata? (JSON stringified, Optional)');
+    const metadataInputRaw = await ctx.promptInput('Metadata (optional, JSON)');
     const metadataInput = metadataInputRaw.trim() || '{}';
     try {
       metadata = parseMetadata(metadataInput);
       break;
     } catch {
-      ctx.addBlock({ type: 'error', message: 'Please enter a valid JSON object.' });
+      ctx.addBlock({ type: 'error', message: 'Must be a valid JSON object.' });
     }
   }
 
-  const emailRaw = await ctx.promptInput("What is the customer's email? (Optional)");
+  const emailRaw = await ctx.promptInput('Customer email (optional)');
   const email = emailRaw.trim() || 'john.doe@example.com';
 
-  const customerIdRaw = await ctx.promptInput("What is the customer's id? (Optional)");
+  const customerIdRaw = await ctx.promptInput('Customer ID (optional)');
   const customerId = customerIdRaw.trim() || 'cus_test';
 
   const eventChoices: Array<{ label: string; value: SupportedEvent | 'exit' }> = [
@@ -125,10 +125,10 @@ export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
   ];
 
   while (true) {
-    const event = await ctx.promptSelect('Select an event to send:', eventChoices) as SupportedEvent | 'exit';
+    const event = await ctx.promptSelect('Event to send', eventChoices) as SupportedEvent | 'exit';
 
     if (event === 'exit') {
-      ctx.addBlock({ type: 'success', message: 'Exiting webhook trigger.' });
+      ctx.addBlock({ type: 'success', message: 'Webhook trigger closed.' });
       return;
     }
 
@@ -152,7 +152,7 @@ export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
 
       const responseBody = await response.text();
 
-      ctx.addBlock({ type: 'success', message: 'Webhook event sent successfully.' });
+      ctx.addBlock({ type: 'success', message: 'Webhook event sent.' });
       ctx.addBlock({
         type: 'detail',
         data: {
@@ -161,7 +161,7 @@ export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
         }
       });
     } catch (error: any) {
-      ctx.addBlock({ type: 'error', message: `Webhook event failed: ${error.message}` });
+      ctx.addBlock({ type: 'error', message: `Webhook event failed. ${error.message}` });
     }
   }
 }

@@ -1,8 +1,7 @@
 import DodoPayments from 'dodopayments';
-import chalk from 'chalk';
 import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
-import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleRefund(
@@ -14,7 +13,7 @@ export async function handleRefund(
   if (subCommand === 'list') {
     const pageNum = parseInt(args[0] ?? '1') || 1;
 
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching refunds...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading refunds…' });
     try {
       const refunds = await client.refunds.list({
         page_number: pageNum - 1,
@@ -35,11 +34,11 @@ export async function handleRefund(
       }));
 
       ctx.addBlock({ type: 'table', data: refundsList });
-      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/refunds list <page>') + chalk.dim(' to see more pages.') });
+      ctx.addBlock({ type: 'streaming', text: paginationTip('/refunds list') });
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch refunds: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load refunds. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }
@@ -47,11 +46,11 @@ export async function handleRefund(
   } else if (subCommand === 'info') {
     const refund_id = args[0];
     if (!refund_id) {
-      ctx.addBlock({ type: 'error', message: 'Please provide a refund ID! (Usage: /refunds info <id>)' });
+      ctx.addBlock({ type: 'error', message: 'Refund ID required. Usage: /refunds info <id>' });
       return;
     }
-    
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching refund...' });
+
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading refund…' });
     try {
       const info = await client.refunds.retrieve(refund_id);
       ctx.removeBlock(spinnerId);
@@ -74,9 +73,9 @@ export async function handleRefund(
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-        ctx.addBlock({ type: 'error', message: 'Incorrect refund ID!' });
+        ctx.addBlock({ type: 'error', message: 'Refund not found. Check the ID and try again.' });
       } else if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch refund: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load this refund. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }

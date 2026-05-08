@@ -165,8 +165,8 @@ Manage your refunds.
 
 | Command | Description |
 |---------|-------------|
-| `/refund list` | List refunds |
-| `/refund info <id>` | View details for a specific refund |
+| `/refunds list <page>` | List refunds |
+| `/refunds info <id>` | View details for a specific refund |
 
 ### Webhooks
 

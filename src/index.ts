@@ -115,7 +115,7 @@ if (process.stdout.isTTY && !category) {
     }
   } catch (e: any) {
     if (e?.name === 'ExitPromptError') process.exit(0);
-    console.error('An unexpected error occurred:', e);
+    console.error('Unexpected error.', e);
     process.exit(1);
   }
 }

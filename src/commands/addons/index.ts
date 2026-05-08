@@ -1,9 +1,8 @@
 import DodoPayments from 'dodopayments';
-import chalk from 'chalk';
 import open from 'open';
 import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
-import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleAddons(
@@ -15,14 +14,14 @@ export async function handleAddons(
   if (subCommand === 'create') {
     try {
       await open('https://app.dodopayments.com/products/create/add-on');
-      ctx.addBlock({ type: 'success', message: 'Opened browser to create addon.' });
+      ctx.addBlock({ type: 'success', message: 'Browser opened to create an addon.' });
     } catch (e: any) {
-      ctx.addBlock({ type: 'error', message: `Failed to open browser: ${e.message}` });
+      ctx.addBlock({ type: 'error', message: `Couldn't open browser. ${e.message}` });
     }
   } else if (subCommand === 'list') {
     const pageNum = parseInt(args[0] ?? '1') || 1;
 
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching addons...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading addons…' });
     try {
       const addons = await client.addons.list({
         page_number: pageNum - 1,
@@ -43,11 +42,11 @@ export async function handleAddons(
       }));
 
       ctx.addBlock({ type: 'table', data: addonsList });
-      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/addons list <page>') + chalk.dim(' to see more pages.') });
+      ctx.addBlock({ type: 'streaming', text: paginationTip('/addons list') });
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch addons: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load addons. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }
@@ -55,11 +54,11 @@ export async function handleAddons(
   } else if (subCommand === 'info') {
     const addon_id = args[0];
     if (!addon_id) {
-      ctx.addBlock({ type: 'error', message: 'Please provide an addon ID! (Usage: /addons info <id>)' });
+      ctx.addBlock({ type: 'error', message: 'Addon ID required. Usage: /addons info <id>' });
       return;
     }
-    
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching addon...' });
+
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading addon…' });
     try {
       const info = await client.addons.retrieve(addon_id);
       ctx.removeBlock(spinnerId);
@@ -83,9 +82,9 @@ export async function handleAddons(
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-        ctx.addBlock({ type: 'error', message: 'Incorrect addon ID!' });
+        ctx.addBlock({ type: 'error', message: 'Addon not found. Check the ID and try again.' });
       } else if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch addon: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load this addon. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }

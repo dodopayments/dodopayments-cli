@@ -164,7 +164,7 @@ export async function resolveCredentials(ctx?: CommandContext, prompt: boolean =
   }
 
   if (!(await configExists())) {
-    throw new Error('Please run `dodo login` first.');
+    throw new Error('Sign in first. Run /login to get started.');
   }
 
   let config: Config;
@@ -172,14 +172,14 @@ export async function resolveCredentials(ctx?: CommandContext, prompt: boolean =
     config = await readConfig();
   } catch {
     await resetConfig();
-    throw new Error('Failed to load credentials. Please try login again.');
+    throw new Error("Couldn't load credentials. Run /login to retry.");
   }
 
   const modes = getConfiguredModesFromConfig(config);
 
   if (modes.length === 0) {
     await resetConfig();
-    throw new Error('No valid credentials found. Please login again.');
+    throw new Error('No valid credentials. Run /login to retry.');
   }
 
   if (modes.length === 1 || !prompt) {
@@ -188,10 +188,10 @@ export async function resolveCredentials(ctx?: CommandContext, prompt: boolean =
   }
 
   if (!ctx) {
-    throw new Error('Multiple environments found. Please use the interactive shell to select.');
+    throw new Error('Multiple environments configured. Run the CLI without arguments to choose one.');
   }
 
-  const selectedMode = await ctx.promptSelect('Choose the environment:', modes.map((mode) => ({
+  const selectedMode = await ctx.promptSelect('Environment', modes.map((mode) => ({
     label: mode === 'test_mode' ? 'Test Mode' : 'Live Mode',
     value: mode,
   }))) as Mode;
