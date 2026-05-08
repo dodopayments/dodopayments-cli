@@ -21,6 +21,12 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
     return;
   }
 
+  if (cmd === '/update') {
+    const { handleUpdate } = await import('../../commands/update');
+    await handleUpdate(ctx);
+    return;
+  }
+
   if (cmd === '/login') {
     const { handleLogin } = await import('../../commands/login');
     await handleLogin(ctx);

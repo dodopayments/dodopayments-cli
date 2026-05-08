@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Text } from 'ink';
 import { resolveCredentials } from '../../utils/auth';
 import { colors, glyphs } from '../theme';
+import { version } from '../../../package.json';
 
 interface StatusBarProps {
   authInfo?: { mode: string; key: string } | null;
@@ -25,14 +26,20 @@ export const StatusBar = ({ authInfo: propAuthInfo }: StatusBarProps) => {
   }, [propAuthInfo]);
 
   const sep = ` ${glyphs.separator} `;
+  const versionTag = (
+    <Text color={colors.textDim}>v{version}</Text>
+  );
 
   if (!authInfo) {
     return (
       <Box paddingX={1} paddingBottom={1}>
-        <Text color={colors.textDim}>{glyphs.separator} </Text>
-        <Text color={colors.textMuted}>Not signed in. Run </Text>
-        <Text color={colors.accentLime}>/login</Text>
-        <Text color={colors.textMuted}> to get started</Text>
+        <Box flexGrow={1}>
+          <Text color={colors.textDim}>{glyphs.separator} </Text>
+          <Text color={colors.textMuted}>Not signed in. Run </Text>
+          <Text color={colors.accentLime}>/login</Text>
+          <Text color={colors.textMuted}> to get started</Text>
+        </Box>
+        {versionTag}
       </Box>
     );
   }
@@ -43,11 +50,14 @@ export const StatusBar = ({ authInfo: propAuthInfo }: StatusBarProps) => {
 
   return (
     <Box paddingX={1} paddingBottom={1}>
-      <Text color={dotColor} bold>{glyphs.dot} {label}</Text>
-      <Text color={colors.textDim}>{sep}</Text>
-      <Text color={colors.textMuted}>{authInfo.key}</Text>
-      <Text color={colors.textDim}>{sep}</Text>
-      <Text color={colors.textMuted}>stored credentials</Text>
+      <Box flexGrow={1}>
+        <Text color={dotColor} bold>{glyphs.dot} {label}</Text>
+        <Text color={colors.textDim}>{sep}</Text>
+        <Text color={colors.textMuted}>{authInfo.key}</Text>
+        <Text color={colors.textDim}>{sep}</Text>
+        <Text color={colors.textMuted}>stored credentials</Text>
+      </Box>
+      {versionTag}
     </Box>
   );
 };

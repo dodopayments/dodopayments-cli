@@ -36,7 +36,7 @@ export const Autocomplete = ({ input, selectedIndex }: AutocompleteProps) => {
             {cmd.command.endsWith('list') && (
               <Text color={colors.textDim}> {'<page>'}</Text>
             )}
-            {(cmd.command.endsWith('info') || cmd.command.endsWith('update') || cmd.command.endsWith('delete')) && (
+            {(cmd.command.endsWith(' info') || cmd.command.endsWith(' update') || cmd.command.endsWith(' delete')) && (
               <Text color={colors.textDim}> {'<id>'}</Text>
             )}
             <Text color={colors.textMuted}> {glyphs.separator} {cmd.description}</Text>

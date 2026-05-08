@@ -91,8 +91,9 @@ export const HELP_GROUPS: HelpGroup[] = [
   {
     heading: 'SESSION',
     items: [
-      { command: '/clear', description: 'Clear message history' },
-      { command: '/exit',  description: 'Quit the CLI' },
+      { command: '/clear',  description: 'Clear message history' },
+      { command: '/update', description: 'Update the CLI to the latest version' },
+      { command: '/exit',   description: 'Quit the CLI' },
     ],
   },
 ];

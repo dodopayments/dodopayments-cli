@@ -8,7 +8,14 @@ import { resolveCredentials, setSessionMode } from '../../utils/auth';
 import type { Message, BlockType, BlockVariant } from './types';
 import type { CommandContext } from './CommandContext';
 import { handleCommand } from './router';
-import { checkForUpdates } from '../../utils/update';
+import {
+  checkForUpdates,
+  detectInstallMethod,
+  dispatchSilentUpdate,
+  consumePendingSilentUpdate,
+  type UpdateInfo,
+  type InstallMethod,
+} from '../../utils/update';
 import { version } from '../../../package.json';
 import { UpdateNotification } from './UpdateNotification';
 import { colors } from '../theme';
@@ -20,13 +27,31 @@ export const App = () => {
   const [showBanner, setShowBanner] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
   const [authInfo, setAuthInfo] = useState<{ mode: string; key: string } | null>(null);
-  const [updateVersion, setUpdateVersion] = useState<string | null>(null);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
+  const [installMethod] = useState<InstallMethod>(() => detectInstallMethod());
 
   useEffect(() => {
+    const completed = consumePendingSilentUpdate();
+    if (completed && completed.to !== completed.from) {
+      addBlockToLatestSystemMessage({
+        type: 'success',
+        message: `Updated to v${completed.to} (was v${completed.from}). Restart to use the new version.`,
+      });
+    }
+
     const checkUpdate = async () => {
-      const latest = await checkForUpdates(version);
-      if (latest) {
-        setUpdateVersion(latest);
+      const info = await checkForUpdates(version);
+      if (!info) return;
+
+      if (info.delta === 'major') {
+        setUpdateInfo(info);
+        return;
+      }
+
+      if (installMethod === 'npm' || installMethod === 'bun') {
+        dispatchSilentUpdate(info, installMethod);
+      } else {
+        setUpdateInfo(info);
       }
     };
     checkUpdate();
@@ -201,7 +226,7 @@ export const App = () => {
           {isInitialized && <StatusBar authInfo={authInfo} />}
         </Box>
       )}
-      {updateVersion && <UpdateNotification latestVersion={updateVersion} />}
+      {updateInfo && <UpdateNotification info={updateInfo} method={installMethod} />}
       {!showBanner && isInitialized && <StatusBar authInfo={authInfo} />}
       <MessageList messages={messages} />
       <InputBar
