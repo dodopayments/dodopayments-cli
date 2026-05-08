@@ -1,7 +1,6 @@
 import DodoPayments from 'dodopayments';
-import chalk from 'chalk';
-import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleDiscounts(
@@ -12,7 +11,7 @@ export async function handleDiscounts(
 ) {
   if (subCommand === 'list') {
     const pageNum = parseInt(args[0] ?? '1') || 1;
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching discounts...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading discounts…' });
     try {
       const discounts = await client.discounts.list({
         page_number: pageNum - 1,
@@ -41,22 +40,22 @@ export async function handleDiscounts(
 
       ctx.addBlock({ type: 'table', data: discountsTable });
       ctx.addBlock({ type: 'link', text: 'To view a discount, go to', url: 'https://app.dodopayments.com/sales/discounts/edit?id={discount_id}' });
-      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/discounts list <page>') + chalk.dim(' to see more pages.') });
+      ctx.addBlock({ type: 'streaming', text: paginationTip('/discounts list') });
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch discounts: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load discounts. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }
     }
   } else if (subCommand === 'create') {
-    const name = await ctx.promptInput('Enter discount name:');
-    const percentage = await ctx.promptInput('Enter discount percentage:');
-    const code = await ctx.promptInput('Enter discount code (Optional):');
-    const cycles = await ctx.promptInput('Enter discount cycles (Optional):');
-    
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Creating discount...' });
+    const name = await ctx.promptInput('Discount name');
+    const percentage = await ctx.promptInput('Discount percentage');
+    const code = await ctx.promptInput('Discount code (optional)');
+    const cycles = await ctx.promptInput('Discount cycles (optional)');
+
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Creating discount…' });
     try {
       const newDiscount = await client.discounts.create({
         name,
@@ -67,7 +66,7 @@ export async function handleDiscounts(
       });
 
       ctx.removeBlock(spinnerId);
-      ctx.addBlock({ type: 'success', message: 'Discount created successfully!' });
+      ctx.addBlock({ type: 'success', message: 'Discount created.' });
       ctx.addBlock({
         type: 'detail',
         data: {
@@ -82,7 +81,7 @@ export async function handleDiscounts(
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to create discount: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't create discount. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }
@@ -90,27 +89,27 @@ export async function handleDiscounts(
   } else if (subCommand === 'delete') {
     const discount_id = args[0];
     if (!discount_id) {
-      ctx.addBlock({ type: 'error', message: 'Please provide a discount ID! (Usage: /discounts delete <id>)' });
+      ctx.addBlock({ type: 'error', message: 'Discount ID required. Usage: /discounts delete <id>' });
       return;
     }
-    
-    const confirmed = await ctx.promptConfirm(`Are you sure you want to delete discount ${discount_id}?`);
+
+    const confirmed = await ctx.promptConfirm(`Delete discount ${discount_id}?`);
     if (!confirmed) {
       ctx.addBlock({ type: 'error', message: 'Deletion cancelled.' });
       return;
     }
 
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Deleting discount...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Deleting discount…' });
     try {
       await client.discounts.delete(discount_id);
       ctx.removeBlock(spinnerId);
-      ctx.addBlock({ type: 'success', message: 'Successfully deleted discount!' });
+      ctx.addBlock({ type: 'success', message: 'Discount deleted.' });
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-        ctx.addBlock({ type: 'error', message: 'Incorrect discount ID!' });
+        ctx.addBlock({ type: 'error', message: 'Discount not found. Check the ID and try again.' });
       } else if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to delete discount: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't delete discount. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }

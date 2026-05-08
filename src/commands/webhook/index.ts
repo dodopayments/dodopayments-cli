@@ -1,5 +1,4 @@
 import type DodoPayments from 'dodopayments';
-import { usage } from '../../utils/usage-help';
 import WebhookListener from './listen';
 import { handleWebhookTrigger } from './trigger';
 import type { CommandContext } from '../../ui/ink/CommandContext';
@@ -17,7 +16,7 @@ export async function handleWebhook(
   switch (subCommand) {
     case 'listen':
       if (!context) {
-        ctx.addBlock({ type: 'error', message: 'Please run `dodo login` first.' });
+        ctx.addBlock({ type: 'error', message: 'Sign in first. Run /login to get started.' });
         process.exit(1);
       }
 

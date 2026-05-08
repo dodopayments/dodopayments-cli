@@ -5,54 +5,61 @@ import type { BlockType } from './types';
 import Spinner from 'ink-spinner';
 import SelectInput from 'ink-select-input';
 import Markdown from 'ink-markdown-es';
+import { boxes, colors, glyphs } from '../theme';
+import { HELP_FOOTER, HELP_GROUPS } from './help-structure';
+
+const MAX_COL_WIDTH = 45;
+const MIN_COL_WIDTH = 10;
 
 const SimpleTable = ({ data }: { data: any[] }) => {
   if (!data || data.length === 0) return null;
   const keys = Object.keys(data[0]);
 
-  // Calculate dynamic column widths (min 10, max 45)
   const columnWidths = keys.reduce((acc, k) => {
     const maxLen = Math.max(
       k.length,
       ...data.map((row) => String(row[k] ?? '').length)
     );
-    acc[k] = Math.min(Math.max(maxLen + 2, 10), 45); // +2 for spacing
+    acc[k] = Math.min(Math.max(maxLen + 2, MIN_COL_WIDTH), MAX_COL_WIDTH);
     return acc;
   }, {} as Record<string, number>);
 
   return (
-    <Box flexDirection="column" borderStyle="single" borderColor="#07BC70">
+    <Box flexDirection="column" {...boxes.table}>
       <Box paddingX={1}>
         {keys.map((k) => (
           <Box key={k} width={columnWidths[k]}>
-            <Text bold color="#07BC70">{k}</Text>
+            <Text bold color={colors.brand}>{k}</Text>
           </Box>
         ))}
       </Box>
       <Box paddingX={1}>
         {keys.map((k) => (
-          <Box key={`dash-${k}`} width={columnWidths[k] ?? 10}>
-            <Text color="gray">{'—'.repeat((columnWidths[k] ?? 10) - 1)}</Text>
+          <Box key={`dash-${k}`} width={columnWidths[k] ?? MIN_COL_WIDTH}>
+            <Text color={colors.textDim}>{'─'.repeat((columnWidths[k] ?? MIN_COL_WIDTH) - 1)}</Text>
           </Box>
         ))}
       </Box>
-      {data.map((row, i) => (
-        <Box key={i} paddingX={1}>
-          {keys.map((k) => {
-            const valStr = String(row[k] ?? '');
-            const w = columnWidths[k] ?? 10;
-            // Truncate if exceeds max width - 1
-            const displayStr = valStr.length > w - 1 
-              ? valStr.substring(0, Math.max(0, w - 4)) + '...' 
-              : valStr;
-            return (
-              <Box key={k} width={w}>
-                <Text>{displayStr}</Text>
-              </Box>
-            );
-          })}
-        </Box>
-      ))}
+      {data.map((row, i) => {
+        const isAltRow = i % 2 === 1;
+        const rowColor = isAltRow ? colors.textMuted : colors.textPrimary;
+        return (
+          <Box key={i} paddingX={1}>
+            {keys.map((k) => {
+              const valStr = String(row[k] ?? '');
+              const w = columnWidths[k] ?? MIN_COL_WIDTH;
+              const displayStr = valStr.length > w - 1
+                ? valStr.substring(0, Math.max(0, w - 2)) + '…'
+                : valStr;
+              return (
+                <Box key={k} width={w}>
+                  <Text color={rowColor}>{displayStr}</Text>
+                </Box>
+              );
+            })}
+          </Box>
+        );
+      })}
     </Box>
   );
 };
@@ -95,11 +102,46 @@ const InlineInput = ({ block }: { block: any }) => {
   };
 
   return (
-    <Box borderStyle="round" borderColor="#07BC70" paddingX={1} width="100%">
+    <Box {...boxes.brand} paddingX={1} width="100%">
       <Box marginRight={1}>
-        <Text color="#07BC70">{block.label}</Text>
+        <Text color={colors.brand}>{block.label}</Text>
       </Box>
       <Text>{renderValue()}</Text>
+    </Box>
+  );
+};
+
+const HelpPanel = () => {
+  const headingWidth = 12;
+  const commandWidth = 22;
+
+  return (
+    <Box flexDirection="column">
+      <Box marginBottom={1}>
+        <Text color={colors.brandLime} bold>{glyphs.bullet} </Text>
+        <Text color={colors.brand} bold>Dodo Payments CLI</Text>
+      </Box>
+      {HELP_GROUPS.map((group, gi) => (
+        <Box key={group.heading} flexDirection="column" marginBottom={gi === HELP_GROUPS.length - 1 ? 1 : 0}>
+          {group.items.map((item, ii) => (
+            <Box key={item.command}>
+              <Box width={headingWidth}>
+                <Text color={colors.brand} bold>{ii === 0 ? group.heading : ''}</Text>
+              </Box>
+              <Box width={commandWidth}>
+                <Text color={colors.textPrimary}>{item.command}</Text>
+              </Box>
+              <Box width={10}>
+                <Text color={colors.textDim}>{item.args ?? ''}</Text>
+              </Box>
+              <Text color={colors.textMuted}>{item.description}</Text>
+            </Box>
+          ))}
+        </Box>
+      ))}
+      <Box>
+        <Text color={colors.textDim}>{HELP_FOOTER}</Text>
+      </Box>
     </Box>
   );
 };
@@ -109,8 +151,8 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
     case 'spinner':
       return (
         <Box>
-          <Text color="#07BC70"><Spinner type="dots" /></Text>
-          <Text> {block.label}</Text>
+          <Text color={colors.brand}><Spinner type={glyphs.spinnerType} /></Text>
+          <Text color={colors.textMuted}> {block.label}</Text>
         </Box>
       );
     case 'table':
@@ -125,37 +167,39 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
           {Object.entries(block.data).map(([key, value]) => (
             <Box key={key}>
               <Box width={20} justifyContent="flex-end" paddingRight={1}>
-                <Text color="#07BC70">{key}:</Text>
+                <Text color={colors.textMuted}>{key}</Text>
               </Box>
-              <Text>{String(value)}</Text>
+              <Text color={colors.textDim}>{glyphs.separator} </Text>
+              <Text color={colors.textPrimary}>{String(value)}</Text>
             </Box>
           ))}
         </Box>
       );
     case 'error':
       return (
-        <Box borderStyle="single" borderColor="red" paddingX={1}>
-          <Text color="red">{block.message}</Text>
+        <Box {...boxes.error} paddingX={1}>
+          <Text color={colors.error}>{glyphs.cross} </Text>
+          <Text color={colors.textPrimary}>{block.message}</Text>
         </Box>
       );
     case 'success':
       return (
         <Box>
-          <Text color="#07BC70">✓ </Text>
-          <Text>{block.message}</Text>
+          <Text color={colors.success}>{glyphs.check} </Text>
+          <Text color={colors.textPrimary}>{block.message}</Text>
         </Box>
       );
     case 'link':
       return (
         <Box>
-          <Text>To view, go to: </Text>
-          <Text color="blueBright" underline>{block.url}</Text>
+          <Text color={colors.textMuted}>{block.text} </Text>
+          <Text color={colors.info} underline>{block.url}</Text>
         </Box>
       );
     case 'empty':
       return (
         <Box>
-          <Text color="gray">No results found.</Text>
+          <Text color={colors.textDim}>{glyphs.dot} No results found.</Text>
         </Box>
       );
     case 'streaming':
@@ -167,23 +211,18 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
     case 'event':
       return (
         <Box>
-          <Text color="yellow">[{new Date().toLocaleTimeString()}] </Text>
-          <Text>{JSON.stringify(block.event)}</Text>
+          <Text color={colors.testMode}>[{new Date().toLocaleTimeString()}] </Text>
+          <Text color={colors.textPrimary}>{JSON.stringify(block.event)}</Text>
         </Box>
       );
     case 'help':
-      return (
-        <Box flexDirection="column">
-          <Text bold>Commands:</Text>
-          <Text color="gray">See autocomplete suggestions for full list.</Text>
-        </Box>
-      );
+      return <HelpPanel />;
     case 'inline-input':
       return <InlineInput block={block} />;
     case 'inline-select':
       return (
         <Box flexDirection="column">
-          {block.label && <Text>{block.label}</Text>}
+          {block.label && <Text color={colors.textMuted}>{block.label}</Text>}
           <SelectInput
             items={block.options}
             onSelect={(item) => block.onSubmit(item.value)}
@@ -193,7 +232,7 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
     case 'confirm':
       return (
         <Box flexDirection="column">
-          <Text>{block.message}</Text>
+          <Text color={colors.textPrimary}>{block.message}</Text>
           <Box gap={1}>
             <SelectInput
               items={[

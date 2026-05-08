@@ -86,7 +86,7 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
       await handleWebhook(subCmd, ctx, { apiKey, client });
       break;
     default:
-      ctx.addBlock({ type: 'error', message: `Unknown command: ${cmd}` });
+      ctx.addBlock({ type: 'error', message: `Unknown command: ${cmd}. Try /help.` });
       break;
   }
 }

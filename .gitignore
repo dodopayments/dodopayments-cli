@@ -37,3 +37,6 @@ dodo-webhooks-server
 scripts
 
 .vscode
+
+# Local agent plan workspace
+.sisyphus/

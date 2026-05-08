@@ -9,13 +9,14 @@ const modeLabels: Record<Exclude<LogoutChoice, 'all'>, string> = {
 };
 
 export async function handleLogout(ctx: CommandContext): Promise<void> {
-  const target = await ctx.promptSelect('Which account would you like to logout from?', [
+  const target = await ctx.promptSelect('Sign out from', [
     { label: 'All accounts', value: 'all' },
     { label: 'Test Mode', value: 'test_mode' },
     { label: 'Live Mode', value: 'live_mode' },
   ]) as LogoutChoice;
 
-  const confirmed = await ctx.promptConfirm(`Are you sure you want to logout from ${target}?`);
+  const targetLabel = target === 'all' ? 'all accounts' : modeLabels[target];
+  const confirmed = await ctx.promptConfirm(`Sign out from ${targetLabel}?`);
   if (!confirmed) {
     ctx.addBlock({ type: 'error', message: 'Logout cancelled.' });
     return;
@@ -31,18 +32,18 @@ export async function handleLogout(ctx: CommandContext): Promise<void> {
 
   if (target === 'all') {
     if (result.removedModes.length === 0) {
-      ctx.addBlock({ type: 'error', message: 'No stored accounts were found.' });
+      ctx.addBlock({ type: 'error', message: 'No stored accounts found.' });
       process.exit(0);
       return;
     }
 
-    ctx.addBlock({ type: 'success', message: 'Logged out from all stored accounts.' });
+    ctx.addBlock({ type: 'success', message: 'Logged out from all accounts.' });
     process.exit(0);
     return;
   }
 
   if (result.removedModes.length === 0) {
-    ctx.addBlock({ type: 'error', message: `No ${modeLabels[target]} account is currently logged in.` });
+    ctx.addBlock({ type: 'error', message: `No ${modeLabels[target]} account is signed in.` });
     process.exit(0);
     return;
   }

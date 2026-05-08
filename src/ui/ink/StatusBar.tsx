@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text } from 'ink';
 import { resolveCredentials } from '../../utils/auth';
+import { colors, glyphs } from '../theme';
 
 interface StatusBarProps {
   authInfo?: { mode: string; key: string } | null;
@@ -23,20 +24,30 @@ export const StatusBar = ({ authInfo: propAuthInfo }: StatusBarProps) => {
       .catch(() => setAuthInfo(null));
   }, [propAuthInfo]);
 
+  const sep = ` ${glyphs.separator} `;
+
   if (!authInfo) {
     return (
       <Box paddingX={1} paddingBottom={1}>
-        <Text color="gray">Not logged in. Run </Text>
-        <Text color="#07BC70">/login</Text>
+        <Text color={colors.textDim}>{glyphs.separator} </Text>
+        <Text color={colors.textMuted}>Not signed in. Run </Text>
+        <Text color={colors.brand}>/login</Text>
+        <Text color={colors.textMuted}> to get started</Text>
       </Box>
     );
   }
 
   const isTest = authInfo.mode === 'test_mode';
+  const dotColor = isTest ? colors.testMode : colors.liveMode;
+  const label = isTest ? 'TEST MODE' : 'LIVE MODE';
+
   return (
     <Box paddingX={1} paddingBottom={1}>
-      <Text color={isTest ? 'yellow' : '#07BC70'}>◉ {authInfo.mode}</Text>
-      <Text color="gray">  {authInfo.key} using stored credentials</Text>
+      <Text color={dotColor} bold>{glyphs.dot} {label}</Text>
+      <Text color={colors.textDim}>{sep}</Text>
+      <Text color={colors.textMuted}>{authInfo.key}</Text>
+      <Text color={colors.textDim}>{sep}</Text>
+      <Text color={colors.textMuted}>stored credentials</Text>
     </Box>
   );
 };

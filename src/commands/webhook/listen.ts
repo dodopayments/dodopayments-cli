@@ -10,7 +10,7 @@ export default async function WebhookListener({
   dodoClient: DodoPayments;
   ctx: CommandContext;
 }) {
-  const endpoint = await ctx.promptInput('Enter the endpoint URL: ');
+  const endpoint = await ctx.promptInput('Endpoint URL');
 
   let targetedEndpoint: string;
   if (process.env.DODO_WH_TEST_SERVER_URL) {
@@ -19,7 +19,7 @@ export default async function WebhookListener({
     targetedEndpoint = 'https://wsserver.dodopayments.tech/';
   }
 
-  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Connecting...' });
+  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Connecting to webhook server…' });
 
   let doesSetupExist = false;
   const checkSetup = await dodoClient.webhooks.list({ limit: 100 });
@@ -53,7 +53,7 @@ export default async function WebhookListener({
   return new Promise<void>((resolve) => {
     ws.onopen = () => {
       ctx.removeBlock(spinnerId);
-      ctx.addBlock({ type: 'success', message: 'Successfully connected to Dodo Payments CLI Webhook Server ✅' });
+      ctx.addBlock({ type: 'success', message: 'Connected to webhook server.' });
     };
 
     ws.onmessage = async (e) => {
@@ -102,17 +102,17 @@ export default async function WebhookListener({
           );
         }
       } catch (error) {
-        ctx.addBlock({ type: 'error', message: `Failed to parse or respond to message: ${String(error)}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't process webhook message. ${String(error)}` });
       }
     };
 
     ws.onclose = (event) => {
-      ctx.addBlock({ type: 'error', message: `Disconnected from Webhook Server. Reason: ${event.reason} Code: ${event.code}` });
+      ctx.addBlock({ type: 'error', message: `Disconnected from webhook server. ${event.reason || ''} (code ${event.code})` });
       resolve();
     };
 
     ws.onerror = (e) => {
-      ctx.addBlock({ type: 'error', message: `Error in Webhook Server: ${(e as any).message || 'Unknown error'}` });
+      ctx.addBlock({ type: 'error', message: `Webhook server error. ${(e as any).message || 'Unknown error'}` });
     };
   });
 }

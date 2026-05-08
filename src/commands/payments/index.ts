@@ -1,8 +1,7 @@
 import DodoPayments from 'dodopayments';
-import chalk from 'chalk';
 import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
-import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handlePayments(
@@ -13,7 +12,7 @@ export async function handlePayments(
 ) {
   if (subCommand === 'list') {
     const pageNum = parseInt(args[0] ?? '1') || 1;
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching payments...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading payments…' });
     try {
       const payments = (
         await client.payments.list({
@@ -42,11 +41,11 @@ export async function handlePayments(
       });
 
       ctx.addBlock({ type: 'link', text: 'To view a payment, go to', url: 'https://app.dodopayments.com/transactions/payments/{payment_id}' });
-      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/payments list <page>') + chalk.dim(' to see more pages.') });
+      ctx.addBlock({ type: 'streaming', text: paginationTip('/payments list') });
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch payments: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load payments. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }
@@ -54,11 +53,11 @@ export async function handlePayments(
   } else if (subCommand === 'info') {
     let payment_id = args[0];
     if (!payment_id) {
-      ctx.addBlock({ type: 'error', message: 'Please provide a payment ID! (Usage: /payments info <id>)' });
+      ctx.addBlock({ type: 'error', message: 'Payment ID required. Usage: /payments info <id>' });
       return;
     }
-    
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching payment...' });
+
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading payment…' });
     try {
       const info = await client.payments.retrieve(payment_id);
       ctx.removeBlock(spinnerId);
@@ -88,7 +87,9 @@ export async function handlePayments(
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-        ctx.addBlock({ type: 'error', message: 'Incorrect payment ID!' });
+        ctx.addBlock({ type: 'error', message: 'Payment not found. Check the ID and try again.' });
+      } else if (isDodoPaymentsAPIError(e)) {
+        ctx.addBlock({ type: 'error', message: `Couldn't load this payment. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }

@@ -1,10 +1,9 @@
 import DodoPayments from 'dodopayments';
-import chalk from 'chalk';
 import open from 'open';
 import type { Price } from 'dodopayments/resources';
 import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
-import { usage } from '../../utils/usage-help';
 import { isDodoPaymentsAPIError } from '../../utils/error';
+import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../ui/ink/CommandContext';
 
 export async function handleProducts(
@@ -15,7 +14,7 @@ export async function handleProducts(
 ) {
   if (subCommand === 'list') {
     const pageNum = parseInt(args[0] ?? '1') || 1;
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching products...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading products…' });
     try {
       const fetchedData = await client.products.list({
         page_number: pageNum - 1,
@@ -43,11 +42,11 @@ export async function handleProducts(
 
       ctx.addBlock({ type: 'table', data: table });
       ctx.addBlock({ type: 'link', text: 'To edit a product, go to', url: 'https://app.dodopayments.com/products/edit?id={product_id}' });
-      ctx.addBlock({ type: 'streaming', text: chalk.dim('\nTip: Use ') + chalk.cyan('/products list <page>') + chalk.dim(' to see more pages.') });
+      ctx.addBlock({ type: 'streaming', text: paginationTip('/products list') });
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e)) {
-        ctx.addBlock({ type: 'error', message: `Failed to fetch products: ${e.error.message}` });
+        ctx.addBlock({ type: 'error', message: `Couldn't load products. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }
@@ -55,18 +54,18 @@ export async function handleProducts(
   } else if (subCommand === 'create') {
     try {
       await open('https://app.dodopayments.com/products/create');
-      ctx.addBlock({ type: 'success', message: 'Opened browser to create product.' });
+      ctx.addBlock({ type: 'success', message: 'Browser opened to create a product.' });
     } catch (e: any) {
-      ctx.addBlock({ type: 'error', message: `Failed to open browser: ${e.message}` });
+      ctx.addBlock({ type: 'error', message: `Couldn't open browser. ${e.message}` });
     }
   } else if (subCommand === 'info') {
     const product_id = args[0];
     if (!product_id) {
-      ctx.addBlock({ type: 'error', message: 'Please provide a product ID! (Usage: /products info <id>)' });
+      ctx.addBlock({ type: 'error', message: 'Product ID required. Usage: /products info <id>' });
       return;
     }
 
-    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Fetching product...' });
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Loading product…' });
     try {
       const info = await client.products.retrieve(product_id);
       ctx.removeBlock(spinnerId);
@@ -97,7 +96,9 @@ export async function handleProducts(
     } catch (e: any) {
       ctx.removeBlock(spinnerId);
       if (isDodoPaymentsAPIError(e) && e.error.code === 'NOT_FOUND') {
-        ctx.addBlock({ type: 'error', message: 'Incorrect product ID!' });
+        ctx.addBlock({ type: 'error', message: 'Product not found. Check the ID and try again.' });
+      } else if (isDodoPaymentsAPIError(e)) {
+        ctx.addBlock({ type: 'error', message: `Couldn't load this product. ${e.error.message}` });
       } else {
         ctx.addBlock({ type: 'error', message: e.message });
       }

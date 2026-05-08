@@ -6,30 +6,30 @@ import type { CommandContext } from '../../ui/ink/CommandContext';
 export async function handleLogin(ctx: CommandContext): Promise<void> {
   await open('https://app.dodopayments.com/developer/api-keys');
 
-  const apiKey = await ctx.promptInput('Enter your Dodo Payments API Key:');
+  const apiKey = await ctx.promptInput('API key');
 
-  const mode = (await ctx.promptSelect('Choose the environment:', [
+  const mode = (await ctx.promptSelect('Environment', [
     { label: 'Test Mode', value: 'test_mode' },
     { label: 'Live Mode', value: 'live_mode' },
   ])) as 'test_mode' | 'live_mode';
 
   const client = new DodoPayments({ bearerToken: apiKey, environment: mode });
 
-  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Verifying Dodo Payments API Key...' });
+  const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Verifying API key…' });
   try {
     await client.products.list({ page_size: 1 });
     ctx.removeBlock(spinnerId);
-    ctx.addBlock({ type: 'success', message: 'Successfully verified your Dodo Payments API Key!' });
+    ctx.addBlock({ type: 'success', message: 'API key verified.' });
   } catch {
     ctx.removeBlock(spinnerId);
     ctx.addBlock({
       type: 'error',
-      message: 'Something went wrong while authenticating. Please check your API key and selected environment.',
+      message: 'Authentication failed. Check your API key and selected environment.',
     });
     process.exitCode = 1;
     return;
   }
 
   await saveConfig(mode, apiKey);
-  ctx.addBlock({ type: 'success', message: 'Setup complete successfully!' });
+  ctx.addBlock({ type: 'success', message: 'Setup complete.' });
 }

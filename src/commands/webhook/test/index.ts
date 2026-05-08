@@ -11,4 +11,4 @@ Bun.serve({
     port: 8080
 });
 
-console.log('Test server running on port 8080. This will catch and log all webhooks sent to it.');
+console.log('Test server listening on port 8080. Logs all incoming webhooks.');
