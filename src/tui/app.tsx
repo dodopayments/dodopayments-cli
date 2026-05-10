@@ -20,7 +20,6 @@ import {
   type UpdateInfo,
 } from '../utils/update';
 import { version } from '../../package.json';
-import { glyphs } from './theme';
 
 const App = () => {
   const [authInfo, setAuthInfo] = createSignal<AuthInfo>(null);
@@ -103,7 +102,7 @@ const App = () => {
         return;
       }
     }
-    store.pushUserEcho(`${glyphs.prompt} ${trimmed}`);
+    store.pushUserEcho(trimmed);
     setInput('');
     setPaletteDismissed(false);
     setIsProcessing(true);
