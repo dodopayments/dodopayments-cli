@@ -1,7 +1,7 @@
 import DodoPayments from 'dodopayments';
 import open from 'open';
 import { saveConfig } from '../../utils/auth';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 export async function handleLogin(ctx: CommandContext): Promise<void> {
   await open('https://app.dodopayments.com/developer/api-keys');

@@ -3,7 +3,7 @@ import {
   supportedEvents,
   type SupportedEvent,
 } from './functions/supported-events';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 import {
   genSubscriptionActive,

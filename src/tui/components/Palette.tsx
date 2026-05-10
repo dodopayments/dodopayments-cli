@@ -111,13 +111,12 @@ export const Palette = (props: PaletteProps) => {
             const fg = isSelected ? colors.accentLime : colors.textPrimary;
             const arrow = isSelected ? `${glyphs.prompt} ` : '  ';
             return (
-              <text>
-                <span fg={fg} attributes={isSelected ? 1 : 0}>
-                  {arrow}
-                  {row.command}
-                </span>
-                <span fg={colors.textDim}>{`  ${glyphs.separator} ${row.description}`}</span>
-              </text>
+              <box flexDirection="row">
+                <text fg={fg} attributes={isSelected ? 1 : 0}>
+                  {`${arrow}${row.command}`}
+                </text>
+                <text fg={colors.textDim}>{`  ${glyphs.separator} ${row.description}`}</text>
+              </box>
             );
           }}
         </For>

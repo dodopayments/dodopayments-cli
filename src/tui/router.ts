@@ -1,9 +1,8 @@
 /**
- * Slash-command router for the OpenTUI TUI. Byte-for-byte port of
- * `src/ui/ink/router.ts` -- the only delta is the CommandContext import path.
- * Keeping the two routers identical (rather than sharing one file) avoids
- * coupling the legacy Ink mount path to the new TUI module graph during the
- * dual-stack period.
+ * Slash-command router. Parses a `/cmd subcmd args...` string and dispatches
+ * to the matching handler in `src/commands/`. Adds an auth gate for
+ * commands that need a Dodo Payments client. Unrecognized commands surface
+ * a friendly error block.
  */
 
 import type { CommandContext } from './CommandContext';

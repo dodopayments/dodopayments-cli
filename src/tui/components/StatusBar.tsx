@@ -1,7 +1,7 @@
 import { Show } from 'solid-js';
 import { colors, glyphs } from '../theme';
 import { version } from '../../../package.json';
-import { useTui } from '../context';
+import { useTui, type AuthInfo } from '../context';
 
 export const StatusBar = () => {
   const { authInfo } = useTui();
@@ -21,7 +21,7 @@ export const StatusBar = () => {
             </>
           }
         >
-          {(info) => {
+          {(info: () => NonNullable<AuthInfo>) => {
             const isTest = info().mode === 'test_mode';
             const dotColor = isTest ? colors.testMode : colors.liveMode;
             const label = isTest ? 'TEST MODE' : 'LIVE MODE';

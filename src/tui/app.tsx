@@ -1,22 +1,21 @@
 /**
- * Solid + OpenTUI render tree. Loaded only via `bootstrap.ts` AFTER the
- * Solid babel plugin is installed, so the JSX here compiles to Solid factory
- * calls (not React.createElement).
+ * Solid + OpenTUI render tree. The JSX here compiles to Solid factory calls
+ * via the @opentui/solid bun-plugin loaded by bunfig.toml's preload.
  *
- * Layout contract (do not break in later phases without updating the plan):
+ * Layout contract:
  *   - Top group: Welcome (visible until messages.length > 0)
  *   - Middle: <scrollbox flexGrow={1} stickyScroll stickyStart="bottom">
- *     contains MessageRow per message
+ *     contains an UpdateNotification banner + one MessageRow per message.
  *   - Bottom chrome group: <box flexShrink={0}> wrapping StatusBar +
  *     InputBar + HintBar. The flexShrink={0} wrapper is mandatory --
- *     without it the scrollbox starves the chrome of height (spike v2).
+ *     without it the scrollbox starves the chrome of height.
  *   - Palette: <Show> + <box position="absolute"> sibling to the column
  *     stack so it floats over the scrollbox without disturbing layout.
  *
  * App owns the message store, the auth signal, the palette state, and the
- * dispatcher into router.handleCommand. InputBar surfaces value changes via
- * onInput so the palette query stays in sync. Global useKeyboard handles
- * palette navigation when the palette is visible.
+ * dispatcher into router.handleCommand. InputBar surfaces value changes
+ * via onInput so the palette query stays in sync. Global useKeyboard
+ * handles palette navigation when the palette is visible.
  */
 
 import { For, Show, createMemo, createSignal, onMount, untrack } from 'solid-js';
@@ -180,7 +179,9 @@ const App = () => {
           paddingRight={2}
         >
           <Show when={updateInfo()}>
-            {(info) => <UpdateNotification info={info()} method={installMethod} />}
+            {(info: () => UpdateInfo) => (
+              <UpdateNotification info={info()} method={installMethod} />
+            )}
           </Show>
           <For each={store.messages()}>{(m) => <MessageRow message={m} />}</For>
         </scrollbox>

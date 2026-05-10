@@ -1,4 +1,4 @@
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 import { version as currentVersion } from '../../../package.json';
 import {
   checkForUpdates,

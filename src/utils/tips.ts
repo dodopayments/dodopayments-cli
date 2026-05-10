@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { colors } from '../ui/theme';
+import { colors } from '../tui/theme';
 
 export const paginationTip = (command: string) =>
   '\n' +

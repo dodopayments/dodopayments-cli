@@ -1,26 +1,30 @@
 import { colors, glyphs } from '../../theme';
 
 export const Success = (props: { message: string }) => (
-  <text>
-    <span fg={colors.success}>{`${glyphs.check} `}</span>
-    <span fg={colors.textPrimary}>{props.message}</span>
-  </text>
+  <box flexDirection="row">
+    <text fg={colors.success}>{`${glyphs.check} `}</text>
+    <text fg={colors.textPrimary}>{props.message}</text>
+  </box>
 );
 
 export const Error = (props: { message: string }) => (
-  <box borderStyle="round" borderColor={colors.error} paddingLeft={1} paddingRight={1}>
-    <text>
-      <span fg={colors.error}>{`${glyphs.cross} `}</span>
-      <span fg={colors.textPrimary}>{props.message}</span>
-    </text>
+  <box
+    borderStyle="rounded"
+    borderColor={colors.error}
+    paddingLeft={1}
+    paddingRight={1}
+    flexDirection="row"
+  >
+    <text fg={colors.error}>{`${glyphs.cross} `}</text>
+    <text fg={colors.textPrimary}>{props.message}</text>
   </box>
 );
 
 export const Info = (props: { message: string }) => (
-  <text>
-    <span fg={colors.info}>{`${glyphs.bullet} `}</span>
-    <span fg={colors.textPrimary}>{props.message}</span>
-  </text>
+  <box flexDirection="row">
+    <text fg={colors.info}>{`${glyphs.bullet} `}</text>
+    <text fg={colors.textPrimary}>{props.message}</text>
+  </box>
 );
 
 export const Empty = () => (
@@ -28,22 +32,22 @@ export const Empty = () => (
 );
 
 export const Link = (props: { text: string; url: string }) => (
-  <text>
-    <span fg={colors.textMuted}>{`${props.text} `}</span>
-    <a href={props.url} fg={colors.info}>{props.url}</a>
-  </text>
+  <box flexDirection="row">
+    <text fg={colors.textMuted}>{`${props.text} `}</text>
+    <text fg={colors.info}>{props.url}</text>
+  </box>
 );
 
 export const Event = (props: { event: any }) => (
-  <text>
-    <span fg={colors.testMode}>{`[${new Date().toLocaleTimeString()}] `}</span>
-    <span fg={colors.textPrimary}>{JSON.stringify(props.event)}</span>
-  </text>
+  <box flexDirection="row">
+    <text fg={colors.testMode}>{`[${new Date().toLocaleTimeString()}] `}</text>
+    <text fg={colors.textPrimary}>{JSON.stringify(props.event)}</text>
+  </box>
 );
 
 const ANSI_REGEX = /\u001b\[[0-9;]*m/g;
 const stripAnsi = (s: string): string => s.replace(ANSI_REGEX, '');
 
 export const Streaming = (props: { text: string }) => (
-  <markdown content={stripAnsi(props.text)} />
+  <text fg={colors.textPrimary}>{stripAnsi(props.text)}</text>
 );

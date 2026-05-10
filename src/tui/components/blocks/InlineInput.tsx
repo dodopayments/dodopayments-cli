@@ -19,7 +19,7 @@ export const InlineInput = (props: InlineInputProps) => {
 
   return (
     <box
-      borderStyle="round"
+      borderStyle="rounded"
       borderColor={colors.accentMagenta}
       paddingLeft={1}
       paddingRight={1}
@@ -30,8 +30,8 @@ export const InlineInput = (props: InlineInputProps) => {
         focused
         value={value()}
         placeholder={props.secure ? '••••••' : ''}
-        onInput={setValue}
-        onSubmit={(v) => props.onSubmit(v)}
+        onInput={((v: string) => setValue(v)) as any}
+        onSubmit={((v: string) => props.onSubmit(v)) as any}
       />
     </box>
   );

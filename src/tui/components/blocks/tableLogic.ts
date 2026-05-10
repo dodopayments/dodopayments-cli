@@ -1,8 +1,7 @@
 /**
- * Numeric / date column detection for Table and Detail blocks. Direct port
- * of `src/ui/ink/OutputBlock.tsx` regex heuristics + isNumericColumn() so
- * column highlighting (amber for numbers) stays consistent across the two
- * TUIs through the dual-stack period.
+ * Numeric / date column detection for Table and Detail blocks. The regex
+ * heuristics flag amount/price/etc keys as numeric (so cells render amber)
+ * and exclude created_at-style date keys to keep them neutral white.
  */
 
 export const MAX_COL_WIDTH = 45;

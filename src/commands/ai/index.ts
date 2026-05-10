@@ -4,7 +4,7 @@ import type { ModelMessage } from 'ai';
 import { createMCPClient } from '@ai-sdk/mcp';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { resolveCredentials } from '../../utils/auth';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 export async function getAIModel(ctx: CommandContext) {
   const { apiKey, mode } = await resolveCredentials(ctx, false);

@@ -16,68 +16,59 @@ import { InlineInput } from './InlineInput';
 import { InlineSelect } from './InlineSelect';
 import { Confirm } from './Confirm';
 
+type Variant<T extends BlockType['type']> = Extract<BlockType, { type: T }>;
+
 export const renderBlock = (block: BlockType) => (
   <Switch fallback={null}>
     <Match when={block.type === 'spinner' && block}>
-      {(b) => <Spinner label={(b() as Extract<BlockType, { type: 'spinner' }>).label} />}
+      {(b: () => Variant<'spinner'>) => <Spinner label={b().label} />}
     </Match>
     <Match when={block.type === 'success' && block}>
-      {(b) => <Success message={(b() as Extract<BlockType, { type: 'success' }>).message} />}
+      {(b: () => Variant<'success'>) => <Success message={b().message} />}
     </Match>
     <Match when={block.type === 'error' && block}>
-      {(b) => <Error message={(b() as Extract<BlockType, { type: 'error' }>).message} />}
+      {(b: () => Variant<'error'>) => <Error message={b().message} />}
     </Match>
     <Match when={block.type === 'info' && block}>
-      {(b) => <Info message={(b() as Extract<BlockType, { type: 'info' }>).message} />}
+      {(b: () => Variant<'info'>) => <Info message={b().message} />}
     </Match>
     <Match when={block.type === 'empty' && block}>{() => <Empty />}</Match>
     <Match when={block.type === 'link' && block}>
-      {(b) => {
-        const blk = b() as Extract<BlockType, { type: 'link' }>;
-        return <Link text={blk.text} url={blk.url} />;
-      }}
+      {(b: () => Variant<'link'>) => <Link text={b().text} url={b().url} />}
     </Match>
     <Match when={block.type === 'event' && block}>
-      {(b) => <Event event={(b() as Extract<BlockType, { type: 'event' }>).event} />}
+      {(b: () => Variant<'event'>) => <Event event={b().event} />}
     </Match>
     <Match when={block.type === 'streaming' && block}>
-      {(b) => <Streaming text={(b() as Extract<BlockType, { type: 'streaming' }>).text} />}
+      {(b: () => Variant<'streaming'>) => <Streaming text={b().text} />}
     </Match>
     <Match when={block.type === 'table' && block}>
-      {(b) => {
-        const blk = b() as Extract<BlockType, { type: 'table' }>;
-        return <Table data={blk.data} statusColumn={blk.statusColumn} />;
-      }}
+      {(b: () => Variant<'table'>) => (
+        <Table data={b().data} statusColumn={b().statusColumn} />
+      )}
     </Match>
     <Match when={block.type === 'detail' && block}>
-      {(b) => <Detail data={(b() as Extract<BlockType, { type: 'detail' }>).data} />}
+      {(b: () => Variant<'detail'>) => <Detail data={b().data} />}
     </Match>
     <Match when={block.type === 'help' && block}>{() => <Help />}</Match>
     <Match when={block.type === 'inline-input' && block}>
-      {(b) => {
-        const blk = b() as Extract<BlockType, { type: 'inline-input' }>;
-        return <InlineInput label={blk.label} secure={blk.secure} onSubmit={blk.onSubmit} />;
-      }}
+      {(b: () => Variant<'inline-input'>) => (
+        <InlineInput label={b().label} secure={b().secure} onSubmit={b().onSubmit} />
+      )}
     </Match>
     <Match when={block.type === 'inline-select' && block}>
-      {(b) => {
-        const blk = b() as Extract<BlockType, { type: 'inline-select' }>;
-        return (
-          <InlineSelect label={blk.label} options={blk.options} onSubmit={blk.onSubmit} />
-        );
-      }}
+      {(b: () => Variant<'inline-select'>) => (
+        <InlineSelect label={b().label} options={b().options} onSubmit={b().onSubmit} />
+      )}
     </Match>
     <Match when={block.type === 'confirm' && block}>
-      {(b) => {
-        const blk = b() as Extract<BlockType, { type: 'confirm' }>;
-        return (
-          <Confirm
-            message={blk.message}
-            onConfirm={blk.onConfirm}
-            onCancel={blk.onCancel}
-          />
-        );
-      }}
+      {(b: () => Variant<'confirm'>) => (
+        <Confirm
+          message={b().message}
+          onConfirm={b().onConfirm}
+          onCancel={b().onCancel}
+        />
+      )}
     </Match>
   </Switch>
 );

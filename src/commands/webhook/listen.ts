@@ -1,5 +1,5 @@
 import type DodoPayments from 'dodopayments';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 export default async function WebhookListener({
   API_KEY,
