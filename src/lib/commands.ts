@@ -24,5 +24,6 @@ export const COMMANDS = [
   { command: '/logout',           description: 'Logout from stored accounts' },
   { command: '/update',           description: 'Update the CLI to the latest version' },
   { command: '/clear',            description: 'Clear message history' },
+  { command: '/exit',             description: 'Exit the CLI' },
   { command: '/help',             description: 'Show all commands' },
 ];
