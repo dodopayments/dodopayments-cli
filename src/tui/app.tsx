@@ -24,6 +24,7 @@ import { Welcome } from './components/Welcome';
 import { StatusBar } from './components/StatusBar';
 import { InputBar } from './components/InputBar';
 import { HintBar } from './components/HintBar';
+import { Divider } from './components/Divider';
 import { MessageRow } from './components/MessageRow';
 import { Palette, rankCommands } from './components/Palette';
 import { UpdateNotification } from './components/UpdateNotification';
@@ -40,7 +41,7 @@ import {
   type UpdateInfo,
 } from '../utils/update';
 import { version } from '../../package.json';
-import { glyphs } from './theme';
+import { colors, glyphs } from './theme';
 
 const App = () => {
   const [authInfo, setAuthInfo] = createSignal<AuthInfo>(null);
@@ -143,13 +144,17 @@ const App = () => {
     if (!paletteVisible()) return;
     const pool = untrack(palettePool);
     if (key.name === 'up') {
+      key.preventDefault();
       setPaletteIndex((i) => Math.max(0, i - 1));
     } else if (key.name === 'down') {
+      key.preventDefault();
       setPaletteIndex((i) => Math.min(pool.length - 1, i + 1));
     } else if (key.name === 'tab') {
+      key.preventDefault();
       const pick = pool[paletteIndex()];
       if (pick) completeWith(pick.command);
     } else if (key.name === 'escape') {
+      key.preventDefault();
       setPaletteDismissed(true);
     }
   });
@@ -185,7 +190,8 @@ const App = () => {
           </Show>
           <For each={store.messages()}>{(m) => <MessageRow message={m} />}</For>
         </scrollbox>
-        <box flexShrink={0} flexDirection="column">
+        <box flexShrink={0} flexDirection="column" backgroundColor={colors.surfaceDeep}>
+          <Divider />
           <StatusBar />
           <InputBar onSubmit={onSubmit} onInput={onInputChange} value={input()} />
           <HintBar />

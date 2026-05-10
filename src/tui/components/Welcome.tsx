@@ -1,21 +1,35 @@
-/**
- * Welcome screen shown when the TUI mounts with no messages yet.
- * Layout mirrors opencode's left-aligned welcome: ASCII wordmark in brand
- * green, then dim metadata rows, then inline action hints.
- *
- * This is a pure render component with zero state. It disappears as soon as
- * `messages().length > 0` (gated by the parent App in Phase 2).
- */
-
-import { For } from 'solid-js';
-import { colors, glyphs, LOGO_DODO } from '../theme';
+import { Show } from 'solid-js';
+import { useTerminalDimensions } from '@opentui/solid';
+import { colors, glyphs } from '../theme';
 import { version } from '../../../package.json';
 
+const PAYMENTS_MIN_WIDTH = 84;
+
 export const Welcome = () => {
+  const dims = useTerminalDimensions();
+  const showPayments = () => dims().width >= PAYMENTS_MIN_WIDTH;
+
   return (
-    <box flexDirection="column" paddingTop={1} paddingLeft={2} flexShrink={0}>
-      <For each={LOGO_DODO}>{(row) => <text fg={colors.brand}>{row}</text>}</For>
-      <text> </text>
+    <box flexDirection="column" paddingLeft={2} paddingTop={1} flexShrink={0}>
+      <ascii_font
+        text="DODO"
+        font="block"
+        color={[colors.brand, colors.brandLime]}
+        selectable={false}
+      />
+      <Show when={showPayments()}>
+        <ascii_font
+          text="PAYMENTS"
+          font="block"
+          color={[colors.brandLime, colors.brand]}
+          selectable={false}
+        />
+      </Show>
+      <box flexDirection="row" paddingTop={1}>
+        <text fg={colors.textPrimary}>Welcome to </text>
+        <text fg={colors.brand} attributes={1}>Dodo Payments</text>
+        <text fg={colors.textPrimary}>! Let’s get you set up.</text>
+      </box>
       <text fg={colors.textMuted}>{`dodopayments cli  ${glyphs.separator}  v${version}`}</text>
       <text fg={colors.textDim}>{`${glyphs.separator} type ${glyphs.prompt} /help to see commands`}</text>
       <text fg={colors.textDim}>{`${glyphs.separator} type ${glyphs.prompt} /login to authenticate`}</text>

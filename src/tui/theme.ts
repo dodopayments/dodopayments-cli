@@ -60,12 +60,4 @@ export const helpHeadingColors: Record<string, string> = {
   SESSION: colors.textMuted,
 };
 
-/**
- * Three-row ASCII wordmark for the welcome screen. Renders correctly at any
- * terminal width >= 24 cols (the wordmark itself is 19 cols + padding).
- */
-export const LOGO_DODO = [
-  '█▀▀▄ █▀▀█ █▀▀▄ █▀▀█',
-  '█  █ █  █ █  █ █  █',
-  '█▄▄▀ ▀▀▀▀ █▄▄▀ ▀▀▀▀',
-] as const;
+
