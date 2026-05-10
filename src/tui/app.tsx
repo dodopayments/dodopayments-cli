@@ -26,10 +26,13 @@ const App = () => {
   const [input, setInput] = createSignal('');
   const [paletteVisible] = createSignal(false);
   const [isProcessing] = createSignal(false);
+  const [promptActive, setPromptActive] = createSignal(false);
   const [hasMessages] = createSignal(false);
 
   return (
-    <TuiContextProvider value={{ authInfo, input, paletteVisible, isProcessing }}>
+    <TuiContextProvider
+      value={{ authInfo, input, paletteVisible, isProcessing, promptActive, setPromptActive }}
+    >
       <box flexDirection="column" width="100%" height="100%">
         <Show when={!hasMessages()}>
           <Welcome />
