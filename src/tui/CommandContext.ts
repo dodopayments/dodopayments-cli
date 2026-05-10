@@ -18,6 +18,7 @@ export interface CommandContext {
   promptInput: (label: string, secure?: boolean) => Promise<string>;
   promptSelect: (label: string, options: { label: string; value: string }[]) => Promise<string>;
   promptConfirm: (message: string) => Promise<boolean>;
+  clear: () => void;
 }
 
 export interface MessageStore {
@@ -125,10 +126,14 @@ export const createMessageStore = (): MessageStore => {
     setMessages((prev) => [...prev, { id, role: 'user', text, blocks: [] }]);
   };
 
+  const clear = () => {
+    setMessages([]);
+  };
+
   return {
     messages,
     setMessages,
     pushUserEcho,
-    ctx: { addBlock, updateBlock, removeBlock, promptInput, promptSelect, promptConfirm },
+    ctx: { addBlock, updateBlock, removeBlock, promptInput, promptSelect, promptConfirm, clear },
   };
 };
