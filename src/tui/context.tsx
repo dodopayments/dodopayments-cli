@@ -14,6 +14,8 @@ export interface TuiContextValue {
   input: Accessor<string>;
   paletteVisible: Accessor<boolean>;
   isProcessing: Accessor<boolean>;
+  promptActive: Accessor<boolean>;
+  setPromptActive: (active: boolean) => void;
 }
 
 const TuiContext = createContext<TuiContextValue>();

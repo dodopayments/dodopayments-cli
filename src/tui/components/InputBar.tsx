@@ -1,6 +1,7 @@
 import { createSignal } from 'solid-js';
 import { useTerminalDimensions } from '@opentui/solid';
 import { colors, glyphs } from '../theme';
+import { useTui } from '../context';
 
 interface InputBarProps {
   onSubmit: (value: string) => void;
@@ -13,6 +14,8 @@ export const InputBar = (props: InputBarProps) => {
   const [value, setValue] = createSignal('');
   const dims = useTerminalDimensions();
   const dividerWidth = () => Math.max(0, dims().width - 2);
+  const { promptActive } = useTui();
+  const isFocused = () => !props.disabled && !promptActive();
 
   const handleInput = (next: string) => {
     setValue(next);
@@ -40,7 +43,7 @@ export const InputBar = (props: InputBarProps) => {
         <text fg={colors.accentLime}>{`${glyphs.prompt} `}</text>
         <input
           flexGrow={1}
-          focused={!props.disabled}
+          focused={isFocused()}
           value={value()}
           placeholder={props.placeholder ?? 'Type a command. /help to list all.'}
           onInput={handleInput}

@@ -48,6 +48,21 @@ export const glyphs = {
 
 export const spacing = { xs: 0, sm: 1, md: 2, lg: 3 } as const;
 
+export const helpHeadingColors: Record<string, string> = {
+  PRODUCTS: colors.accentCyan,
+  PAYMENTS: colors.accentAmber,
+  CUSTOMERS: colors.accentMagenta,
+  DISCOUNTS: colors.accentLime,
+  LICENCES: colors.accentSky,
+  ADDONS: colors.accentCyan,
+  REFUNDS: colors.accentAmber,
+  CHECKOUT: colors.accentLime,
+  WEBHOOKS: colors.accentMagenta,
+  AI: colors.accentLime,
+  AUTH: colors.accentSky,
+  SESSION: colors.textMuted,
+};
+
 /**
  * Three-row ASCII wordmark for the welcome screen. Renders correctly at any
  * terminal width >= 24 cols (the wordmark itself is 19 cols + padding).
