@@ -106,14 +106,14 @@ export const Palette = (props: PaletteProps) => {
         </Show>
         <For each={visibleRows()}>
           {(row, i) => {
-            const absIndex = window().start + i();
-            const isSelected = absIndex === props.selectedIndex;
-            const fg = isSelected ? colors.accentLime : colors.textPrimary;
-            const arrow = isSelected ? `${glyphs.prompt} ` : '  ';
+            const isSelected = () => window().start + i() === props.selectedIndex;
             return (
               <box flexDirection="row">
-                <text fg={fg} attributes={isSelected ? 1 : 0}>
-                  {`${arrow}${row.command}`}
+                <text
+                  fg={isSelected() ? colors.accentLime : colors.textPrimary}
+                  attributes={isSelected() ? 1 : 0}
+                >
+                  {`${isSelected() ? `${glyphs.prompt} ` : '  '}${row.command}`}
                 </text>
                 <text fg={colors.textDim}>{`  ${glyphs.separator} ${row.description}`}</text>
               </box>
