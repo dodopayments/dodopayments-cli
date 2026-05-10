@@ -4,7 +4,6 @@ import { Welcome } from './components/Welcome';
 import { InputBar } from './components/InputBar';
 import { HintRow } from './components/HintRow';
 import { Footer } from './components/Footer';
-import { TitleStrip } from './components/TitleStrip';
 import { MessageRow } from './components/MessageRow';
 import { Palette, rankCommands } from './components/Palette';
 import { UpdateNotification } from './components/UpdateNotification';
@@ -31,8 +30,6 @@ const App = () => {
   const [isProcessing, setIsProcessing] = createSignal(false);
   const [promptActive, setPromptActive] = createSignal(false);
   const [updateInfo, setUpdateInfo] = createSignal<UpdateInfo | null>(null);
-  const [lastCommand, setLastCommand] = createSignal<string | null>(null);
-  const [startedAt] = createSignal<number>(Date.now());
   const installMethod: InstallMethod = detectInstallMethod();
 
   const store = createMessageStore();
@@ -106,7 +103,6 @@ const App = () => {
         return;
       }
     }
-    setLastCommand(trimmed);
     store.pushUserEcho(`${glyphs.prompt} ${trimmed}`);
     setInput('');
     setPaletteDismissed(false);
@@ -153,14 +149,9 @@ const App = () => {
         isProcessing,
         promptActive,
         setPromptActive,
-        lastCommand,
-        startedAt,
       }}
     >
       <box flexDirection="column" width="100%" height="100%">
-        <Show when={hasMessages()}>
-          <TitleStrip />
-        </Show>
         <Show
           when={hasMessages()}
           fallback={<Welcome />}

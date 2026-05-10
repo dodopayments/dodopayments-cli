@@ -18,8 +18,6 @@ export interface TuiContextValue {
   isProcessing: Accessor<boolean>;
   promptActive: Accessor<boolean>;
   setPromptActive: (active: boolean) => void;
-  lastCommand: Accessor<string | null>;
-  startedAt: Accessor<number>;
 }
 
 const TuiContext = createContext<TuiContextValue>();
