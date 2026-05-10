@@ -33,4 +33,5 @@ export const defaultContext: CommandContext = {
   promptConfirm: async () => {
     throw new Error('Cannot prompt in non-TTY mode');
   },
+  clear: () => console.clear(),
 };

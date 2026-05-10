@@ -109,6 +109,7 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
     case '/clear':
     case '/exit': {
       if (cmd === '/exit') exit();
+      if (cmd === '/clear') ctx.clear();
       break;
     }
     default:
