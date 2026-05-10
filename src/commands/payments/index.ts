@@ -22,7 +22,7 @@ export async function handlePayments(
       ).items;
 
       ctx.removeBlock(spinnerId);
-      
+
       if (payments.length === 0) {
         ctx.addBlock({ type: 'empty' });
         return;
@@ -75,11 +75,7 @@ export async function handlePayments(
           ...(info.subscription_id && {
             'subscription id': info.subscription_id,
           }),
-          'billing address street': info.billing.street,
-          'billing address state': info.billing.state,
-          'billing address city': info.billing.city,
-          'billing address country': info.billing.country,
-          'billing address zipcode': info.billing.zipcode,
+          'billing address': [info.billing.street, info.billing.city, info.billing.state, info.billing.zipcode, info.billing.country].filter(Boolean).join(', '),
         }
       });
 
