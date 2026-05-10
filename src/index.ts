@@ -20,7 +20,7 @@ if (category === '--version' || category === '-v') {
 }
 
 if (process.stdout.isTTY && !category) {
-  render(React.createElement(App));
+  render(React.createElement(App), { alternateScreen: true, exitOnCtrlC: true });
 } else {
   try {
     if (category === 'login') {

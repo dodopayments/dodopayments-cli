@@ -9,6 +9,12 @@ interface WelcomeBannerProps {
   authMode?: string | null;
 }
 
+const LOGO = [
+  '█▀▀▄ █▀▀█ █▀▀▄ █▀▀█',
+  '█  █ █  █ █  █ █  █',
+  '█▄▄▀ ▀▀▀▀ █▄▄▀ ▀▀▀▀',
+];
+
 const formatCwd = (): string => {
   const cwd = process.cwd();
   const home = os.homedir();
@@ -28,21 +34,42 @@ const modeColor = (mode?: string | null): string => {
 };
 
 export const WelcomeBanner = ({ authMode }: WelcomeBannerProps) => {
-  const sep = ` ${glyphs.separator} `;
   return (
-    <Box flexDirection="column" alignItems="center" paddingY={1}>
-      <Text color={colors.brand} bold>dodopayments</Text>
-      <Box marginTop={1}>
-        <Text color={colors.textMuted}>/help for commands</Text>
-        <Text color={colors.textDim}>{sep}</Text>
-        <Text color={colors.textMuted}>/login to auth</Text>
+    <Box flexDirection="column" paddingX={2} paddingY={1}>
+      <Box flexDirection="column">
+        {LOGO.map((row, i) => (
+          <Text key={i} color={colors.brand}>{row}</Text>
+        ))}
       </Box>
-      <Box marginTop={1}>
-        <Text color={colors.textDim}>v{version}</Text>
-        <Text color={colors.textDim}>{sep}</Text>
-        <Text color={modeColor(authMode)}>{formatMode(authMode)}</Text>
-        <Text color={colors.textDim}>{sep}</Text>
-        <Text color={colors.textDim}>{formatCwd()}</Text>
+      <Box marginTop={1} flexDirection="column">
+        <Box>
+          <Text color={colors.textMuted}>dodopayments cli</Text>
+          <Text color={colors.textDim}> {glyphs.separator} v{version}</Text>
+        </Box>
+        <Box>
+          <Text color={modeColor(authMode)}>{formatMode(authMode)}</Text>
+          <Text color={colors.textDim}> {glyphs.separator} </Text>
+          <Text color={colors.textMuted}>{formatCwd()}</Text>
+        </Box>
+      </Box>
+      <Box marginTop={1} flexDirection="column">
+        <Box>
+          <Text color={colors.textDim}>type </Text>
+          <Text color={colors.accentLime}>/help</Text>
+          <Text color={colors.textDim}> to see commands</Text>
+        </Box>
+        <Box>
+          <Text color={colors.textDim}>type </Text>
+          <Text color={colors.accentLime}>/</Text>
+          <Text color={colors.textDim}> to open the command palette</Text>
+        </Box>
+        {!authMode && (
+          <Box>
+            <Text color={colors.textDim}>type </Text>
+            <Text color={colors.accentLime}>/login</Text>
+            <Text color={colors.textDim}> to sign in</Text>
+          </Box>
+        )}
       </Box>
     </Box>
   );

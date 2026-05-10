@@ -98,4 +98,4 @@ export const HELP_GROUPS: HelpGroup[] = [
   },
 ];
 
-export const HELP_FOOTER = 'Tab to autocomplete · ↑/↓ for history · Esc to exit';
+export const HELP_FOOTER = 'Tab to autocomplete · ↑/↓ for history · Ctrl+C to exit';

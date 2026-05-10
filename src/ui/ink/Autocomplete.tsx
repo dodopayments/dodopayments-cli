@@ -1,10 +1,10 @@
 import React from 'react';
 import { Box, Text, useStdout } from 'ink';
 import { COMMANDS } from '../../lib/commands';
-import { boxes, colors, glyphs } from '../theme';
+import { colors, glyphs } from '../theme';
 
-const PALETTE_WIDTH = 60;
-const PALETTE_MAX_ITEMS = 8;
+const PALETTE_WIDTH = 64;
+const PALETTE_MAX_ITEMS = 9;
 
 type Suggestion = (typeof COMMANDS)[number] & { score: number };
 
@@ -53,7 +53,22 @@ export const Autocomplete = ({ input, selectedIndex }: AutocompleteProps) => {
 
   return (
     <Box marginLeft={leftPad}>
-      <Box flexDirection="column" {...boxes.panel} width={PALETTE_WIDTH} paddingX={1}>
+      <Box
+        flexDirection="column"
+        borderStyle="single"
+        borderColor={colors.accentSky}
+        width={PALETTE_WIDTH}
+        paddingX={1}
+      >
+        <Box>
+          <Text color={colors.accentSky} bold>{glyphs.bullet} </Text>
+          <Text color={colors.textPrimary} bold>command palette</Text>
+          <Box flexGrow={1} />
+          <Text color={colors.textDim}>{visible.length}/{all.length}</Text>
+        </Box>
+        <Box>
+          <Text color={colors.accentSky}>{'─'.repeat(PALETTE_WIDTH - 4)}</Text>
+        </Box>
         <Box>
           <Text color={colors.accentLime}>{glyphs.prompt} </Text>
           <Text color={colors.textPrimary}>{input}</Text>
@@ -78,13 +93,9 @@ export const Autocomplete = ({ input, selectedIndex }: AutocompleteProps) => {
         })}
         {overflow > 0 && (
           <Box>
-            <Text color={colors.textDim}>  +{overflow} more</Text>
+            <Text color={colors.textDim}>  +{overflow} more {glyphs.separator} keep typing to filter</Text>
           </Box>
         )}
-        <Box marginTop={1} justifyContent="space-between">
-          <Text color={colors.textDim}>↑↓ navigate</Text>
-          <Text color={colors.textDim}>↵ select {glyphs.separator} esc cancel</Text>
-        </Box>
       </Box>
     </Box>
   );

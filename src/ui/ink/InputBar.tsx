@@ -9,9 +9,18 @@ interface InputBarProps {
   onClear: () => void;
   onExit: () => void;
   isActive: boolean;
+  onPaletteChange?: (visible: boolean) => void;
+  onInputEmptyChange?: (empty: boolean) => void;
 }
 
-export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps) => {
+export const InputBar = ({
+  onSubmit,
+  onClear,
+  onExit,
+  isActive,
+  onPaletteChange,
+  onInputEmptyChange,
+}: InputBarProps) => {
   const [input, setInput] = useState('');
   const [cursorOffset, setCursorOffset] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -30,6 +39,14 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
       setSelectedIndex(0);
     }
   }, [suggestions.length, selectedIndex]);
+
+  useEffect(() => {
+    onPaletteChange?.(paletteVisible);
+  }, [paletteVisible, onPaletteChange]);
+
+  useEffect(() => {
+    onInputEmptyChange?.(input.length === 0);
+  }, [input, onInputEmptyChange]);
 
   useInput((ch, key) => {
     if (!isActive) return;

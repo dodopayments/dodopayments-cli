@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Box, useApp, useInput } from 'ink';
+import React, { useState, useEffect } from 'react';
+import { Box, useApp, useStdout } from 'ink';
 import { WelcomeBanner } from './WelcomeBanner';
 import { StatusBar } from './StatusBar';
+import { HintBar } from './HintBar';
 import { MessageList } from './MessageList';
 import { InputBar } from './InputBar';
 import { resolveCredentials, setSessionMode } from '../../utils/auth';
@@ -28,6 +29,11 @@ export const App = () => {
   const [authInfo, setAuthInfo] = useState<{ mode: string; key: string } | null>(null);
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [installMethod] = useState<InstallMethod>(() => detectInstallMethod());
+  const [paletteVisible, setPaletteVisible] = useState(false);
+  const [inputEmpty, setInputEmpty] = useState(true);
+  const { stdout } = useStdout();
+  const rows = stdout?.rows ?? 24;
+  const cols = stdout?.columns ?? 80;
 
   useEffect(() => {
     const completed = consumePendingSilentUpdate();
@@ -76,12 +82,6 @@ export const App = () => {
     };
     init();
   }, []);
-
-  useInput((_ch, key) => {
-    if (key.escape) {
-      exit();
-    }
-  });
 
 
   const addMessage = (role: 'user' | 'system', text?: string) => {
@@ -218,16 +218,25 @@ export const App = () => {
   };
 
   return (
-    <Box flexDirection="column" minHeight={10}>
-      {showBanner && isInitialized && <WelcomeBanner authMode={authInfo?.mode} />}
-      {updateInfo && <UpdateNotification info={updateInfo} method={installMethod} />}
-      <MessageList messages={messages} />
-      {!showBanner && isInitialized && <StatusBar authInfo={authInfo} />}
+    <Box flexDirection="column" height={rows} width={cols}>
+      <Box flexDirection="column" flexGrow={1} flexShrink={1} overflow="hidden">
+        {showBanner && isInitialized && <WelcomeBanner authMode={authInfo?.mode} />}
+        {updateInfo && <UpdateNotification info={updateInfo} method={installMethod} />}
+        <MessageList messages={messages} />
+      </Box>
+      {isInitialized && <StatusBar authInfo={authInfo} />}
       <InputBar
         onSubmit={handleSubmit}
         onClear={() => setMessages([])}
         onExit={exit}
         isActive={!isProcessing}
+        onPaletteChange={setPaletteVisible}
+        onInputEmptyChange={setInputEmpty}
+      />
+      <HintBar
+        paletteVisible={paletteVisible}
+        isProcessing={isProcessing}
+        inputEmpty={inputEmpty}
       />
     </Box>
   );
