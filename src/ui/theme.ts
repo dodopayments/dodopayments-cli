@@ -44,12 +44,27 @@ export const glyphs = {
 } as const;
 
 export const boxes = {
-  panel:   { borderStyle: 'round'  as const, borderColor: colors.border },
-  brand:   { borderStyle: 'round'  as const, borderColor: colors.brand },
-  error:   { borderStyle: 'round'  as const, borderColor: colors.error },
-  warning: { borderStyle: 'round'  as const, borderColor: colors.warning },
+  panel:   { borderStyle: 'single' as const, borderColor: colors.border },
+  brand:   { borderStyle: 'single' as const, borderColor: colors.brand },
+  error:   { borderStyle: 'single' as const, borderColor: colors.error },
+  warning: { borderStyle: 'single' as const, borderColor: colors.warning },
   table:   { borderStyle: 'single' as const, borderColor: colors.accentSky },
-  prompt:  { borderStyle: 'round'  as const, borderColor: colors.accentMagenta },
+  prompt:  { borderStyle: 'single' as const, borderColor: colors.accentMagenta },
 } as const;
 
 export const spacing = { xs: 0, sm: 1, md: 2, lg: 3 } as const;
+
+export const helpHeadingColors: Record<string, string> = {
+  PRODUCTS:  colors.accentCyan,
+  PAYMENTS:  colors.accentAmber,
+  CUSTOMERS: colors.accentMagenta,
+  DISCOUNTS: colors.accentLime,
+  LICENCES:  colors.accentSky,
+  ADDONS:    colors.accentCyan,
+  REFUNDS:   colors.accentAmber,
+  CHECKOUT:  colors.accentLime,
+  WEBHOOKS:  colors.accentMagenta,
+  AI:        colors.accentLime,
+  AUTH:      colors.accentSky,
+  SESSION:   colors.textMuted,
+};

@@ -18,7 +18,6 @@ import {
 } from '../../utils/update';
 import { version } from '../../../package.json';
 import { UpdateNotification } from './UpdateNotification';
-import { colors } from '../theme';
 
 export const App = () => {
   const { exit } = useApp();
@@ -220,15 +219,10 @@ export const App = () => {
 
   return (
     <Box flexDirection="column" minHeight={10}>
-      {showBanner && (
-        <Box flexDirection="column" borderStyle="round" borderColor={colors.brand} paddingX={1} paddingY={0}>
-          <WelcomeBanner />
-          {isInitialized && <StatusBar authInfo={authInfo} />}
-        </Box>
-      )}
+      {showBanner && isInitialized && <WelcomeBanner authMode={authInfo?.mode} />}
       {updateInfo && <UpdateNotification info={updateInfo} method={installMethod} />}
-      {!showBanner && isInitialized && <StatusBar authInfo={authInfo} />}
       <MessageList messages={messages} />
+      {!showBanner && isInitialized && <StatusBar authInfo={authInfo} />}
       <InputBar
         onSubmit={handleSubmit}
         onClear={() => setMessages([])}

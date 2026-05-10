@@ -1,32 +1,48 @@
 import React from 'react';
-import { Box, Text, useStdout } from 'ink';
-import Gradient from 'ink-gradient';
-import { renderWordmark } from '../wordmark';
-import { colors } from '../theme';
+import path from 'node:path';
+import os from 'node:os';
+import { Box, Text } from 'ink';
+import { colors, glyphs } from '../theme';
+import { version } from '../../../package.json';
 
-const DODO = renderWordmark('DODO');
-const PAYMENTS = renderWordmark('PAYMENTS');
-const PAYMENTS_WIDTH = (PAYMENTS[0]?.length ?? 0) + 6;
+interface WelcomeBannerProps {
+  authMode?: string | null;
+}
 
-export const WelcomeBanner = () => {
-  const { stdout } = useStdout();
-  const cols = stdout?.columns ?? 80;
-  const showPayments = cols >= PAYMENTS_WIDTH;
+const formatCwd = (): string => {
+  const cwd = process.cwd();
+  const home = os.homedir();
+  if (cwd === home) return '~';
+  if (cwd.startsWith(home + path.sep)) return '~' + cwd.slice(home.length);
+  return cwd;
+};
 
+const formatMode = (mode?: string | null): string => {
+  if (!mode) return 'NOT SIGNED IN';
+  return mode === 'test_mode' ? 'TEST' : 'LIVE';
+};
+
+const modeColor = (mode?: string | null): string => {
+  if (!mode) return colors.textMuted;
+  return mode === 'test_mode' ? colors.testMode : colors.liveMode;
+};
+
+export const WelcomeBanner = ({ authMode }: WelcomeBannerProps) => {
+  const sep = ` ${glyphs.separator} `;
   return (
-    <Box flexDirection="column" paddingX={1}>
-      <Gradient colors={[colors.brand, colors.brandLime]}>
-        <Text>{DODO.join('\n')}</Text>
-      </Gradient>
-      {showPayments && (
-        <Gradient colors={[colors.brandLime, colors.brand]}>
-          <Text>{PAYMENTS.join('\n')}</Text>
-        </Gradient>
-      )}
+    <Box flexDirection="column" alignItems="center" paddingY={1}>
+      <Text color={colors.brand} bold>dodopayments</Text>
       <Box marginTop={1}>
-        <Text color={colors.textPrimary}>Welcome to </Text>
-        <Text color={colors.brand} bold>Dodo Payments</Text>
-        <Text color={colors.textPrimary}>! Let’s get you set up.</Text>
+        <Text color={colors.textMuted}>/help for commands</Text>
+        <Text color={colors.textDim}>{sep}</Text>
+        <Text color={colors.textMuted}>/login to auth</Text>
+      </Box>
+      <Box marginTop={1}>
+        <Text color={colors.textDim}>v{version}</Text>
+        <Text color={colors.textDim}>{sep}</Text>
+        <Text color={modeColor(authMode)}>{formatMode(authMode)}</Text>
+        <Text color={colors.textDim}>{sep}</Text>
+        <Text color={colors.textDim}>{formatCwd()}</Text>
       </Box>
     </Box>
   );

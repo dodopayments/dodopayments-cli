@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Box, Text, useInput } from 'ink';
+import React, { useState, useEffect } from 'react';
+import { Box, Text, useInput, useStdout } from 'ink';
 import chalk from 'chalk';
 import { Autocomplete, getSuggestions } from './Autocomplete';
 import { colors, glyphs } from '../theme';
@@ -17,8 +17,19 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [paletteDismissed, setPaletteDismissed] = useState(false);
 
-  const suggestions = getSuggestions(input);
+  const rawSuggestions = getSuggestions(input);
+  const exactMatch = rawSuggestions.length === 1
+    && rawSuggestions[0]!.command.toLowerCase() === input.toLowerCase();
+  const paletteVisible = !paletteDismissed && rawSuggestions.length > 0 && !exactMatch;
+  const suggestions = paletteVisible ? rawSuggestions : [];
+
+  useEffect(() => {
+    if (selectedIndex >= suggestions.length && suggestions.length > 0) {
+      setSelectedIndex(0);
+    }
+  }, [suggestions.length, selectedIndex]);
 
   useInput((ch, key) => {
     if (!isActive) return;
@@ -76,6 +87,13 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
         setHistoryIndex(-1);
       }
     } else if (key.return) {
+      if (suggestions.length > 0 && suggestions[selectedIndex]) {
+        const val = suggestions[selectedIndex].command + ' ';
+        setInput(val);
+        setCursorOffset(val.length);
+        setPaletteDismissed(true);
+        return;
+      }
       const val = input.trim();
       if (val) {
         setHistory((prev) => {
@@ -86,12 +104,15 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
           return newHist;
         });
         setHistoryIndex(-1);
+        setPaletteDismissed(false);
         onSubmit(val);
         setInput('');
         setCursorOffset(0);
       }
     } else if (key.escape) {
-      // Dismiss handled implicitly
+      if (suggestions.length > 0) {
+        setPaletteDismissed(true);
+      }
     } else if (key.ctrl && ch === 'l') {
       onClear();
     } else if (key.ctrl && ch === 'c') {
@@ -101,6 +122,7 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
       setCursorOffset((prev) => prev + ch.length);
       setSelectedIndex(0);
       setHistoryIndex(-1);
+      setPaletteDismissed(false);
     }
   });
 
@@ -123,10 +145,16 @@ export const InputBar = ({ onSubmit, onClear, onExit, isActive }: InputBarProps)
     return <Text>{rendered}</Text>;
   };
 
+  const { stdout } = useStdout();
+  const cols = stdout?.columns ?? 80;
+
   return (
-    <Box flexDirection="column" marginTop={1}>
+    <Box flexDirection="column">
       {historyIndex === -1 && <Autocomplete input={input} selectedIndex={selectedIndex} />}
-      <Box backgroundColor={colors.brandBlack} paddingX={1} width="100%">
+      <Box>
+        <Text color={colors.textDim}>{'─'.repeat(Math.max(0, cols))}</Text>
+      </Box>
+      <Box paddingX={1} width="100%">
         <Box marginRight={1}>
           <Text color={colors.accentLime}>{glyphs.prompt}</Text>
         </Box>

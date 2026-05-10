@@ -5,7 +5,7 @@ import type { BlockType } from './types';
 import Spinner from 'ink-spinner';
 import SelectInput from 'ink-select-input';
 import Markdown from 'ink-markdown-es';
-import { boxes, colors, glyphs } from '../theme';
+import { boxes, colors, glyphs, helpHeadingColors } from '../theme';
 import { HELP_FOOTER, HELP_GROUPS } from './help-structure';
 
 const MAX_COL_WIDTH = 45;
@@ -27,21 +27,6 @@ const isNumericColumn = (key: string, samples: any[]): boolean => {
     if (CURRENCY_OR_NUMBER.test(s)) numericHits++;
   }
   return nonEmpty > 0 && numericHits / nonEmpty >= 0.7;
-};
-
-const HELP_HEADING_COLORS: Record<string, string> = {
-  PRODUCTS: '#7FC4D4',
-  PAYMENTS: '#F5A623',
-  CUSTOMERS: '#E85BCF',
-  DISCOUNTS: '#C6FE1E',
-  LICENCES: '#38BDF8',
-  ADDONS: '#7FC4D4',
-  REFUNDS: '#F5A623',
-  CHECKOUT: '#C6FE1E',
-  WEBHOOKS: '#E85BCF',
-  AI: '#C6FE1E',
-  AUTH: '#38BDF8',
-  SESSION: '#737470',
 };
 
 const SimpleTable = ({ data }: { data: any[] }) => {
@@ -78,27 +63,23 @@ const SimpleTable = ({ data }: { data: any[] }) => {
           </Box>
         ))}
       </Box>
-      {data.map((row, i) => {
-        const isAltRow = i % 2 === 1;
-        const baseColor = isAltRow ? colors.textMuted : colors.textPrimary;
-        return (
-          <Box key={i} paddingX={1}>
-            {keys.map((k) => {
-              const valStr = String(row[k] ?? '');
-              const w = columnWidths[k] ?? MIN_COL_WIDTH;
-              const displayStr = valStr.length > w - 1
-                ? valStr.substring(0, Math.max(0, w - 2)) + '…'
-                : valStr;
-              const cellColor = numericFlags[k] ? colors.accentAmber : baseColor;
-              return (
-                <Box key={k} width={w}>
-                  <Text color={cellColor}>{displayStr}</Text>
-                </Box>
-              );
-            })}
-          </Box>
-        );
-      })}
+      {data.map((row, i) => (
+        <Box key={i} paddingX={1}>
+          {keys.map((k) => {
+            const valStr = String(row[k] ?? '');
+            const w = columnWidths[k] ?? MIN_COL_WIDTH;
+            const displayStr = valStr.length > w - 1
+              ? valStr.substring(0, Math.max(0, w - 2)) + '…'
+              : valStr;
+            const cellColor = numericFlags[k] ? colors.accentAmber : colors.textPrimary;
+            return (
+              <Box key={k} width={w}>
+                <Text color={cellColor}>{displayStr}</Text>
+              </Box>
+            );
+          })}
+        </Box>
+      ))}
     </Box>
   );
 };
@@ -161,7 +142,7 @@ const HelpPanel = () => {
         <Text color={colors.textPrimary} bold>Dodo Payments CLI</Text>
       </Box>
       {HELP_GROUPS.map((group, gi) => {
-        const headingColor = HELP_HEADING_COLORS[group.heading] ?? colors.textMuted;
+        const headingColor = helpHeadingColors[group.heading] ?? colors.textMuted;
         return (
           <Box key={group.heading} flexDirection="column" marginBottom={gi === HELP_GROUPS.length - 1 ? 1 : 0}>
             {group.items.map((item, ii) => (
@@ -226,8 +207,8 @@ export const OutputBlock = ({ block }: { block: BlockType }) => {
       );
     case 'error':
       return (
-        <Box {...boxes.error} paddingX={1}>
-          <Text color={colors.error}>{glyphs.cross} </Text>
+        <Box>
+          <Text color={colors.error} bold>{glyphs.cross} </Text>
           <Text color={colors.textPrimary}>{block.message}</Text>
         </Box>
       );
