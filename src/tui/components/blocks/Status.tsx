@@ -41,6 +41,9 @@ export const Event = (props: { event: any }) => (
   </text>
 );
 
+const ANSI_REGEX = /\u001b\[[0-9;]*m/g;
+const stripAnsi = (s: string): string => s.replace(ANSI_REGEX, '');
+
 export const Streaming = (props: { text: string }) => (
-  <markdown content={props.text} />
+  <markdown content={stripAnsi(props.text)} />
 );
