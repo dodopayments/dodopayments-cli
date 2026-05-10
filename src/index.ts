@@ -10,16 +10,23 @@ import React from 'react';
 process.on('SIGINT', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));
 
-const category = process.argv[2];
-const subCommand = process.argv[3];
-const extraArgs = process.argv.slice(4);
+const rawArgs = process.argv.slice(2);
+const useNewTui = rawArgs.includes('--tui');
+const positional = rawArgs.filter((a) => !a.startsWith('--'));
 
-if (category === '--version' || category === '-v') {
+const category = positional[0];
+const subCommand = positional[1];
+const extraArgs = positional.slice(2);
+
+if (category === '--version' || category === '-v' || rawArgs.includes('--version') || rawArgs.includes('-v')) {
   console.log(`v${version}`);
   process.exit(0);
 }
 
-if (process.stdout.isTTY && !category) {
+if (process.stdout.isTTY && !category && useNewTui) {
+  const { mountTui } = await import('./tui/bootstrap');
+  await mountTui();
+} else if (process.stdout.isTTY && !category) {
   render(React.createElement(App));
 } else {
   try {

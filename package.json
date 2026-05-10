@@ -24,13 +24,17 @@
   },
   "scripts": {
     "build": "bun build ./src/index.ts --minify --target node --outdir ./dist",
-    "build-native": "bun run build-binaries.ts"
+    "build-native": "bun run build-binaries.ts",
+    "dev": "bun src/index.ts --tui",
+    "build:tui": "bun build ./src/index.ts --minify --target node --outdir ./dist"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.36",
     "@ai-sdk/openai": "^3.0.54",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@openrouter/ai-sdk-provider": "^2.8.0",
+    "@opentui/core": "^0.2.6",
+    "@opentui/solid": "^0.2.6",
     "@types/react": "^19.2.14",
     "ai": "^6.0.168",
     "chalk": "^5.6.2",
@@ -44,7 +48,8 @@
     "keytar": "^7.9.0",
     "open": "^11.0.0",
     "react": "^19.2.5",
-    "react-devtools-core": "^7.0.1"
+    "react-devtools-core": "^7.0.1",
+    "solid-js": "^1.9.12"
   },
   "devDependencies": {
     "@types/bun": "latest"
