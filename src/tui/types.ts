@@ -1,10 +1,8 @@
 /**
- * Block variant union for the OpenTUI message stream. Mirrors
- * `src/ui/ink/types.ts` 1:1 so command handlers in `src/commands/` work
- * unchanged with both TUIs through Phases 1-7.
- *
- * The 15 variants below map onto the 14 renderers built in Phase 4
- * (step-form is reserved; not yet used by any command -- see plan v2).
+ * Block variant union for the message stream. Each variant maps onto a
+ * Solid component in `src/tui/components/blocks/` via the dispatcher in
+ * `components/blocks/index.tsx`. step-form is reserved -- no command
+ * currently emits it and there is no renderer for it.
  */
 
 export type BlockVariant =

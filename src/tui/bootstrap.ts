@@ -1,15 +1,13 @@
 /**
- * OpenTUI bootstrap. Installs the @opentui/solid babel plugin BEFORE any
- * Solid TSX module is imported, then dynamically loads the TSX app tree.
+ * Async entry into the OpenTUI render tree. Kept separate from `app.tsx`
+ * so `src/index.ts` can lazy-load the TUI only on TTY launches and keep
+ * the headless dispatch path free of the Solid render graph.
  *
- * This file MUST stay JSX-free and MUST NOT statically import any TSX
- * module. Doing so would load (and React-transform) the Solid tree before
- * the plugin is registered, which is exactly the bug the bootstrap exists
- * to prevent. See plan v2 Phase 1 + Oracle consult bg_73e90d73.
+ * The Solid babel plugin is installed via bunfig.toml's preload (Ink is
+ * gone, so the global preload no longer collides with anything).
  */
 
 export const mountTui = async (): Promise<void> => {
-  await import('@opentui/solid/preload');
   const { mountTuiApp } = await import('./app');
   mountTuiApp();
 };

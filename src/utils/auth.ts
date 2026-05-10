@@ -155,7 +155,7 @@ export async function clearConfig(target: LogoutTarget): Promise<{
   return { hadInvalidConfig: false, removedModes: [target] };
 }
 
-import type { CommandContext } from '../ui/ink/CommandContext';
+import type { CommandContext } from '../tui/CommandContext';
 
 export async function resolveCredentials(ctx?: CommandContext, prompt: boolean = true): Promise<ResolvedCredentials> {
   if (sessionMode) {

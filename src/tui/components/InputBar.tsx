@@ -43,8 +43,8 @@ export const InputBar = (props: InputBarProps) => {
           focused={isFocused()}
           value={props.value ?? ''}
           placeholder={props.placeholder ?? 'Type a command. /help to list all.'}
-          onInput={handleInput}
-          onSubmit={handleSubmit}
+          onInput={handleInput as any}
+          onSubmit={handleSubmit as any}
         />
       </box>
     </box>

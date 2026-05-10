@@ -3,7 +3,7 @@ import open from 'open';
 import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 export async function handleAddons(
   client: DodoPayments,

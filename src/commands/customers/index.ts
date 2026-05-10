@@ -1,7 +1,7 @@
 import DodoPayments from 'dodopayments';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 export async function handleCustomers(
   client: DodoPayments,

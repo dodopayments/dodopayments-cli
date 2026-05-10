@@ -1,4 +1,5 @@
 import { rename, rm } from "node:fs/promises";
+import solidPlugin from "@opentui/solid/bun-plugin";
 
 const targets: any = [
     "bun-darwin-x64",
@@ -17,6 +18,7 @@ for (const target of targets) {
         entrypoints: ["./src/index.ts"],
         outdir: tempDir,
         target: "bun",
+        plugins: [solidPlugin],
         compile: {
             // `as any` cause Bun doesn't provide type of exact platforms
             target: target as any,

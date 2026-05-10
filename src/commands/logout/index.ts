@@ -1,5 +1,5 @@
 import { clearConfig } from '../../utils/auth';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 type LogoutChoice = 'all' | 'test_mode' | 'live_mode';
 

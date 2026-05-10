@@ -1,11 +1,8 @@
 /**
- * Design tokens for the Dodo Payments OpenTUI/SolidJS layer.
- * Mirrors `src/ui/theme.ts` (the Ink theme) so visual parity is exact during
- * the dual-stack period (Phases 1-7). When the legacy Ink path is removed in
- * Phase 8, this file becomes the sole source of truth.
- *
- * Brand values from dodopayments.com/brand. Do not introduce hex literals or
- * named ANSI colors elsewhere.
+ * Design tokens for the Dodo Payments TUI. Sole source of truth for brand
+ * colors, glyphs, and the ASCII wordmark. Brand values from
+ * dodopayments.com/brand. Do not introduce hex literals or named ANSI
+ * colors elsewhere -- everything must reference these tokens.
  */
 
 export const colors = {

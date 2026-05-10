@@ -2,32 +2,31 @@
 import { renderHelp } from './ui';
 import { version } from '../package.json';
 import { configExists, resolveCredentials } from './utils/auth';
-import { defaultContext } from './ui/ink/DefaultContext';
-import { render } from 'ink';
-import { App } from './ui/ink/App';
-import React from 'react';
+import { defaultContext } from './tui/DefaultContext';
 
 process.on('SIGINT', () => process.exit(0));
 process.on('SIGTERM', () => process.exit(0));
 
-const rawArgs = process.argv.slice(2);
-const useNewTui = rawArgs.includes('--tui');
-const positional = rawArgs.filter((a) => !a.startsWith('--'));
+const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
+const flags = process.argv.slice(2).filter((a) => a.startsWith('--'));
 
 const category = positional[0];
 const subCommand = positional[1];
 const extraArgs = positional.slice(2);
 
-if (category === '--version' || category === '-v' || rawArgs.includes('--version') || rawArgs.includes('-v')) {
+if (
+  category === '--version' ||
+  category === '-v' ||
+  flags.includes('--version') ||
+  flags.includes('-v')
+) {
   console.log(`v${version}`);
   process.exit(0);
 }
 
-if (process.stdout.isTTY && !category && useNewTui) {
+if (process.stdout.isTTY && !category) {
   const { mountTui } = await import('./tui/bootstrap');
   await mountTui();
-} else if (process.stdout.isTTY && !category) {
-  render(React.createElement(App));
 } else {
   try {
     if (category === 'login') {

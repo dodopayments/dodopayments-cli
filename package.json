@@ -23,10 +23,9 @@
     "dodopayments": "dist/index.js"
   },
   "scripts": {
-    "build": "bun build ./src/index.ts --minify --target node --outdir ./dist",
+    "build": "bun run scripts/build.ts",
     "build-native": "bun run build-binaries.ts",
-    "dev": "bun src/index.ts --tui",
-    "build:tui": "bun build ./src/index.ts --minify --target node --outdir ./dist"
+    "dev": "bun src/index.ts"
   },
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.36",
@@ -35,20 +34,11 @@
     "@openrouter/ai-sdk-provider": "^2.8.0",
     "@opentui/core": "^0.2.6",
     "@opentui/solid": "^0.2.6",
-    "@types/react": "^19.2.14",
     "ai": "^6.0.168",
     "chalk": "^5.6.2",
     "dodopayments": "^2.19.0",
-    "ink": "^7.0.1",
-    "ink-gradient": "^4.0.0",
-    "ink-markdown-es": "^1.4.0",
-    "ink-select-input": "^6.2.0",
-    "ink-spinner": "^5.0.0",
-    "ink-text-input": "^6.0.0",
     "keytar": "^7.9.0",
     "open": "^11.0.0",
-    "react": "^19.2.5",
-    "react-devtools-core": "^7.0.1",
     "solid-js": "^1.9.12"
   },
   "devDependencies": {

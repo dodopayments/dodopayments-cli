@@ -1,6 +1,6 @@
 import DodoPayments from 'dodopayments';
 import { isDodoPaymentsAPIError } from '../../utils/error';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 export async function handleCheckout(
   client: DodoPayments,

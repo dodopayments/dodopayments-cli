@@ -1,8 +1,6 @@
 /**
  * Solid-signal-backed implementation of the CommandContext interface that
- * every command handler in `src/commands/` consumes. The interface signature
- * is identical to `src/ui/ink/CommandContext.ts` so handler code does not
- * need to change between the two TUIs.
+ * every command handler in `src/commands/` consumes.
  *
  * Prompt resolution: addBlock for an inline-input/select/confirm variant
  * stores its onSubmit (or onConfirm/onCancel) callback. promptInput etc.

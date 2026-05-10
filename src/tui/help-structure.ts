@@ -1,7 +1,7 @@
 /**
- * Slash-command help catalogue. 1:1 port of `src/ui/ink/help-structure.ts`.
- * Edits made here MUST be mirrored to the Ink version through the cutover
- * (Phase 7) -- both TUIs render the same /help during the dual-stack period.
+ * Slash-command help catalogue rendered by the Help block. Add new
+ * commands here so they show up in /help; the palette pulls from
+ * `src/lib/commands.ts` separately.
  */
 
 export interface HelpItem {

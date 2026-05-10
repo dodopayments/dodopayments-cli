@@ -10,9 +10,9 @@ export const Spinner = (props: { label: string }) => {
     onCleanup(() => clearInterval(t));
   });
   return (
-    <text>
-      <span fg={colors.accentAmber}>{FRAMES[frame()]}</span>
-      <span fg={colors.textMuted}>{` ${props.label}`}</span>
-    </text>
+    <box flexDirection="row">
+      <text fg={colors.accentAmber}>{FRAMES[frame()] ?? FRAMES[0]}</text>
+      <text fg={colors.textMuted}>{` ${props.label}`}</text>
+    </box>
   );
 };

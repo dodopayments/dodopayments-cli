@@ -1,7 +1,7 @@
 import type DodoPayments from 'dodopayments';
 import WebhookListener from './listen';
 import { handleWebhookTrigger } from './trigger';
-import type { CommandContext } from '../../ui/ink/CommandContext';
+import type { CommandContext } from '../../tui/CommandContext';
 
 type AuthenticatedWebhookContext = {
   apiKey: string;

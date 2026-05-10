@@ -13,7 +13,7 @@ export const UpdateNotification = (props: UpdateNotificationProps) => {
 
   return (
     <box
-      borderStyle="round"
+      borderStyle="rounded"
       borderColor={colors.warning}
       paddingLeft={2}
       paddingRight={2}
@@ -21,31 +21,31 @@ export const UpdateNotification = (props: UpdateNotificationProps) => {
       paddingBottom={1}
       flexDirection="column"
     >
-      <text>
-        <span fg={colors.warning} attributes={1}>
+      <box flexDirection="row">
+        <text fg={colors.warning} attributes={1}>
           {`${glyphs.bullet} ${isMajor() ? 'Major update available' : 'Update available'} `}
-        </span>
-        <span fg={colors.textMuted}>{`v${props.info.currentVersion} `}</span>
-        <span fg={colors.textDim}>{`${glyphs.arrow} `}</span>
-        <span fg={colors.brand} attributes={1}>{`v${props.info.latestVersion}`}</span>
-      </text>
+        </text>
+        <text fg={colors.textMuted}>{`v${props.info.currentVersion} `}</text>
+        <text fg={colors.textDim}>{`${glyphs.arrow} `}</text>
+        <text fg={colors.brand} attributes={1}>{`v${props.info.latestVersion}`}</text>
+      </box>
       <Show
         when={canSelfUpdate()}
         fallback={
-          <text>
-            <span fg={colors.textMuted}>Refer to </span>
-            <a href="https://github.com/dodopayments/dodopayments-cli" fg={colors.info} attributes={5}>
+          <box flexDirection="row">
+            <text fg={colors.textMuted}>Refer to </text>
+            <text fg={colors.info} attributes={5}>
               https://github.com/dodopayments/dodopayments-cli
-            </a>
-            <span fg={colors.textMuted}> for the update guide.</span>
-          </text>
+            </text>
+            <text fg={colors.textMuted}> for the update guide.</text>
+          </box>
         }
       >
-        <text>
-          <span fg={colors.textMuted}>Run </span>
-          <span fg={colors.accentLime} attributes={1}>/update</span>
-          <span fg={colors.textMuted}> to install now.</span>
-        </text>
+        <box flexDirection="row">
+          <text fg={colors.textMuted}>Run </text>
+          <text fg={colors.accentLime} attributes={1}>/update</text>
+          <text fg={colors.textMuted}> to install now.</text>
+        </box>
       </Show>
     </box>
   );
