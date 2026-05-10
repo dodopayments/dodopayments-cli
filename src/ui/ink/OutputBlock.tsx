@@ -79,8 +79,7 @@ const SimpleTable = ({ data }: { data: any[] }) => {
         ))}
       </Box>
       {data.map((row, i) => {
-        const isAltRow = i % 2 === 1;
-        const baseColor = isAltRow ? colors.textMuted : colors.textPrimary;
+        const baseColor = colors.textPrimary;
         return (
           <Box key={i} paddingX={1}>
             {keys.map((k) => {
