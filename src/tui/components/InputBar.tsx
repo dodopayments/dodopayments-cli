@@ -1,5 +1,7 @@
+import { Show } from 'solid-js';
+import { version } from '../../../package.json';
 import { colors, glyphs } from '../theme';
-import { useTui } from '../context';
+import { useTui, type AuthInfo } from '../context';
 
 interface InputBarProps {
   onSubmit: (value: string) => void;
@@ -10,7 +12,7 @@ interface InputBarProps {
 }
 
 export const InputBar = (props: InputBarProps) => {
-  const { promptActive } = useTui();
+  const { promptActive, authInfo } = useTui();
   const isFocused = () => !props.disabled && !promptActive();
 
   const handleInput = (next: string) => {
@@ -24,22 +26,56 @@ export const InputBar = (props: InputBarProps) => {
   };
 
   return (
-    <box
-      flexDirection="row"
-      paddingLeft={1}
-      paddingRight={1}
-      flexShrink={0}
-      backgroundColor={colors.brandBlack}
-    >
-      <text fg={colors.accentLime}>{`${glyphs.prompt} `}</text>
-      <input
+    <box flexDirection="row" flexShrink={0} alignItems="stretch">
+      <box width={1} flexShrink={0} backgroundColor={colors.accentSky}>
+        <text fg={colors.accentSky}> </text>
+      </box>
+      <box
+        flexDirection="column"
         flexGrow={1}
-        focused={isFocused()}
-        value={props.value ?? ''}
-        placeholder={props.placeholder ?? 'Type a command. /help to list all.'}
-        onInput={handleInput as any}
-        onSubmit={handleSubmit as any}
-      />
+        paddingLeft={2}
+        paddingRight={2}
+        paddingTop={1}
+        paddingBottom={1}
+        backgroundColor={colors.brandBlack}
+      >
+        <box flexDirection="row" flexShrink={0}>
+          <input
+            flexGrow={1}
+            focused={isFocused()}
+            value={props.value ?? ''}
+            placeholder={props.placeholder ?? `Ask anything... ${glyphs.separator} type / for commands`}
+            onInput={handleInput as any}
+            onSubmit={handleSubmit as any}
+          />
+        </box>
+        <box flexDirection="row" flexShrink={0}>
+          <text fg={colors.accentLime}>dodopayments cli</text>
+          <text fg={colors.textDim}>{` ${glyphs.separator} `}</text>
+          <Show
+            when={authInfo()}
+            fallback={
+              <>
+                <text fg={colors.textMuted}>signed out</text>
+                <text fg={colors.textDim}>{` ${glyphs.separator} `}</text>
+                <text fg={colors.textMuted}>{`v${version}`}</text>
+              </>
+            }
+          >
+            {(info: () => NonNullable<AuthInfo>) => (
+              <>
+                <text fg={info().mode === 'test_mode' ? colors.testMode : colors.liveMode}>
+                  {info().mode === 'test_mode' ? 'TEST' : 'LIVE'}
+                </text>
+                <text fg={colors.textDim}>{` ${glyphs.separator} `}</text>
+                <text fg={colors.textMuted}>{info().key}</text>
+                <text fg={colors.textDim}>{` ${glyphs.separator} `}</text>
+                <text fg={colors.textMuted}>{`v${version}`}</text>
+              </>
+            )}
+          </Show>
+        </box>
+      </box>
     </box>
   );
 };
