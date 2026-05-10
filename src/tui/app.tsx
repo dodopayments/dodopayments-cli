@@ -1,30 +1,10 @@
-/**
- * Solid + OpenTUI render tree. The JSX here compiles to Solid factory calls
- * via the @opentui/solid bun-plugin loaded by bunfig.toml's preload.
- *
- * Layout contract:
- *   - Top group: Welcome (visible until messages.length > 0)
- *   - Middle: <scrollbox flexGrow={1} stickyScroll stickyStart="bottom">
- *     contains an UpdateNotification banner + one MessageRow per message.
- *   - Bottom chrome group: <box flexShrink={0}> wrapping StatusBar +
- *     InputBar + HintBar. The flexShrink={0} wrapper is mandatory --
- *     without it the scrollbox starves the chrome of height.
- *   - Palette: <Show> + <box position="absolute"> sibling to the column
- *     stack so it floats over the scrollbox without disturbing layout.
- *
- * App owns the message store, the auth signal, the palette state, and the
- * dispatcher into router.handleCommand. InputBar surfaces value changes
- * via onInput so the palette query stays in sync. Global useKeyboard
- * handles palette navigation when the palette is visible.
- */
-
 import { For, Show, createMemo, createSignal, onMount, untrack } from 'solid-js';
 import { render, useKeyboard } from '@opentui/solid';
 import { Welcome } from './components/Welcome';
-import { StatusBar } from './components/StatusBar';
 import { InputBar } from './components/InputBar';
-import { HintBar } from './components/HintBar';
-import { Divider } from './components/Divider';
+import { HintRow } from './components/HintRow';
+import { Footer } from './components/Footer';
+import { TitleStrip } from './components/TitleStrip';
 import { MessageRow } from './components/MessageRow';
 import { Palette, rankCommands } from './components/Palette';
 import { UpdateNotification } from './components/UpdateNotification';
@@ -41,7 +21,7 @@ import {
   type UpdateInfo,
 } from '../utils/update';
 import { version } from '../../package.json';
-import { colors, glyphs } from './theme';
+import { glyphs } from './theme';
 
 const App = () => {
   const [authInfo, setAuthInfo] = createSignal<AuthInfo>(null);
@@ -51,6 +31,8 @@ const App = () => {
   const [isProcessing, setIsProcessing] = createSignal(false);
   const [promptActive, setPromptActive] = createSignal(false);
   const [updateInfo, setUpdateInfo] = createSignal<UpdateInfo | null>(null);
+  const [lastCommand, setLastCommand] = createSignal<string | null>(null);
+  const [startedAt] = createSignal<number>(Date.now());
   const installMethod: InstallMethod = detectInstallMethod();
 
   const store = createMessageStore();
@@ -124,6 +106,7 @@ const App = () => {
         return;
       }
     }
+    setLastCommand(trimmed);
     store.pushUserEcho(`${glyphs.prompt} ${trimmed}`);
     setInput('');
     setPaletteDismissed(false);
@@ -170,32 +153,38 @@ const App = () => {
         isProcessing,
         promptActive,
         setPromptActive,
+        lastCommand,
+        startedAt,
       }}
     >
       <box flexDirection="column" width="100%" height="100%">
-        <Show when={!hasMessages()}>
-          <Welcome />
+        <Show when={hasMessages()}>
+          <TitleStrip />
         </Show>
-        <scrollbox
-          flexGrow={1}
-          stickyScroll={true}
-          stickyStart="bottom"
-          paddingLeft={2}
-          paddingRight={2}
+        <Show
+          when={hasMessages()}
+          fallback={<Welcome />}
         >
-          <Show when={updateInfo()}>
-            {(info: () => UpdateInfo) => (
-              <UpdateNotification info={info()} method={installMethod} />
-            )}
-          </Show>
-          <For each={store.messages()}>{(m) => <MessageRow message={m} />}</For>
-        </scrollbox>
-        <box flexShrink={0} flexDirection="column" backgroundColor={colors.surfaceDeep}>
-          <Divider />
-          <StatusBar />
+          <scrollbox
+            flexGrow={1}
+            stickyScroll={true}
+            stickyStart="bottom"
+            paddingLeft={2}
+            paddingRight={2}
+          >
+            <Show when={updateInfo()}>
+              {(info: () => UpdateInfo) => (
+                <UpdateNotification info={info()} method={installMethod} />
+              )}
+            </Show>
+            <For each={store.messages()}>{(m) => <MessageRow message={m} />}</For>
+          </scrollbox>
+        </Show>
+        <box flexShrink={0} flexDirection="column" paddingLeft={2} paddingRight={2}>
           <InputBar onSubmit={onSubmit} onInput={onInputChange} value={input()} />
-          <HintBar />
+          <HintRow />
         </box>
+        <Footer />
         <Palette
           query={input()}
           selectedIndex={paletteIndex()}
