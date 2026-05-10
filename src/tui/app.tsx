@@ -3,35 +3,170 @@
  * Solid babel plugin is installed, so the JSX here compiles to Solid factory
  * calls (not React.createElement).
  *
- * Phase 2 layout contract (do not break in later phases without updating
- * the plan):
+ * Layout contract (do not break in later phases without updating the plan):
  *   - Top group: Welcome (visible until messages.length > 0)
  *   - Middle: <scrollbox flexGrow={1} stickyScroll stickyStart="bottom">
+ *     contains MessageRow per message
  *   - Bottom chrome group: <box flexShrink={0}> wrapping StatusBar +
  *     InputBar + HintBar. The flexShrink={0} wrapper is mandatory --
- *     without it the scrollbox starves the chrome of height (verified
- *     during spike v2).
+ *     without it the scrollbox starves the chrome of height (spike v2).
+ *   - Palette: <Show> + <box position="absolute"> sibling to the column
+ *     stack so it floats over the scrollbox without disturbing layout.
+ *
+ * App owns the message store, the auth signal, the palette state, and the
+ * dispatcher into router.handleCommand. InputBar surfaces value changes via
+ * onInput so the palette query stays in sync. Global useKeyboard handles
+ * palette navigation when the palette is visible.
  */
 
-import { createSignal, Show } from 'solid-js';
-import { render } from '@opentui/solid';
+import { For, Show, createMemo, createSignal, onMount, untrack } from 'solid-js';
+import { render, useKeyboard } from '@opentui/solid';
 import { Welcome } from './components/Welcome';
 import { StatusBar } from './components/StatusBar';
 import { InputBar } from './components/InputBar';
 import { HintBar } from './components/HintBar';
+import { MessageRow } from './components/MessageRow';
+import { Palette, rankCommands } from './components/Palette';
+import { UpdateNotification } from './components/UpdateNotification';
 import { TuiContextProvider, type AuthInfo } from './context';
+import { createMessageStore } from './CommandContext';
+import { handleCommand } from './router';
+import { resolveCredentials, setSessionMode } from '../utils/auth';
+import {
+  checkForUpdates,
+  consumePendingSilentUpdate,
+  detectInstallMethod,
+  dispatchSilentUpdate,
+  type InstallMethod,
+  type UpdateInfo,
+} from '../utils/update';
+import { version } from '../../package.json';
+import { glyphs } from './theme';
 
 const App = () => {
-  const [authInfo] = createSignal<AuthInfo>(null);
+  const [authInfo, setAuthInfo] = createSignal<AuthInfo>(null);
   const [input, setInput] = createSignal('');
-  const [paletteVisible] = createSignal(false);
-  const [isProcessing] = createSignal(false);
+  const [paletteIndex, setPaletteIndex] = createSignal(0);
+  const [paletteDismissed, setPaletteDismissed] = createSignal(false);
+  const [isProcessing, setIsProcessing] = createSignal(false);
   const [promptActive, setPromptActive] = createSignal(false);
-  const [hasMessages] = createSignal(false);
+  const [updateInfo, setUpdateInfo] = createSignal<UpdateInfo | null>(null);
+  const installMethod: InstallMethod = detectInstallMethod();
+
+  const store = createMessageStore();
+  const hasMessages = createMemo(() => store.messages().length > 0);
+  const paletteVisible = createMemo(() => {
+    const v = input();
+    if (!v.startsWith('/')) return false;
+    if (paletteDismissed() || promptActive()) return false;
+    const firstWord = v.split(' ')[0] ?? '';
+    if (v.includes(' ') && firstWord.length > 1) {
+      const exactMatch = rankCommands(firstWord).some((c) => c.command === firstWord);
+      if (exactMatch) return false;
+    }
+    return true;
+  });
+  const palettePool = createMemo(() => rankCommands(input()));
+
+  onMount(() => {
+    resolveCredentials(undefined, false)
+      .then(({ mode, apiKey }) => {
+        setSessionMode(mode);
+        const masked = apiKey.slice(0, 10) + '...' + apiKey.slice(-3);
+        setAuthInfo({ mode, key: masked });
+      })
+      .catch(() => setAuthInfo(null));
+
+    const completed = consumePendingSilentUpdate();
+    if (completed && completed.to !== completed.from) {
+      store.ctx.addBlock({
+        type: 'success',
+        message: `Updated to v${completed.to} (was v${completed.from}). Restart to use the new version.`,
+      });
+    }
+
+    void checkForUpdates(version).then((info) => {
+      if (!info) return;
+      if (info.delta === 'major') {
+        setUpdateInfo(info);
+        return;
+      }
+      if (installMethod === 'npm' || installMethod === 'bun') {
+        dispatchSilentUpdate(info, installMethod);
+      } else {
+        setUpdateInfo(info);
+      }
+    });
+  });
+
+  const onInputChange = (next: string) => {
+    setInput(next);
+    setPaletteIndex(0);
+    if (paletteDismissed() && next.length > 0) setPaletteDismissed(false);
+  };
+
+  const completeWith = (cmd: string) => {
+    const next = `${cmd} `;
+    setInput(next);
+    setPaletteDismissed(true);
+  };
+
+  const onSubmit = async (raw: string) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+    if (paletteVisible()) {
+      const pool = untrack(palettePool);
+      const pick = pool[paletteIndex()];
+      const looksIncomplete =
+        !!pick && pick.command !== trimmed && pick.command.startsWith(trimmed);
+      if (looksIncomplete) {
+        completeWith(pick.command);
+        return;
+      }
+    }
+    store.pushUserEcho(`${glyphs.prompt} ${trimmed}`);
+    setInput('');
+    setPaletteDismissed(false);
+    setIsProcessing(true);
+    try {
+      await handleCommand(trimmed, store.ctx, () => process.exit(0));
+    } catch (e: any) {
+      store.ctx.addBlock({
+        type: 'error',
+        message: e?.message ?? String(e),
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  useKeyboard((key) => {
+    if (!paletteVisible()) return;
+    const pool = untrack(palettePool);
+    if (key.name === 'up') {
+      setPaletteIndex((i) => Math.max(0, i - 1));
+    } else if (key.name === 'down') {
+      setPaletteIndex((i) => Math.min(pool.length - 1, i + 1));
+    } else if (key.name === 'tab') {
+      const pick = pool[paletteIndex()];
+      if (pick) completeWith(pick.command);
+    } else if (key.name === 'escape') {
+      setPaletteDismissed(true);
+    }
+  });
 
   return (
     <TuiContextProvider
-      value={{ authInfo, input, paletteVisible, isProcessing, promptActive, setPromptActive }}
+      value={{
+        authInfo,
+        input,
+        setInput,
+        paletteVisible,
+        paletteIndex,
+        isProcessing,
+        promptActive,
+        setPromptActive,
+      }}
     >
       <box flexDirection="column" width="100%" height="100%">
         <Show when={!hasMessages()}>
@@ -43,12 +178,22 @@ const App = () => {
           stickyStart="bottom"
           paddingLeft={2}
           paddingRight={2}
-        />
+        >
+          <Show when={updateInfo()}>
+            {(info) => <UpdateNotification info={info()} method={installMethod} />}
+          </Show>
+          <For each={store.messages()}>{(m) => <MessageRow message={m} />}</For>
+        </scrollbox>
         <box flexShrink={0} flexDirection="column">
           <StatusBar />
-          <InputBar onSubmit={() => {}} onInput={setInput} />
+          <InputBar onSubmit={onSubmit} onInput={onInputChange} value={input()} />
           <HintBar />
         </box>
+        <Palette
+          query={input()}
+          selectedIndex={paletteIndex()}
+          visible={paletteVisible()}
+        />
       </box>
     </TuiContextProvider>
   );
