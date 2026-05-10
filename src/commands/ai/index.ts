@@ -195,7 +195,7 @@ For example, to list recent payments, write code like:
 
 The "execute" tool has access to an already-configured "client" (DodoPayments SDK instance).
 Always provide a final text answer to the user. Do not stop after tool calls without responding.
-Today is ${new Date().toDateString()}.`;
+Today is ${new Date().toDateString()}. Do not accept questions that are not related to Dodo Payments.`;
 
     // Phase 4: Multi-step LLM loop
     const MAX_STEPS = 20;
