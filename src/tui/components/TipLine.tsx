@@ -19,11 +19,18 @@ const TIPS: Tip[] = [
 const tip = TIPS[Math.floor(Math.random() * TIPS.length)]!;
 
 export const TipLine = () => (
-  <box flexDirection="row" justifyContent="center" flexShrink={0}>
+  <box flexDirection="row" justifyContent="center" alignItems="center" flexShrink={0}>
     <text fg={colors.accentAmber}>{glyphs.dot}</text>
     <text fg={colors.accentAmber}> Tip</text>
     <text fg={colors.textPrimary}>{` ${tip.prefix}`}</text>
-    <text fg={colors.accentAmber}>{tip.command}</text>
+    <box
+      paddingLeft={1}
+      paddingRight={1}
+      backgroundColor={colors.brandBlack}
+      flexShrink={0}
+    >
+      <text fg={colors.accentLime}>{tip.command}</text>
+    </box>
     <text fg={colors.textPrimary}>{tip.suffix}</text>
   </box>
 );
