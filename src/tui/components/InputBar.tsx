@@ -49,6 +49,7 @@ export const InputBar = (props: InputBarProps) => {
             onSubmit={handleSubmit as any}
           />
         </box>
+        <box height={1} flexShrink={0} />
         <box flexDirection="row" flexShrink={0}>
           <text fg={colors.accentLime}>dodopayments cli</text>
           <text fg={colors.textDim}>{` ${glyphs.separator} `}</text>
