@@ -48,8 +48,7 @@ export const Table = (props: { data: any[]; statusColumn?: string }) => {
       </box>
       <For each={props.data}>
         {(row, i) => {
-          const isAlt = i() % 2 === 1;
-          const baseColor = isAlt ? colors.textMuted : colors.textPrimary;
+          const baseColor = colors.textPrimary;
           return (
             <box paddingLeft={1} paddingRight={1} flexDirection="row">
               <For each={keys()}>
