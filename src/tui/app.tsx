@@ -26,6 +26,8 @@ const App = () => {
   const [input, setInput] = createSignal('');
   const [paletteIndex, setPaletteIndex] = createSignal(0);
   const [paletteDismissed, setPaletteDismissed] = createSignal(false);
+  const [history, setHistory] = createSignal<string[]>([]);
+  const [historyIndex, setHistoryIndex] = createSignal(-1);
   const [isProcessing, setIsProcessing] = createSignal(false);
   const [promptActive, setPromptActive] = createSignal(false);
   const [updateInfo, setUpdateInfo] = createSignal<UpdateInfo | null>(null);
@@ -80,6 +82,7 @@ const App = () => {
   const onInputChange = (next: string) => {
     setInput(next);
     setPaletteIndex(0);
+    setHistoryIndex(-1);
     if (paletteDismissed() && next.length > 0) setPaletteDismissed(false);
   };
 
@@ -103,6 +106,8 @@ const App = () => {
       }
     }
     store.pushUserEcho(trimmed);
+    setHistory((prev) => [trimmed, ...prev.filter((h) => h !== trimmed)]);
+    setHistoryIndex(-1);
     setInput('');
     setPaletteDismissed(false);
     setIsProcessing(true);
@@ -119,21 +124,47 @@ const App = () => {
   };
 
   useKeyboard((key) => {
-    if (!paletteVisible()) return;
-    const pool = untrack(palettePool);
+    if (paletteVisible()) {
+      const pool = untrack(palettePool);
+      if (key.name === 'up') {
+        key.preventDefault();
+        setPaletteIndex((i) => Math.max(0, i - 1));
+      } else if (key.name === 'down') {
+        key.preventDefault();
+        setPaletteIndex((i) => Math.min(pool.length - 1, i + 1));
+      } else if (key.name === 'tab') {
+        key.preventDefault();
+        const pick = pool[paletteIndex()];
+        if (pick) completeWith(pick.command);
+      } else if (key.name === 'escape') {
+        key.preventDefault();
+        setPaletteDismissed(true);
+      }
+      return;
+    }
+
     if (key.name === 'up') {
+      const hist = untrack(history);
+      if (hist.length === 0) return;
       key.preventDefault();
-      setPaletteIndex((i) => Math.max(0, i - 1));
+      setHistoryIndex((i) => {
+        const next = Math.min(hist.length - 1, i + 1);
+        setInput(hist[next] ?? '');
+        return next;
+      });
     } else if (key.name === 'down') {
+      const hist = untrack(history);
+      if (hist.length === 0) return;
       key.preventDefault();
-      setPaletteIndex((i) => Math.min(pool.length - 1, i + 1));
-    } else if (key.name === 'tab') {
-      key.preventDefault();
-      const pick = pool[paletteIndex()];
-      if (pick) completeWith(pick.command);
-    } else if (key.name === 'escape') {
-      key.preventDefault();
-      setPaletteDismissed(true);
+      setHistoryIndex((i) => {
+        const next = i - 1;
+        if (next >= 0) {
+          setInput(hist[next] ?? '');
+          return next;
+        }
+        setInput('');
+        return -1;
+      });
     }
   });
 
