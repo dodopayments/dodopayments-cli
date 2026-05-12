@@ -8,8 +8,11 @@ import type { CommandContext } from '../../tui/CommandContext';
 
 export async function getAIModel(ctx: CommandContext) {
   const { apiKey, mode } = await resolveCredentials(ctx, false);
-  const proxyMode = mode === 'test_mode' ? 'test' : 'live';
+  return buildModel(apiKey, mode);
+}
 
+function buildModel(apiKey: string, mode: 'test_mode' | 'live_mode') {
+  const proxyMode = mode === 'test_mode' ? 'test' : 'live';
   const openrouter = createOpenRouter({
     baseURL: 'https://ai-proxy.dodopayments.tech/proxy',
     apiKey,
@@ -113,8 +116,13 @@ export async function handleAI(query: string, ctx: CommandContext) {
   try {
     // Phase 1: Resolve credentials & create model
     let model;
+    let apiKey: string;
+    let mode: 'test_mode' | 'live_mode';
     try {
-      model = await getAIModel(ctx);
+      const creds = await resolveCredentials(ctx, false);
+      apiKey = creds.apiKey;
+      mode = creds.mode;
+      model = buildModel(apiKey, mode);
     } catch (e: any) {
       throw Object.assign(new Error(classifyError(e, 'Auth')), { _classified: true });
     }
@@ -146,8 +154,12 @@ export async function handleAI(query: string, ctx: CommandContext) {
         createMCPClient({
           transport: new StdioClientTransport({
             command: 'npx',
-            args: ['-y', 'mcp-remote@latest', 'https://mcp.dodopayments.com/sse'],
-            env: process.env as Record<string, string>,
+            args: ['-y', 'dodopayments-mcp'],
+            env: {
+              ...(process.env as Record<string, string>),
+              DODO_PAYMENTS_API_KEY: apiKey,
+              DODO_PAYMENTS_ENVIRONMENT: mode,
+            },
             stderr: 'pipe',
           }),
         }),
