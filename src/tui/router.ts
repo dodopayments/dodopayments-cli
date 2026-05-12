@@ -13,6 +13,16 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
   if (!trimmedInput) return;
 
   if (!trimmedInput.startsWith('/')) {
+    const lower = trimmedInput.toLowerCase();
+    if (lower === 'exit' || lower === 'quit') {
+      exit();
+      return;
+    }
+    if (lower === 'clear') {
+      ctx.clear();
+      return;
+    }
+
     const { handleAI } = await import('../commands/ai');
     await handleAI(trimmedInput, ctx);
     return;
@@ -107,8 +117,9 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
       break;
     }
     case '/clear':
+    case '/quit':
     case '/exit': {
-      if (cmd === '/exit') exit();
+      if (cmd === '/exit' || cmd === '/quit') exit();
       if (cmd === '/clear') ctx.clear();
       break;
     }
