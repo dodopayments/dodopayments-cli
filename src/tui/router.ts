@@ -116,11 +116,12 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
       await handleWebhook(subCmd, ctx, { apiKey, client });
       break;
     }
-    case '/clear':
-    case '/quit':
+    case '/clear': {
+      ctx.clear();
+      break;
+    }
     case '/exit': {
-      if (cmd === '/exit' || cmd === '/quit') exit();
-      if (cmd === '/clear') ctx.clear();
+      exit();
       break;
     }
     default:

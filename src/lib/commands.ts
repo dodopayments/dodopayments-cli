@@ -25,6 +25,5 @@ export const COMMANDS = [
   { command: '/update',           description: 'Update the CLI to the latest version' },
   { command: '/clear',            description: 'Clear message history' },
   { command: '/exit',             description: 'Exit the CLI' },
-  { command: '/quit',             description: 'Exit the CLI' },
   { command: '/help',             description: 'Show all commands' },
 ];
