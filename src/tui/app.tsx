@@ -116,7 +116,7 @@ const App = () => {
     setPaletteDismissed(false);
     setIsProcessing(true);
     try {
-      await handleCommand(trimmed, store.ctx, () => process.exit(0));
+      await handleCommand(trimmed, store.ctx, exitTui);
     } catch (e: any) {
       store.ctx.addBlock({
         type: 'error',
@@ -141,7 +141,7 @@ const App = () => {
       const now = Date.now();
       const last = untrack(lastEscape);
       if (now - last < 500) {
-        process.exit(0);
+        exitTui();
       }
       setLastEscape(now);
 
@@ -240,6 +240,12 @@ const App = () => {
       </box>
     </TuiContextProvider>
   );
+};
+
+const exitTui = () => {
+  // Disable mouse tracking (1000, 1002, 1003, 1006, 1015) and show cursor
+  process.stdout.write('\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1015l\x1b[?25h');
+  process.exit(0);
 };
 
 export const mountTuiApp = (): void => {
