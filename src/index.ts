@@ -4,9 +4,6 @@ import { version } from '../package.json';
 import { configExists, resolveCredentials } from './utils/auth';
 import { defaultContext } from './tui/DefaultContext';
 
-process.on('SIGINT', () => process.exit(0));
-process.on('SIGTERM', () => process.exit(0));
-
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 const flags = process.argv.slice(2).filter((a) => a.startsWith('--'));
 
@@ -28,6 +25,8 @@ if (process.stdout.isTTY && !category) {
   const { mountTui } = await import('./tui/bootstrap');
   await mountTui();
 } else {
+  process.on('SIGINT', () => process.exit(0));
+  process.on('SIGTERM', () => process.exit(0));
   try {
     if (category === 'login') {
       const { handleLogin } = await import('./commands/login');
