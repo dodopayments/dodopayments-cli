@@ -34,6 +34,7 @@ const App = () => {
   const [isProcessing, setIsProcessing] = createSignal(false);
   const [promptActive, setPromptActive] = createSignal(false);
   const [updateInfo, setUpdateInfo] = createSignal<UpdateInfo | null>(null);
+  const [lastEscape, setLastEscape] = createSignal(0);
   const installMethod: InstallMethod = detectInstallMethod();
 
   const store = createMessageStore();
@@ -136,6 +137,21 @@ const App = () => {
   });
 
   useKeyboard((key) => {
+    if (key.name === 'escape') {
+      const now = Date.now();
+      const last = untrack(lastEscape);
+      if (now - last < 500) {
+        process.exit(0);
+      }
+      setLastEscape(now);
+
+      if (paletteVisible()) {
+        key.preventDefault();
+        setPaletteDismissed(true);
+      }
+      return;
+    }
+
     if (paletteVisible()) {
       const pool = untrack(palettePool);
       if (key.name === 'up') {
@@ -148,9 +164,6 @@ const App = () => {
         key.preventDefault();
         const pick = pool[paletteIndex()];
         if (pick) completeWith(pick.command);
-      } else if (key.name === 'escape') {
-        key.preventDefault();
-        setPaletteDismissed(true);
       }
       return;
     }
