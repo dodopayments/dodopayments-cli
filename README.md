@@ -1,6 +1,10 @@
 # Dodo Payments CLI
 
 <p align="center">
+  <img src="./.github/assets/cli-preview.png" alt="Dodo Payments CLI preview" width="100%" />
+</p>
+
+<p align="center">
   <strong>A powerful Command Line Interface for Dodo Payments</strong>
 </p>
 
