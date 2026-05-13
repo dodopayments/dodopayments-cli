@@ -32,7 +32,7 @@
     "type": "git",
     "url": "git+https://github.com/dodopayments/dodopayments-cli.git"
   },
-  "license": "ISC",
+  "license": "GPL-3.0-or-later",
   "author": "Dodo Payments",
   "type": "module",
   "main": "index.ts",

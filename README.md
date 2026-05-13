@@ -1,10 +1,6 @@
 # Dodo Payments CLI
 
 <p align="center">
-  <img src="./.github/assets/cli-preview.png" alt="Dodo Payments CLI preview" width="100%" />
-</p>
-
-<p align="center">
   <strong>A powerful Command Line Interface for Dodo Payments</strong>
 </p>
 
@@ -16,7 +12,7 @@
     <img src="https://img.shields.io/discord/1305511580854779984?label=Discord&logo=discord&color=5865F2" alt="Discord" />
   </a>
   <a href="LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT" />
+    <img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License: GPL-3.0" />
   </a>
 </p>
 
@@ -32,6 +28,10 @@
 ---
 
 Manage your [Dodo Payments](https://dodopayments.com/) resources, test webhooks, and run AI-powered queries against your account — all from the terminal.
+
+<p align="center">
+  <img src="./.github/assets/cli-preview.png" alt="Dodo Payments CLI preview" width="100%" />
+</p>
 
 ## Features
 
@@ -309,7 +309,22 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) to get started. We also 
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the **GNU General Public License v3.0 or later** — see the [LICENSE](./LICENSE) file for the full text.
+
+```
+Dodo Payments CLI — manage Dodo Payments resources from the terminal.
+Copyright (C) 2025  Dodo Payments
+
+This program is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+```
 
 ---
 
