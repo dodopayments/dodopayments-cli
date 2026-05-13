@@ -15,6 +15,7 @@ import { Help } from './Help';
 import { InlineInput } from './InlineInput';
 import { InlineSelect } from './InlineSelect';
 import { Confirm } from './Confirm';
+import { Markdown } from './Markdown';
 
 type Variant<T extends BlockType['type']> = Extract<BlockType, { type: T }>;
 
@@ -41,6 +42,11 @@ export const renderBlock = (block: BlockType) => (
     </Match>
     <Match when={block.type === 'streaming' && block}>
       {(b: () => Variant<'streaming'>) => <Streaming text={b().text} />}
+    </Match>
+    <Match when={block.type === 'markdown' && block}>
+      {(b: () => Variant<'markdown'>) => (
+        <Markdown text={b().text} streaming={b().streaming} />
+      )}
     </Match>
     <Match when={block.type === 'table' && block}>
       {(b: () => Variant<'table'>) => (

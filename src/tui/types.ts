@@ -15,6 +15,7 @@ export type BlockVariant =
   | { type: 'link'; text: string; url: string }
   | { type: 'empty' }
   | { type: 'streaming'; text: string }
+  | { type: 'markdown'; text: string; streaming?: boolean }
   | { type: 'event'; event: any }
   | { type: 'help' }
   | { type: 'inline-input'; label: string; secure?: boolean; onSubmit: (val: string) => void }

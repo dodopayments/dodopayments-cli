@@ -17,6 +17,7 @@ export const defaultContext: CommandContext = {
     else if (b.type === 'info') console.log(b.message);
     else if (b.type === 'link') console.log('To view, go to:', b.url);
     else if (b.type === 'streaming') process.stdout.write(b.text);
+    else if (b.type === 'markdown') console.log(b.text);
     else if (b.type === 'event') console.log(b.event);
     else if (b.type === 'empty') console.log('No results found.');
     else if (b.type === 'help') console.log('Commands...');

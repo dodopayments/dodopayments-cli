@@ -256,7 +256,7 @@ Today is ${new Date().toDateString()}. Do not accept questions that are not rela
     ctx.removeBlock(spinnerId);
 
     if (finalText) {
-      ctx.addBlock({ type: 'streaming', text: finalText });
+      ctx.addBlock({ type: 'markdown', text: finalText });
     } else {
       ctx.addBlock({ type: 'error', message: 'No response from the assistant. Try rephrasing your question.' });
     }
