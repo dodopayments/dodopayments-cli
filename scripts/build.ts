@@ -28,6 +28,7 @@ const result = await Bun.build({
   target: 'bun',
   minify: true,
   plugins: [solidPlugin],
+  external: ['keytar'],
 });
 
 if (!result.success) {
