@@ -1,5 +1,8 @@
 import { For, Show, createMemo, createSignal, onMount, untrack } from 'solid-js';
-import { render, useKeyboard } from '@opentui/solid';
+import { render, useKeyboard, useRenderer, useSelectionHandler } from '@opentui/solid';
+import { ToastViewport } from './components/Toast';
+import { showToast } from './toast';
+import { copyToClipboard } from './clipboard';
 import { Welcome } from './components/Welcome';
 import { InputBar } from './components/InputBar';
 import { HintRow } from './components/HintRow';
@@ -123,6 +126,15 @@ const App = () => {
     }
   };
 
+  const renderer = useRenderer();
+  useSelectionHandler((selection) => {
+    const text = selection.getSelectedText();
+    if (!text || text.trim().length === 0) return;
+    void copyToClipboard(text);
+    showToast('Copied to clipboard', { variant: 'success' });
+    renderer.clearSelection();
+  });
+
   useKeyboard((key) => {
     if (paletteVisible()) {
       const pool = untrack(palettePool);
@@ -211,11 +223,12 @@ const App = () => {
           selectedIndex={paletteIndex()}
           visible={paletteVisible()}
         />
+        <ToastViewport />
       </box>
     </TuiContextProvider>
   );
 };
 
 export const mountTuiApp = (): void => {
-  render(() => <App />, { exitOnCtrlC: true, targetFps: 30 });
+  render(() => <App />, { exitOnCtrlC: true, targetFps: 30, useMouse: true });
 };
