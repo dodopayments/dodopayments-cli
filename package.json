@@ -1,10 +1,28 @@
 {
   "name": "dodopayments-cli",
   "version": "3.0.0",
-  "description": "A CLI for Dodo Payments",
+  "description": "Official Dodo Payments CLI — manage payments, customers, products, subscriptions, and webhooks from your terminal. Includes an interactive TUI, an AI assistant powered by MCP, and offline webhook testing.",
   "keywords": [
     "dodopayments",
-    "cli"
+    "dodo-payments",
+    "cli",
+    "command-line",
+    "terminal",
+    "tui",
+    "payments",
+    "billing",
+    "subscriptions",
+    "checkout",
+    "saas",
+    "developer-tools",
+    "webhooks",
+    "webhook-testing",
+    "ai",
+    "mcp",
+    "typescript",
+    "bun",
+    "opentui",
+    "stripe-alternative"
   ],
   "homepage": "https://github.com/dodopayments/dodopayments-cli#readme",
   "bugs": {
@@ -42,6 +60,10 @@
     "solid-js": "^1.9.12"
   },
   "devDependencies": {
+    "@opentui/core-darwin-x64": "0.2.3",
+    "@opentui/core-linux-arm64": "0.2.3",
+    "@opentui/core-linux-x64": "0.2.3",
+    "@opentui/core-win32-x64": "0.2.3",
     "@types/bun": "latest"
   },
   "peerDependencies": {
