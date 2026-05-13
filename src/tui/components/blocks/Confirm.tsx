@@ -20,6 +20,7 @@ export const Confirm = (props: ConfirmProps) => {
       <text fg={colors.textPrimary}>{props.message}</text>
       <select
         focused
+        height={4}
         options={[
           { name: 'Yes', value: 'yes', description: 'confirm' },
           { name: 'No', value: 'no', description: 'cancel' },
