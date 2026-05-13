@@ -137,6 +137,8 @@ const App = () => {
   });
 
   useKeyboard((key) => {
+    if (untrack(promptActive)) return;
+
     if (key.name === 'escape') {
       const now = Date.now();
       const last = untrack(lastEscape);

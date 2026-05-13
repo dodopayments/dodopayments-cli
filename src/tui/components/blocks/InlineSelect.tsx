@@ -27,7 +27,9 @@ export const InlineSelect = (props: InlineSelectProps) => {
       </Show>
       <select
         focused
-        options={props.options.map((o) => ({ name: o.label, value: o.value, description: o.label }))}
+        height={Math.min(props.options.length, 10)}
+        showDescription={false}
+        options={props.options.map((o) => ({ name: o.label, value: o.value, description: '' }))}
         onSelect={(_i, opt) => {
           if (opt) props.onSubmit(opt.value as string);
         }}
