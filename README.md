@@ -197,6 +197,9 @@ This interactive tool guides you through:
 | **Dispute** | `opened`, `expired`, `accepted`, `cancelled`, `challenged`, `won`, `lost` |
 | **License** | `created` |
 
+### Exit
+To exit, use /exit or press escape key twice.
+
 ## Contributing
 
 We welcome contributions from the community! Whether you're fixing bugs, adding new features, or improving documentation, your help is appreciated.
