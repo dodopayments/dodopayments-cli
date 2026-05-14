@@ -12,6 +12,7 @@ export async function handleWebhook(
   subCommand: string | undefined,
   ctx: CommandContext,
   context?: AuthenticatedWebhookContext,
+  extraArgs: string[] = [],
 ) {
   switch (subCommand) {
     case 'listen':
@@ -24,6 +25,7 @@ export async function handleWebhook(
         API_KEY: context.apiKey,
         dodoClient: context.client,
         ctx,
+        endpoint: extraArgs[0],
       });
       break;
     case 'trigger':

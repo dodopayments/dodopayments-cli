@@ -5,12 +5,27 @@ export default async function WebhookListener({
   API_KEY,
   dodoClient,
   ctx,
+  endpoint: endpointArg,
 }: {
   API_KEY: string;
   dodoClient: DodoPayments;
   ctx: CommandContext;
+  endpoint?: string;
 }) {
-  const endpoint = await ctx.promptInput('Endpoint URL');
+  let endpoint: string;
+  if (endpointArg) {
+    endpoint = endpointArg;
+  } else {
+    try {
+      endpoint = await ctx.promptInput('Endpoint URL');
+    } catch {
+      ctx.addBlock({
+        type: 'error',
+        message: 'Endpoint URL is required. Usage: dodo wh listen <url>',
+      });
+      return;
+    }
+  }
 
   let targetedEndpoint: string;
   if (process.env.DODO_WH_TEST_SERVER_URL) {
