@@ -36,7 +36,7 @@ if (process.stdout.isTTY && !category) {
       await handleLogout(defaultContext);
     } else if (category === 'wh' && subCommand === 'trigger') {
       const { handleWebhook } = await import('./commands/webhook');
-      await handleWebhook(subCommand, defaultContext);
+      await handleWebhook(subCommand, defaultContext, undefined, extraArgs);
     } else if (!(await configExists())) {
       if (category === 'wh' && !subCommand) {
         renderHelp(category);
