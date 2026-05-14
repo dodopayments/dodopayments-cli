@@ -52,7 +52,7 @@ const App = () => {
   });
   const palettePool = createMemo(() => rankCommands(input()));
 
-  onMount(() => {
+  const refreshAuthInfo = () => {
     resolveCredentials(undefined, false)
       .then(({ mode, apiKey }) => {
         setSessionMode(mode);
@@ -60,6 +60,10 @@ const App = () => {
         setAuthInfo({ mode, key: masked });
       })
       .catch(() => setAuthInfo(null));
+  };
+
+  onMount(() => {
+    refreshAuthInfo();
 
     const completed = consumePendingSilentUpdate();
     if (completed && completed.to !== completed.from) {
@@ -116,7 +120,7 @@ const App = () => {
     setPaletteDismissed(false);
     setIsProcessing(true);
     try {
-      await handleCommand(trimmed, store.ctx, exitTui);
+      await handleCommand(trimmed, store.ctx, exitTui, refreshAuthInfo);
     } catch (e: any) {
       store.ctx.addBlock({
         type: 'error',
