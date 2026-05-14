@@ -14,16 +14,29 @@ export default async function WebhookListener({
 }) {
   let endpoint: string;
   if (endpointArg) {
+    if (!endpointArg.startsWith('http://') && !endpointArg.startsWith('https://')) {
+      ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+      return;
+    }
     endpoint = endpointArg;
   } else {
-    try {
-      endpoint = await ctx.promptInput('Endpoint URL');
-    } catch {
-      ctx.addBlock({
-        type: 'error',
-        message: 'Endpoint URL is required. Usage: dodo wh listen <url>',
-      });
-      return;
+    endpoint = '';
+    while (!endpoint) {
+      let value: string;
+      try {
+        value = await ctx.promptInput('Endpoint URL');
+      } catch {
+        ctx.addBlock({
+          type: 'error',
+          message: 'Endpoint URL is required. Usage: dodo wh listen <url>',
+        });
+        return;
+      }
+      if (value.startsWith('http://') || value.startsWith('https://')) {
+        endpoint = value;
+      } else {
+        ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+      }
     }
   }
 
