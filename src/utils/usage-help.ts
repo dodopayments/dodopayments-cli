@@ -47,7 +47,7 @@ export const usage: Record<string, UsageCommand[]> = {
   ],
   wh: [
     {
-      command: 'listen',
+      command: 'listen <url>',
       description: 'Listen to webhook events directly from Dodo Payments',
     },
     { command: 'trigger', description: 'Trigger a webhook event offline' },

@@ -111,7 +111,7 @@ if (process.stdout.isTTY && !category) {
         }
         case 'wh': {
           const { handleWebhook } = await import('./commands/webhook');
-          await handleWebhook(subCommand, defaultContext, { apiKey, client: dodoClient });
+          await handleWebhook(subCommand, defaultContext, { apiKey, client: dodoClient }, extraArgs);
           break;
         }
         default:

@@ -119,7 +119,7 @@ export async function handleCommand(
     }
     case '/wh': {
       const { handleWebhook } = await import('../commands/webhook');
-      await handleWebhook(subCmd, ctx, { apiKey, client });
+      await handleWebhook(subCmd, ctx, { apiKey, client }, extraArgs);
       break;
     }
     case '/clear': {
