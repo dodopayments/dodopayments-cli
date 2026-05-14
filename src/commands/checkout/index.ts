@@ -1,6 +1,7 @@
 import DodoPayments from 'dodopayments';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 export async function handleCheckout(
   client: DodoPayments,
@@ -70,6 +71,6 @@ export async function handleCheckout(
       }
     }
   } else {
-    ctx.addBlock({ type: 'help' });
+    unknownSubcommand(ctx, 'checkout', subCommand);
   }
 }

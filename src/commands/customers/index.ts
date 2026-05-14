@@ -2,6 +2,7 @@ import DodoPayments from 'dodopayments';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 export async function handleCustomers(
   client: DodoPayments,
@@ -132,6 +133,6 @@ export async function handleCustomers(
       }
     }
   } else {
-    ctx.addBlock({ type: 'help' });
+    unknownSubcommand(ctx, 'customers', subCommand);
   }
 }

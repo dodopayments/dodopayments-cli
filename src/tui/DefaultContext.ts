@@ -7,6 +7,7 @@
 
 import type { CommandContext } from './CommandContext';
 import type { BlockVariant } from './types';
+import { renderHelp } from '../ui/help';
 
 export const defaultContext: CommandContext = {
   addBlock: (b: BlockVariant) => {
@@ -20,7 +21,7 @@ export const defaultContext: CommandContext = {
     else if (b.type === 'markdown') console.log(b.text);
     else if (b.type === 'event') console.log(b.event);
     else if (b.type === 'empty') console.log('No results found.');
-    else if (b.type === 'help') console.log('Commands...');
+    else if (b.type === 'help') renderHelp();
     return '';
   },
   updateBlock: () => {},

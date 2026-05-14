@@ -1,3 +1,5 @@
+import type { CommandContext } from '../tui/CommandContext';
+
 type UsageCommand = {
   command: string;
   description: string;
@@ -54,3 +56,27 @@ export const usage: Record<string, UsageCommand[]> = {
   ],
   checkout: [{ command: 'new', description: 'Create a checkout session' }],
 };
+
+export function unknownSubcommand(
+  ctx: CommandContext,
+  category: string,
+  subCommand: string | undefined,
+): void {
+  if (subCommand) {
+    ctx.addBlock({
+      type: 'error',
+      message: `Unknown subcommand '${subCommand}' for /${category}.`,
+    });
+  } else {
+    ctx.addBlock({ type: 'error', message: `Subcommand required for /${category}.` });
+  }
+
+  const commands = usage[category];
+  if (!commands) return;
+
+  const lines = [
+    'Usage:',
+    ...commands.map((c) => `  /${category} ${c.command} - ${c.description}`),
+  ].join('\n');
+  ctx.addBlock({ type: 'info', message: lines });
+}

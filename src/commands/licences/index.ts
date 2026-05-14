@@ -2,6 +2,7 @@ import DodoPayments from 'dodopayments';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 export async function handleLicences(
   client: DodoPayments,
@@ -37,6 +38,6 @@ export async function handleLicences(
       }
     }
   } else {
-    ctx.addBlock({ type: 'help' });
+    unknownSubcommand(ctx, 'licences', subCommand);
   }
 }

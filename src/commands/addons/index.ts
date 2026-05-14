@@ -4,6 +4,7 @@ import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 export async function handleAddons(
   client: DodoPayments,
@@ -90,6 +91,6 @@ export async function handleAddons(
       }
     }
   } else {
-    ctx.addBlock({ type: 'help' });
+    unknownSubcommand(ctx, 'addons', subCommand);
   }
 }

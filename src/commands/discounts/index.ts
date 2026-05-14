@@ -2,6 +2,7 @@ import DodoPayments from 'dodopayments';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 export async function handleDiscounts(
   client: DodoPayments,
@@ -115,6 +116,6 @@ export async function handleDiscounts(
       }
     }
   } else {
-    ctx.addBlock({ type: 'help' });
+    unknownSubcommand(ctx, 'discounts', subCommand);
   }
 }
