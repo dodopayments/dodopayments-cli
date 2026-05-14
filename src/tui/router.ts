@@ -8,7 +8,12 @@
 import type { CommandContext } from './CommandContext';
 import { resolveCredentials } from '../utils/auth';
 
-export async function handleCommand(input: string, ctx: CommandContext, exit: () => void) {
+export async function handleCommand(
+  input: string,
+  ctx: CommandContext,
+  exit: () => void,
+  refreshAuth: () => void,
+) {
   const trimmedInput = input.trim();
   if (!trimmedInput) return;
 
@@ -47,6 +52,7 @@ export async function handleCommand(input: string, ctx: CommandContext, exit: ()
   if (cmd === '/login') {
     const { handleLogin } = await import('../commands/login');
     await handleLogin(ctx);
+    refreshAuth();
     return;
   }
 
