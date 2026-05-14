@@ -78,10 +78,91 @@ function parseMetadata(metadataInput: string): Record<string, unknown> {
   }
 }
 
-export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
+const USAGE = [
+  'Usage: dodo wh trigger <event> <url>',
+  '',
+  'Supported events:',
+  ...supportedEvents.map((e) => `  ${e}`),
+].join('\n');
+
+async function sendEvent(
+  ctx: CommandContext,
+  endpoint: string,
+  event: SupportedEvent,
+  args: baseArgs,
+): Promise<void> {
+  const data = eventGenerators[event](args);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    const responseBody = await response.text();
+
+    ctx.addBlock({ type: 'success', message: 'Webhook event sent.' });
+    ctx.addBlock({
+      type: 'detail',
+      data: { Status: response.status, Response: responseBody },
+    });
+  } catch (error: any) {
+    ctx.addBlock({ type: 'error', message: `Webhook event failed. ${error.message}` });
+  }
+}
+
+async function triggerOnce(
+  ctx: CommandContext,
+  eventArg: string | undefined,
+  urlArg: string | undefined,
+): Promise<void> {
+  if (!eventArg || !urlArg) {
+    ctx.addBlock({ type: 'error', message: 'Event and URL are required.' });
+    ctx.addBlock({ type: 'info', message: USAGE });
+    return;
+  }
+
+  if (!supportedEvents.includes(eventArg as SupportedEvent)) {
+    ctx.addBlock({ type: 'error', message: `Unsupported event '${eventArg}'.` });
+    ctx.addBlock({ type: 'info', message: USAGE });
+    return;
+  }
+
+  if (!urlArg.startsWith('http://') && !urlArg.startsWith('https://')) {
+    ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+    return;
+  }
+
+  await sendEvent(ctx, urlArg, eventArg as SupportedEvent, {
+    business_id: 'bus_test',
+    product_id: 'pdt_test',
+    metadata: {},
+    email: 'john.doe@example.com',
+    customer_id: 'cus_test',
+  });
+}
+
+export async function handleWebhookTrigger(
+  ctx: CommandContext,
+  extraArgs: string[] = [],
+): Promise<void> {
+  const [eventArg, urlArg] = extraArgs;
+  if (eventArg || urlArg) {
+    await triggerOnce(ctx, eventArg, urlArg);
+    return;
+  }
+
   let endpoint = '';
   while (!endpoint) {
-    const value = await ctx.promptInput('Endpoint URL');
+    let value: string;
+    try {
+      value = await ctx.promptInput('Endpoint URL');
+    } catch {
+      ctx.addBlock({ type: 'error', message: 'Event and URL are required.' });
+      ctx.addBlock({ type: 'info', message: USAGE });
+      return;
+    }
     if (value.startsWith('http://') || value.startsWith('https://')) {
       endpoint = value;
     } else {
@@ -132,36 +213,12 @@ export async function handleWebhookTrigger(ctx: CommandContext): Promise<void> {
       return;
     }
 
-    const generator = eventGenerators[event];
-    const data = generator({
+    await sendEvent(ctx, endpoint, event, {
       business_id: businessId,
       product_id: productId,
       metadata,
       email,
       customer_id: customerId,
     });
-
-    try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const responseBody = await response.text();
-
-      ctx.addBlock({ type: 'success', message: 'Webhook event sent.' });
-      ctx.addBlock({
-        type: 'detail',
-        data: {
-          'Status': response.status,
-          'Response': responseBody
-        }
-      });
-    } catch (error: any) {
-      ctx.addBlock({ type: 'error', message: `Webhook event failed. ${error.message}` });
-    }
   }
 }

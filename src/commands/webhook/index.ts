@@ -29,7 +29,7 @@ export async function handleWebhook(
       });
       break;
     case 'trigger':
-      await handleWebhookTrigger(ctx);
+      await handleWebhookTrigger(ctx, extraArgs);
       break;
     default:
       ctx.addBlock({ type: 'help' });
