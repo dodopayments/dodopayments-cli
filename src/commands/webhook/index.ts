@@ -2,6 +2,7 @@ import type DodoPayments from 'dodopayments';
 import WebhookListener from './listen';
 import { handleWebhookTrigger } from './trigger';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 type AuthenticatedWebhookContext = {
   apiKey: string;
@@ -32,6 +33,6 @@ export async function handleWebhook(
       await handleWebhookTrigger(ctx, extraArgs);
       break;
     default:
-      ctx.addBlock({ type: 'help' });
+      unknownSubcommand(ctx, 'wh', subCommand);
   }
 }

@@ -3,6 +3,7 @@ import { currencyToSymbolMap } from '../../utils/currency-to-symbol-map';
 import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
+import { unknownSubcommand } from '../../utils/usage-help';
 
 export async function handleRefund(
   client: DodoPayments,
@@ -81,6 +82,6 @@ export async function handleRefund(
       }
     }
   } else {
-    ctx.addBlock({ type: 'help' });
+    unknownSubcommand(ctx, 'refunds', subCommand);
   }
 }
