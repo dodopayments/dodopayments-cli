@@ -8,7 +8,9 @@ const modeLabels: Record<Exclude<LogoutChoice, 'all'>, string> = {
   live_mode: 'Live Mode',
 };
 
-export async function handleLogout(ctx: CommandContext): Promise<void> {
+export async function handleLogout(ctx: CommandContext, exit?: () => void): Promise<void> {
+  const exitCli = exit ?? (() => process.exit(0));
+
   const target = await ctx.promptSelect('Sign out from', [
     { label: 'All accounts', value: 'all' },
     { label: 'Test Mode', value: 'test_mode' },
@@ -26,25 +28,25 @@ export async function handleLogout(ctx: CommandContext): Promise<void> {
 
   if (result.hadInvalidConfig) {
     ctx.addBlock({ type: 'error', message: 'Stored credentials were invalid and have been cleared.' });
-    process.exit(0);
+    exitCli();
     return;
   }
 
   if (target === 'all') {
     if (result.removedModes.length === 0) {
       ctx.addBlock({ type: 'error', message: 'No stored accounts found.' });
-      process.exit(0);
+      exitCli();
       return;
     }
 
     ctx.addBlock({ type: 'success', message: 'Logged out from all accounts.' });
-    process.exit(0);
+    exitCli();
     return;
   }
 
   if (result.removedModes.length === 0) {
     ctx.addBlock({ type: 'error', message: `No ${modeLabels[target]} account is signed in.` });
-    process.exit(0);
+    exitCli();
     return;
   }
 

@@ -58,7 +58,7 @@ export async function handleCommand(
 
   if (cmd === '/logout') {
     const { handleLogout } = await import('../commands/logout');
-    await handleLogout(ctx);
+    await handleLogout(ctx, exit);
     return;
   }
 
