@@ -28,6 +28,14 @@ if (process.stdout.isTTY && !category) {
   process.on('SIGINT', () => process.exit(0));
   process.on('SIGTERM', () => process.exit(0));
   try {
+    if (category && subCommand) {
+      const { isInteractiveOnly } = await import('./utils/usage-help');
+      if (isInteractiveOnly(category, subCommand)) {
+        console.error(`\`dodo ${category} ${subCommand}\` is interactive — open the TUI with \`dodo\`.`);
+        process.exit(0);
+      }
+    }
+
     if (category === 'login') {
       const { handleLogin } = await import('./commands/login');
       await handleLogin(defaultContext, subCommand, extraArgs[0]);
