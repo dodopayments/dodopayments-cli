@@ -51,5 +51,5 @@ export async function handleLogout(ctx: CommandContext, exit?: () => void): Prom
   }
 
   ctx.addBlock({ type: 'success', message: `Logged out from ${modeLabels[target]}.` });
-  process.exit(0);
+  exitCli();
 }
