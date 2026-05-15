@@ -13,7 +13,7 @@ export async function handleWebhook(
   subCommand: string | undefined,
   ctx: CommandContext,
   context?: AuthenticatedWebhookContext,
-  extraArgs: string[] = [],
+  extraArgs: readonly string[] = [],
 ) {
   switch (subCommand) {
     case 'listen':
