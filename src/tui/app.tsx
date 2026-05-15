@@ -138,7 +138,6 @@ const App = () => {
     // before destroy() flips stdin to canonical mode and the kernel echoes them.
     setTimeout(() => {
       renderer.destroy();
-      process.stdout.write('\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1015l\x1b[?25h');
       process.exit(0);
     }, 80);
   };
@@ -260,5 +259,10 @@ const App = () => {
 };
 
 export const mountTuiApp = (): void => {
+  // Restore terminal state on any exit, including OpenTUI's own Ctrl+C handler
+  // (which bypasses exitTui).
+  process.on('exit', () => {
+    process.stdout.write('\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1015l\x1b[?25h');
+  });
   render(() => <App />, { exitOnCtrlC: true, targetFps: 30, useMouse: true });
 };
