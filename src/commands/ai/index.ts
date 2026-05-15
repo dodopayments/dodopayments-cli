@@ -6,6 +6,11 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { resolveCredentials } from '../../utils/auth';
 import type { CommandContext } from '../../tui/CommandContext';
 
+let cachedKnowledgeClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
+let cachedExecClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
+let cachedTools: Record<string, any> | null = null;
+let cachedApiKey: string | null = null;
+let cachedMode: string | null = null;
 export async function getAIModel(ctx: CommandContext) {
   const { apiKey, mode } = await resolveCredentials(ctx, false);
   return buildModel(apiKey, mode);
@@ -110,9 +115,6 @@ export async function handleAI(query: string, ctx: CommandContext) {
 
   const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Initializing assistant…' });
 
-  let knowledgeClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
-  let execClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
-
   try {
     // Phase 1: Resolve credentials & create model
     let model;
@@ -128,69 +130,83 @@ export async function handleAI(query: string, ctx: CommandContext) {
     }
 
     // Phase 2: Initialize MCP clients (with timeouts)
-    ctx.updateBlock(spinnerId, { label: 'Loading knowledge base…' });
+    if (!cachedKnowledgeClient) {
+      ctx.updateBlock(spinnerId, { label: 'Loading knowledge base…' });
 
-    try {
-      knowledgeClient = await withTimeout(
-        createMCPClient({
-          transport: new StdioClientTransport({
-            command: 'npx',
-            args: ['-y', 'mcp-remote@latest', 'https://knowledge.dodopayments.com/mcp'],
-            env: process.env as Record<string, string>,
-            stderr: 'pipe',
+      try {
+        cachedKnowledgeClient = await withTimeout(
+          createMCPClient({
+            transport: new StdioClientTransport({
+              command: 'npx',
+              args: ['-y', 'mcp-remote@latest', 'https://knowledge.dodopayments.com/mcp'],
+              env: process.env as Record<string, string>,
+              stderr: 'pipe',
+            }),
           }),
-        }),
-        MCP_INIT_TIMEOUT,
-        'MCP Knowledge server',
-      );
-    } catch (e: any) {
-      throw Object.assign(new Error(classifyError(e, 'MCP Knowledge Init')), { _classified: true });
-    }
-
-    ctx.updateBlock(spinnerId, { label: 'Loading workspace…' });
-
-    try {
-      execClient = await withTimeout(
-        createMCPClient({
-          transport: new StdioClientTransport({
-            command: 'npx',
-            args: ['-y', 'dodopayments-mcp'],
-            env: {
-              ...(process.env as Record<string, string>),
-              DODO_PAYMENTS_API_KEY: apiKey,
-              DODO_PAYMENTS_ENVIRONMENT: mode,
-            },
-            stderr: 'pipe',
-          }),
-        }),
-        MCP_INIT_TIMEOUT,
-        'MCP Execution server',
-      );
-    } catch (e: any) {
-      throw Object.assign(new Error(classifyError(e, 'MCP Exec Init')), { _classified: true });
-    }
-
-    ctx.updateBlock(spinnerId, { label: 'Preparing context…' });
-    let kTools, eTools;
-    try {
-      [kTools, eTools] = await withTimeout(
-        Promise.all([knowledgeClient.tools(), execClient.tools()]),
-        MCP_INIT_TIMEOUT,
-        'MCP tool discovery',
-      );
-    } catch (e: any) {
-      throw Object.assign(new Error(classifyError(e, 'MCP Tool Loading')), { _classified: true });
-    }
-
-    // Merge tools, prefixing knowledge tools that collide with execution tools
-    const tools: Record<string, any> = { ...eTools };
-    for (const [key, value] of Object.entries(kTools)) {
-      if (tools[key]) {
-        tools[`knowledge_${key}`] = value;
-      } else {
-        tools[key] = value;
+          MCP_INIT_TIMEOUT,
+          'MCP Knowledge server',
+        );
+      } catch (e: any) {
+        throw Object.assign(new Error(classifyError(e, 'MCP Knowledge Init')), { _classified: true });
       }
     }
+
+    if (!cachedExecClient || cachedApiKey !== apiKey || cachedMode !== mode) {
+      if (cachedExecClient) {
+        try { await cachedExecClient.close(); } catch {}
+      }
+      ctx.updateBlock(spinnerId, { label: 'Loading workspace…' });
+
+      try {
+        cachedExecClient = await withTimeout(
+          createMCPClient({
+            transport: new StdioClientTransport({
+              command: 'npx',
+              args: ['-y', 'dodopayments-mcp'],
+              env: {
+                ...(process.env as Record<string, string>),
+                DODO_PAYMENTS_API_KEY: apiKey,
+                DODO_PAYMENTS_ENVIRONMENT: mode,
+              },
+              stderr: 'pipe',
+            }),
+          }),
+          MCP_INIT_TIMEOUT,
+          'MCP Execution server',
+        );
+        cachedApiKey = apiKey;
+        cachedMode = mode;
+        cachedTools = null;
+      } catch (e: any) {
+        throw Object.assign(new Error(classifyError(e, 'MCP Exec Init')), { _classified: true });
+      }
+    }
+
+    if (!cachedTools) {
+      ctx.updateBlock(spinnerId, { label: 'Preparing context…' });
+      let kTools, eTools;
+      try {
+        [kTools, eTools] = await withTimeout(
+          Promise.all([cachedKnowledgeClient.tools(), cachedExecClient.tools()]),
+          MCP_INIT_TIMEOUT,
+          'MCP tool discovery',
+        );
+      } catch (e: any) {
+        throw Object.assign(new Error(classifyError(e, 'MCP Tool Loading')), { _classified: true });
+      }
+
+      // Merge tools, prefixing knowledge tools that collide with execution tools
+      const toolsToCache: Record<string, any> = { ...eTools };
+      for (const [key, value] of Object.entries(kTools)) {
+        if (toolsToCache[key]) {
+          toolsToCache[`knowledge_${key}`] = value;
+        } else {
+          toolsToCache[key] = value;
+        }
+      }
+      cachedTools = toolsToCache;
+    }
+    const tools = cachedTools;
 
     ctx.updateBlock(spinnerId, { label: 'Analyzing your question…' });
 
@@ -264,8 +280,5 @@ Today is ${new Date().toDateString()}. Do not accept questions that are not rela
     ctx.removeBlock(spinnerId);
     const message = (e as any)?._classified ? e.message : classifyError(e, 'Unknown');
     ctx.addBlock({ type: 'error', message });
-  } finally {
-    try { await knowledgeClient?.close(); } catch { }
-    try { await execClient?.close(); } catch { }
   }
 }
