@@ -37,7 +37,7 @@ Manage your [Dodo Payments](https://dodopayments.com/) resources, test webhooks,
 
 - **Interactive TUI** — launch `dodo` with no arguments to open the full interactive interface with command palette, history, and live notifications.
 - **AI assistant built in** — ask questions or take actions in plain English with `/ai`. No extra setup, runs `dodopayments-mcp` locally.
-- **Secure by default** — API keys are stored in your OS secret store (macOS Keychain, Windows Credential Vault, Linux libsecret). No plaintext config on disk.
+- **Encrypted at rest** — API keys are stored in `~/.dodopayments/config.json`, AES-256-GCM encrypted with a machine-derived key. No plaintext credentials on disk.
 - **Auto update** — the CLI checks for new versions and notifies you in-app. Run `/update` to upgrade in place.
 - **Webhook tooling** — listen for live webhooks or trigger payloads offline for local development.
 
@@ -103,9 +103,9 @@ The login flow will:
 1. Open your browser to the Dodo Payments API Keys page.
 2. Prompt you to paste your API Key.
 3. Ask you to select an environment — **Test Mode** or **Live Mode**.
-4. Store the credentials in your OS secret store (Keychain on macOS, Credential Vault on Windows, libsecret on Linux).
+4. Store the credentials encrypted at `~/.dodopayments/config.json` (AES-256-GCM, machine-bound key).
 
-> **Heads up:** Because we use the OS secret store, you may be prompted for your **device password** the first time the CLI reads or writes credentials. If you're upgrading from an older version, any existing plaintext API key will be **migrated to the secret store and the legacy file deleted** automatically.
+> **Upgrading from v3.0.x?** Your previous keychain-stored credentials won't carry over — just run `dodo login` once to re-authenticate.
 
 ### Switching modes / logging out
 
