@@ -5,12 +5,71 @@ on:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
-  publish:
+  binaries:
+    name: Build and upload release binaries
     runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 'latest'
+
+      - name: Update package.json version from release tag
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          TAG_STRIPPED="${TAG_NAME#v}"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+            pkg.version = '${TAG_STRIPPED}';
+            fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build cross-platform binaries
+        run: bun run build-native
+
+      - name: Generate SHA256SUMS
+        working-directory: dist
+        run: |
+          shasum -a 256 \
+            dodo-cli-darwin-arm64 \
+            dodo-cli-darwin-x64 \
+            dodo-cli-linux-arm64 \
+            dodo-cli-linux-x64 \
+            dodo-cli-windows-x64.exe \
+            > SHA256SUMS.txt
+          echo "--- SHA256SUMS.txt ---"
+          cat SHA256SUMS.txt
+
+      - name: Upload binaries to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          gh release upload "${TAG_NAME}" \
+            dist/dodo-cli-darwin-arm64 \
+            dist/dodo-cli-darwin-x64 \
+            dist/dodo-cli-linux-arm64 \
+            dist/dodo-cli-linux-x64 \
+            dist/dodo-cli-windows-x64.exe \
+            dist/SHA256SUMS.txt \
+            --clobber
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    needs: binaries
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,7 +92,7 @@ jobs:
           echo "TAG_NAME=${TAG_NAME}"
           TAG_STRIPPED="${TAG_NAME#v}"
           echo "Updating package.json version to: ${TAG_STRIPPED}"
-          
+
           # Update package.json version using node
           node -e "
             const fs = require('fs');
@@ -42,7 +101,7 @@ jobs:
             fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
             console.log('Updated package.json version to:', pkg.version);
           "
-          
+
           # Verify the update
           PKG_VERSION=$(node -p "require('./package.json').version")
           echo "package.json version after update: ${PKG_VERSION}"
