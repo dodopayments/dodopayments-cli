@@ -10,7 +10,7 @@
  * After bundling, we inject a tiny Node-compatible prelude that re-execs
  * the bundle under Bun if it's launched by Node. This is required because
  * `target: 'bun'` emits Bun-only runtime APIs (e.g. `import.meta.require`)
- * and our native deps (@opentui/core, keytar) load through Bun's loader.
+ * and our native deps (@opentui/core) load through Bun's loader.
  *
  * Without this prelude, `bun install -g dodopayments-cli` works on disk
  * but the symlinked `dodo` binary is invoked via `#!/usr/bin/env node`,
@@ -28,7 +28,6 @@ const result = await Bun.build({
   target: 'bun',
   minify: true,
   plugins: [solidPlugin],
-  external: ['keytar'],
 });
 
 if (!result.success) {
