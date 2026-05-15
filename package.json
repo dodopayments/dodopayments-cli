@@ -1,6 +1,6 @@
 {
   "name": "dodopayments-cli",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Official Dodo Payments CLI — manage payments, customers, products, subscriptions, and webhooks from your terminal. Includes an interactive TUI, an AI assistant powered by MCP, and offline webhook testing.",
   "keywords": [
     "dodopayments",
