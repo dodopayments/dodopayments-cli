@@ -51,8 +51,7 @@ export async function handleCommand(
 
   if (cmd === '/login') {
     const { handleLogin } = await import('../commands/login');
-    await handleLogin(ctx);
-    refreshAuth();
+    if (await handleLogin(ctx)) refreshAuth();
     return;
   }
 
