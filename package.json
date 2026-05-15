@@ -60,6 +60,7 @@
     "solid-js": "^1.9.12"
   },
   "devDependencies": {
+    "@opentui/core-darwin-arm64": "0.2.3",
     "@opentui/core-darwin-x64": "0.2.3",
     "@opentui/core-linux-arm64": "0.2.3",
     "@opentui/core-linux-x64": "0.2.3",
