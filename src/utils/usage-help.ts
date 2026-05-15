@@ -57,26 +57,37 @@ export const usage: Record<string, UsageCommand[]> = {
   checkout: [{ command: 'new', description: 'Create a checkout session' }],
 };
 
+export const categoryNotes: Record<string, string> = {
+  wh: 'Run `dodo wh trigger` without logging in, or `dodo login` to use `dodo wh listen`.',
+};
+
 export function unknownSubcommand(
   ctx: CommandContext,
   category: string,
   subCommand: string | undefined,
 ): void {
+  const invocation = ctx.invocation === 'cli' ? `dodo ${category}` : `/${category}`;
+
   if (subCommand) {
     ctx.addBlock({
       type: 'error',
-      message: `Unknown subcommand '${subCommand}' for /${category}.`,
+      message: `Unknown subcommand '${subCommand}' for ${invocation}.`,
     });
   } else {
-    ctx.addBlock({ type: 'error', message: `Subcommand required for /${category}.` });
+    ctx.addBlock({ type: 'error', message: `Subcommand required for ${invocation}.` });
   }
 
   const commands = usage[category];
-  if (!commands) return;
+  if (commands) {
+    const lines = [
+      'Usage:',
+      ...commands.map((c) => `  ${invocation} ${c.command} - ${c.description}`),
+    ].join('\n');
+    ctx.addBlock({ type: 'info', message: lines });
+  }
 
-  const lines = [
-    'Usage:',
-    ...commands.map((c) => `  /${category} ${c.command} - ${c.description}`),
-  ].join('\n');
-  ctx.addBlock({ type: 'info', message: lines });
+  const note = categoryNotes[category];
+  if (note && ctx.invocation === 'cli') {
+    ctx.addBlock({ type: 'info', message: note });
+  }
 }

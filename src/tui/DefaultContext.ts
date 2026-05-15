@@ -36,4 +36,5 @@ export const defaultContext: CommandContext = {
     throw new Error('Cannot prompt in non-TTY mode');
   },
   clear: () => console.clear(),
+  invocation: 'cli',
 };

@@ -38,18 +38,15 @@ if (process.stdout.isTTY && !category) {
       const { handleWebhook } = await import('./commands/webhook');
       await handleWebhook(subCommand, defaultContext, undefined, extraArgs);
     } else if (!(await configExists())) {
-      if (category === 'wh' && !subCommand) {
-        renderHelp(category);
-        console.log();
-        console.log(
-          'Run `dodo wh trigger` without logging in, or `dodo login` to use `dodo wh listen`.',
-        );
-        process.exit(0);
-      }
-
       if (category && !subCommand) {
         renderHelp(category);
         console.log();
+        const { categoryNotes } = await import('./utils/usage-help');
+        const note = categoryNotes[category];
+        if (note) {
+          console.log(note);
+          process.exit(0);
+        }
       } else if (!category && !subCommand) {
         renderHelp();
         console.log();

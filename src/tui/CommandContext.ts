@@ -19,6 +19,7 @@ export interface CommandContext {
   promptSelect: (label: string, options: { label: string; value: string }[]) => Promise<string>;
   promptConfirm: (message: string) => Promise<boolean>;
   clear: () => void;
+  readonly invocation: 'tui' | 'cli';
 }
 
 export interface MessageStore {
@@ -134,6 +135,6 @@ export const createMessageStore = (): MessageStore => {
     messages,
     setMessages,
     pushUserEcho,
-    ctx: { addBlock, updateBlock, removeBlock, promptInput, promptSelect, promptConfirm, clear },
+    ctx: { addBlock, updateBlock, removeBlock, promptInput, promptSelect, promptConfirm, clear, invocation: 'tui' },
   };
 };
