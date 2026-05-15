@@ -14,6 +14,7 @@ export type LogoutTarget = Mode | 'all';
 
 const CONFIG_DIR = path.join(os.homedir(), '.dodopayments');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
+const STATE_PATH = path.join(CONFIG_DIR, 'state.json');
 const LEGACY_CONFIG_PATH = path.join(CONFIG_DIR, 'api-key');
 const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
 const ALGORITHM = 'aes-256-gcm';
@@ -21,12 +22,44 @@ const ALGORITHM = 'aes-256-gcm';
 let sessionMode: Mode | null = null;
 let cachedKey: Buffer | null = null;
 
+export type State = {
+  mode?: Mode;
+};
+
+function readState(): State {
+  try {
+    if (fs.existsSync(STATE_PATH)) {
+      return JSON.parse(fs.readFileSync(STATE_PATH, 'utf-8'));
+    }
+  } catch {
+    // Ignore errors
+  }
+  return {};
+}
+
+function writeState(state: State) {
+  ensureConfigDir();
+  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
+}
+
 export function setSessionMode(mode: Mode) {
   sessionMode = mode;
+  writeState({ mode });
 }
 
 export function getSessionMode(): Mode | null {
+  if (!sessionMode) {
+    const state = readState();
+    if (state.mode) {
+      sessionMode = state.mode;
+    }
+  }
   return sessionMode;
+}
+
+export function clearSessionMode() {
+  sessionMode = null;
+  writeState({});
 }
 
 function getEncryptionKey(): Buffer {
@@ -192,6 +225,7 @@ export async function resetConfig(): Promise<void> {
       // Ignore errors
     }
   }
+  clearSessionMode();
 }
 
 export async function clearConfig(target: LogoutTarget): Promise<{
@@ -214,6 +248,7 @@ export async function clearConfig(target: LogoutTarget): Promise<{
 
   if (target === 'all') {
     await resetConfig();
+    clearSessionMode();
     return { hadInvalidConfig: false, removedModes: configuredModes };
   }
 
@@ -226,15 +261,34 @@ export async function clearConfig(target: LogoutTarget): Promise<{
   delete config[target];
   await writeConfig(config);
 
+  if (sessionMode === target) {
+    clearSessionMode();
+  }
+
   return { hadInvalidConfig: false, removedModes: [target] };
 }
 
 import type { CommandContext } from '../tui/CommandContext';
 
-export async function resolveCredentials(ctx?: CommandContext, prompt: boolean = true): Promise<ResolvedCredentials> {
-  if (sessionMode) {
+export async function resolveCredentials(
+  ctx?: CommandContext,
+  prompt: boolean = true,
+  forcePrompt: boolean = false,
+): Promise<ResolvedCredentials> {
+  if (!sessionMode) {
+    const state = readState();
+    if (state.mode) {
+      sessionMode = state.mode;
+    }
+  }
+
+  if (sessionMode && !forcePrompt) {
     const config = await readConfig();
-    return { mode: sessionMode, apiKey: config[sessionMode]! };
+    // If the persisted mode is no longer in config, we should ignore it
+    if (config[sessionMode]) {
+      return { mode: sessionMode, apiKey: config[sessionMode]! };
+    }
+    sessionMode = null;
   }
 
   if (!(await configExists())) {
@@ -256,8 +310,9 @@ export async function resolveCredentials(ctx?: CommandContext, prompt: boolean =
     throw new Error('No valid credentials. Run /login to retry.');
   }
 
-  if (modes.length === 1 || !prompt) {
+  if (modes.length === 1 || (!prompt && !forcePrompt)) {
     const mode = modes[0] as Mode;
+    if (prompt) setSessionMode(mode);
     return { mode, apiKey: config[mode]! };
   }
 
@@ -265,10 +320,14 @@ export async function resolveCredentials(ctx?: CommandContext, prompt: boolean =
     throw new Error('Multiple environments configured. Run the CLI without arguments to choose one.');
   }
 
-  const selectedMode = await ctx.promptSelect('Environment', modes.map((mode) => ({
-    label: mode === 'test_mode' ? 'Test Mode' : 'Live Mode',
-    value: mode,
-  }))) as Mode;
+  const selectedMode = (await ctx.promptSelect(
+    'Environment',
+    modes.map((mode) => ({
+      label: mode === 'test_mode' ? 'Test Mode' : 'Live Mode',
+      value: mode,
+    })),
+  )) as Mode;
 
+  setSessionMode(selectedMode);
   return { mode: selectedMode, apiKey: config[selectedMode]! };
 }
