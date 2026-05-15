@@ -242,10 +242,12 @@ Manage and test webhooks directly from the CLI.
 
 | Command | Description |
 | --- | --- |
-| `/wh listen` | Listen for webhooks in real time and forward them to your local dev server |
-| `/wh trigger` | Trigger a test webhook event interactively — even while logged out |
+| `/wh listen <url>` | Listen for webhooks in real time and forward them to `<url>` |
+| `/wh trigger <event> <url>` | Trigger a test webhook event offline — even while logged out |
 
-The `/wh trigger` flow guides you through:
+In the TUI, omitting the args (`/wh listen` or `/wh trigger`) opens an interactive wizard. In direct mode (`dodo wh …`), both arguments are required.
+
+The interactive `/wh trigger` flow guides you through:
 
 1. Setting a destination **endpoint URL**
 2. Selecting a specific **event** to trigger
