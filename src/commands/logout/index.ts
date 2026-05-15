@@ -8,20 +8,50 @@ const modeLabels: Record<Exclude<LogoutChoice, 'all'>, string> = {
   live_mode: 'Live Mode',
 };
 
-export async function handleLogout(ctx: CommandContext, exit?: () => void): Promise<void> {
+const USAGE = 'Usage: dodo logout <test|live|all>';
+
+function normalizeTarget(value: string): LogoutChoice | null {
+  if (value === 'all') return 'all';
+  if (value === 'test' || value === 'test_mode') return 'test_mode';
+  if (value === 'live' || value === 'live_mode') return 'live_mode';
+  return null;
+}
+
+export async function handleLogout(
+  ctx: CommandContext,
+  exit?: () => void,
+  targetArg?: string,
+): Promise<void> {
   const exitCli = exit ?? (() => process.exit(0));
 
-  const target = await ctx.promptSelect('Sign out from', [
-    { label: 'All accounts', value: 'all' },
-    { label: 'Test Mode', value: 'test_mode' },
-    { label: 'Live Mode', value: 'live_mode' },
-  ]) as LogoutChoice;
+  let target: LogoutChoice;
 
-  const targetLabel = target === 'all' ? 'all accounts' : modeLabels[target];
-  const confirmed = await ctx.promptConfirm(`Sign out from ${targetLabel}?`);
-  if (!confirmed) {
-    ctx.addBlock({ type: 'error', message: 'Logout cancelled.' });
-    return;
+  if (ctx.invocation === 'cli') {
+    if (!targetArg) {
+      ctx.addBlock({ type: 'error', message: 'Target is required.' });
+      ctx.addBlock({ type: 'info', message: USAGE });
+      return;
+    }
+    const normalized = normalizeTarget(targetArg);
+    if (!normalized) {
+      ctx.addBlock({ type: 'error', message: `Invalid target '${targetArg}'. Use 'test', 'live', or 'all'.` });
+      ctx.addBlock({ type: 'info', message: USAGE });
+      return;
+    }
+    target = normalized;
+  } else {
+    target = (await ctx.promptSelect('Sign out from', [
+      { label: 'All accounts', value: 'all' },
+      { label: 'Test Mode', value: 'test_mode' },
+      { label: 'Live Mode', value: 'live_mode' },
+    ])) as LogoutChoice;
+
+    const targetLabel = target === 'all' ? 'all accounts' : modeLabels[target];
+    const confirmed = await ctx.promptConfirm(`Sign out from ${targetLabel}?`);
+    if (!confirmed) {
+      ctx.addBlock({ type: 'error', message: 'Logout cancelled.' });
+      return;
+    }
   }
 
   const result = await clearConfig(target);

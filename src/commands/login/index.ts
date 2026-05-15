@@ -1,17 +1,46 @@
 import DodoPayments from 'dodopayments';
 import open from 'open';
-import { saveConfig } from '../../utils/auth';
+import { saveConfig, type Mode } from '../../utils/auth';
 import type { CommandContext } from '../../tui/CommandContext';
 
-export async function handleLogin(ctx: CommandContext): Promise<boolean> {
-  await open('https://app.dodopayments.com/developer/api-keys');
+const USAGE = 'Usage: dodo login <api-key> <test|live>';
 
-  const apiKey = await ctx.promptInput('API key');
+function normalizeMode(value: string): Mode | null {
+  if (value === 'test' || value === 'test_mode') return 'test_mode';
+  if (value === 'live' || value === 'live_mode') return 'live_mode';
+  return null;
+}
 
-  const mode = (await ctx.promptSelect('Environment', [
-    { label: 'Test Mode', value: 'test_mode' },
-    { label: 'Live Mode', value: 'live_mode' },
-  ])) as 'test_mode' | 'live_mode';
+export async function handleLogin(
+  ctx: CommandContext,
+  apiKeyArg?: string,
+  modeArg?: string,
+): Promise<boolean> {
+  let apiKey: string;
+  let mode: Mode;
+
+  if (ctx.invocation === 'cli') {
+    if (!apiKeyArg || !modeArg) {
+      ctx.addBlock({ type: 'error', message: 'API key and mode are required.' });
+      ctx.addBlock({ type: 'info', message: USAGE });
+      return false;
+    }
+    const normalized = normalizeMode(modeArg);
+    if (!normalized) {
+      ctx.addBlock({ type: 'error', message: `Invalid mode '${modeArg}'. Use 'test' or 'live'.` });
+      ctx.addBlock({ type: 'info', message: USAGE });
+      return false;
+    }
+    apiKey = apiKeyArg;
+    mode = normalized;
+  } else {
+    await open('https://app.dodopayments.com/developer/api-keys');
+    apiKey = await ctx.promptInput('API key');
+    mode = (await ctx.promptSelect('Environment', [
+      { label: 'Test Mode', value: 'test_mode' },
+      { label: 'Live Mode', value: 'live_mode' },
+    ])) as Mode;
+  }
 
   const client = new DodoPayments({ bearerToken: apiKey, environment: mode });
 
