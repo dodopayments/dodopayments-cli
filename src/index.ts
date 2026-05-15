@@ -30,10 +30,10 @@ if (process.stdout.isTTY && !category) {
   try {
     if (category === 'login') {
       const { handleLogin } = await import('./commands/login');
-      await handleLogin(defaultContext);
+      await handleLogin(defaultContext, subCommand, extraArgs[0]);
     } else if (category === 'logout') {
       const { handleLogout } = await import('./commands/logout');
-      await handleLogout(defaultContext);
+      await handleLogout(defaultContext, undefined, subCommand);
     } else if (category === 'wh' && subCommand === 'trigger') {
       const { handleWebhook } = await import('./commands/webhook');
       await handleWebhook(subCommand, defaultContext, undefined, extraArgs);
