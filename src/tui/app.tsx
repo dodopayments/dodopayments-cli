@@ -132,6 +132,17 @@ const App = () => {
   };
 
   const renderer = useRenderer();
+
+  const exitTui = () => {
+    // Defer to let OpenTUI's stdin parser drain in-flight terminal responses
+    // before destroy() flips stdin to canonical mode and the kernel echoes them.
+    setTimeout(() => {
+      renderer.destroy();
+      process.stdout.write('\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1015l\x1b[?25h');
+      process.exit(0);
+    }, 80);
+  };
+
   useSelectionHandler((selection) => {
     const text = selection.getSelectedText();
     if (!text || text.trim().length === 0) return;
@@ -246,12 +257,6 @@ const App = () => {
       </box>
     </TuiContextProvider>
   );
-};
-
-const exitTui = () => {
-  // Disable mouse tracking (1000, 1002, 1003, 1006, 1015) and show cursor
-  process.stdout.write('\x1b[?1000l\x1b[?1002l\x1b[?1003l\x1b[?1006l\x1b[?1015l\x1b[?25h');
-  process.exit(0);
 };
 
 export const mountTuiApp = (): void => {
