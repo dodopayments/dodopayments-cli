@@ -151,11 +151,11 @@ For example:
 
 ```bash
 dodo payments list 1
-dodo customers create
-dodo wh trigger
+dodo customers list
+dodo wh trigger payment.success http://localhost:3000/webhook
 ```
 
-The reference tables below show every command. In the TUI, prefix them with `/`; in direct mode, drop the `/`.
+The reference tables below show every command. In the TUI, prefix them with `/`; in direct mode, drop the `/`. Commands marked `(TUI only)` are interactive wizards and only work inside the TUI.
 
 ---
 
@@ -198,16 +198,16 @@ The assistant respects your active environment (Test / Live).
 | Command | Description |
 | --- | --- |
 | `/customers list <page>` | List customers |
-| `/customers create` | Create a new customer |
-| `/customers update <id>` | Update an existing customer |
+| `/customers create` | Create a new customer (TUI only) |
+| `/customers update <id>` | Update an existing customer (TUI only) |
 
 ### Discounts
 
 | Command | Description |
 | --- | --- |
 | `/discounts list <page>` | List discounts |
-| `/discounts create` | Create a new percentage-based discount |
-| `/discounts delete <id>` | Remove a discount by ID |
+| `/discounts create` | Create a new percentage-based discount (TUI only) |
+| `/discounts delete <id>` | Remove a discount by ID (TUI only) |
 
 ### Licenses
 
@@ -234,7 +234,7 @@ The assistant respects your active environment (Test / Live).
 
 | Command | Description |
 | --- | --- |
-| `/checkout new` | Interactively create a hosted checkout session and get a payment link |
+| `/checkout new` | Interactively create a hosted checkout session and get a payment link (TUI only) |
 
 ### Webhooks
 
