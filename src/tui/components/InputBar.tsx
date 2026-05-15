@@ -66,7 +66,7 @@ export const InputBar = (props: InputBarProps) => {
             {(info: () => NonNullable<AuthInfo>) => (
               <>
                 <text fg={info().mode === 'test_mode' ? colors.testMode : colors.liveMode}>
-                  {info().mode === 'test_mode' ? 'TEST' : 'LIVE'}
+                  {info().mode === 'test_mode' ? 'TEST MODE' : 'LIVE MODE'}
                 </text>
                 <text fg={colors.textDim}>{` ${glyphs.separator} `}</text>
                 <text fg={colors.textMuted}>{info().key}</text>

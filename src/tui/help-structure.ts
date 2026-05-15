@@ -86,6 +86,7 @@ export const HELP_GROUPS: HelpGroup[] = [
     items: [
       { command: '/login', description: 'Sign in with a Dodo Payments API key' },
       { command: '/logout', description: 'Sign out from stored accounts' },
+      { command: '/switch', description: 'Toggle between Test and Live modes' },
     ],
   },
   {

@@ -6,7 +6,7 @@
  */
 
 import type { CommandContext } from './CommandContext';
-import { resolveCredentials } from '../utils/auth';
+import { resolveCredentials, clearSessionMode } from '../utils/auth';
 
 export async function handleCommand(
   input: string,
@@ -58,6 +58,13 @@ export async function handleCommand(
   if (cmd === '/logout') {
     const { handleLogout } = await import('../commands/logout');
     await handleLogout(ctx, exit);
+    return;
+  }
+
+  if (cmd === '/switch') {
+    await resolveCredentials(ctx, true, true);
+    refreshAuth();
+    ctx.addBlock({ type: 'success', message: 'Environment switched.' });
     return;
   }
 

@@ -22,6 +22,7 @@ export const COMMANDS = [
   { command: '/ai',               description: 'Ask a question about your data' },
   { command: '/login',            description: 'Login with a Dodo API key' },
   { command: '/logout',           description: 'Logout from stored accounts' },
+  { command: '/switch',           description: 'Switch between Test and Live modes' },
   { command: '/update',           description: 'Update the CLI to the latest version' },
   { command: '/clear',            description: 'Clear message history' },
   { command: '/exit',             description: 'Exit the CLI' },
