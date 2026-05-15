@@ -3,7 +3,7 @@ import open from 'open';
 import { saveConfig } from '../../utils/auth';
 import type { CommandContext } from '../../tui/CommandContext';
 
-export async function handleLogin(ctx: CommandContext): Promise<void> {
+export async function handleLogin(ctx: CommandContext): Promise<boolean> {
   await open('https://app.dodopayments.com/developer/api-keys');
 
   const apiKey = await ctx.promptInput('API key');
@@ -27,9 +27,10 @@ export async function handleLogin(ctx: CommandContext): Promise<void> {
       message: 'Authentication failed. Check your API key and selected environment.',
     });
     process.exitCode = 1;
-    return;
+    return false;
   }
 
   await saveConfig(mode, apiKey);
   ctx.addBlock({ type: 'success', message: 'Setup complete.' });
+  return true;
 }
