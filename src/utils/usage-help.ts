@@ -3,6 +3,7 @@ import type { CommandContext } from '../tui/CommandContext';
 type UsageCommand = {
   command: string;
   description: string;
+  interactive?: boolean;
 };
 
 // For help commands
@@ -29,13 +30,13 @@ export const usage: Record<string, UsageCommand[]> = {
   ],
   customers: [
     { command: 'list', description: 'List your customers' },
-    { command: 'create', description: 'Create a customer' },
-    { command: 'update <id>', description: 'Update a customer' },
+    { command: 'create', description: 'Create a customer', interactive: true },
+    { command: 'update <id>', description: 'Update a customer', interactive: true },
   ],
   discounts: [
     { command: 'list', description: 'List your discounts' },
-    { command: 'create', description: 'Create a discount' },
-    { command: 'delete <id>', description: 'Remove a discount' },
+    { command: 'create', description: 'Create a discount', interactive: true },
+    { command: 'delete <id>', description: 'Remove a discount', interactive: true },
   ],
   licences: [{ command: 'list', description: 'List licences' }],
   addons: [
@@ -54,8 +55,14 @@ export const usage: Record<string, UsageCommand[]> = {
     },
     { command: 'trigger <event> <url>', description: 'Trigger a webhook event offline' },
   ],
-  checkout: [{ command: 'new', description: 'Create a checkout session' }],
+  checkout: [{ command: 'new', description: 'Create a checkout session', interactive: true }],
 };
+
+export function isInteractiveOnly(category: string, subCommand: string): boolean {
+  const commands = usage[category];
+  if (!commands) return false;
+  return commands.some((c) => c.command.split(' ')[0] === subCommand && c.interactive === true);
+}
 
 export const categoryNotes: Record<string, string> = {
   wh: 'Run `dodo wh trigger` without logging in, or `dodo login` to use `dodo wh listen`.',
@@ -79,9 +86,13 @@ export function unknownSubcommand(
 
   const commands = usage[category];
   if (commands) {
+    const annotate = ctx.invocation === 'cli';
     const lines = [
       'Usage:',
-      ...commands.map((c) => `  ${invocation} ${c.command} - ${c.description}`),
+      ...commands.map((c) => {
+        const tag = annotate && c.interactive ? ' (TUI only)' : '';
+        return `  ${invocation} ${c.command} - ${c.description}${tag}`;
+      }),
     ].join('\n');
     ctx.addBlock({ type: 'info', message: lines });
   }

@@ -93,7 +93,6 @@ export async function handleDiscounts(
       ctx.addBlock({ type: 'error', message: 'Discount ID required. Usage: /discounts delete <id>' });
       return;
     }
-
     const confirmed = await ctx.promptConfirm(`Delete discount ${discount_id}?`);
     if (!confirmed) {
       ctx.addBlock({ type: 'error', message: 'Deletion cancelled.' });

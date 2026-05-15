@@ -8,9 +8,10 @@ export const renderHelp = (category?: string): void => {
     const commands = usage[category as keyof typeof usage]!;
 
     console.log(category);
-    commands.forEach(({ command, description }, index) => {
+    commands.forEach(({ command, description, interactive }, index) => {
       const prefix = index === commands.length - 1 ? '`--' : '|--';
-      console.log(`${prefix} dodo ${category} ${command} - ${description}`);
+      const tag = interactive ? ' (TUI only)' : '';
+      console.log(`${prefix} dodo ${category} ${command} - ${description}${tag}`);
     });
 
     return;
@@ -30,12 +31,13 @@ export const renderHelp = (category?: string): void => {
 
     console.log(`${isLastCategory ? '`--' : '|--'} ${categoryName}`);
 
-    commands.forEach(({ command, description }, commandIndex) => {
+    commands.forEach(({ command, description, interactive }, commandIndex) => {
       const prefix = isLastCategory ? '    ' : '|   ';
       const branch = commandIndex === commands.length - 1 ? '`--' : '|--';
+      const tag = interactive ? ' (TUI only)' : '';
 
       console.log(
-        `${prefix}${branch} dodo ${categoryName} ${command} - ${description}`,
+        `${prefix}${branch} dodo ${categoryName} ${command} - ${description}${tag}`,
       );
     });
 
