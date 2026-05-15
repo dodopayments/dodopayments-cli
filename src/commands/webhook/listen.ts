@@ -1,5 +1,6 @@
 import type DodoPayments from 'dodopayments';
 import type { CommandContext } from '../../tui/CommandContext';
+import { HTTP_SCHEME_ERROR, isHttpUrl } from '../../utils/url';
 
 export default async function WebhookListener({
   API_KEY,
@@ -14,8 +15,8 @@ export default async function WebhookListener({
 }) {
   let endpoint: string;
   if (endpointArg) {
-    if (!endpointArg.startsWith('http://') && !endpointArg.startsWith('https://')) {
-      ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+    if (!isHttpUrl(endpointArg)) {
+      ctx.addBlock({ type: 'error', message: HTTP_SCHEME_ERROR });
       return;
     }
     endpoint = endpointArg;
@@ -32,10 +33,10 @@ export default async function WebhookListener({
         });
         return;
       }
-      if (value.startsWith('http://') || value.startsWith('https://')) {
+      if (isHttpUrl(value)) {
         endpoint = value;
       } else {
-        ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+        ctx.addBlock({ type: 'error', message: HTTP_SCHEME_ERROR });
       }
     }
   }

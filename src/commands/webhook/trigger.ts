@@ -4,6 +4,7 @@ import {
   type SupportedEvent,
 } from './functions/supported-events';
 import type { CommandContext } from '../../tui/CommandContext';
+import { HTTP_SCHEME_ERROR, isHttpUrl } from '../../utils/url';
 
 import {
   genSubscriptionActive,
@@ -123,18 +124,20 @@ async function triggerOnce(
     return;
   }
 
-  if (!supportedEvents.includes(eventArg as SupportedEvent)) {
+  if (!(supportedEvents as readonly string[]).includes(eventArg)) {
     ctx.addBlock({ type: 'error', message: `Unsupported event '${eventArg}'.` });
     ctx.addBlock({ type: 'info', message: USAGE });
     return;
   }
+  const event = eventArg as SupportedEvent;
 
-  if (!urlArg.startsWith('http://') && !urlArg.startsWith('https://')) {
-    ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+  if (!isHttpUrl(urlArg)) {
+    ctx.addBlock({ type: 'error', message: HTTP_SCHEME_ERROR });
+    ctx.addBlock({ type: 'info', message: USAGE });
     return;
   }
 
-  await sendEvent(ctx, urlArg, eventArg as SupportedEvent, {
+  await sendEvent(ctx, urlArg, event, {
     business_id: 'bus_test',
     product_id: 'pdt_test',
     metadata: {},
@@ -145,7 +148,7 @@ async function triggerOnce(
 
 export async function handleWebhookTrigger(
   ctx: CommandContext,
-  extraArgs: string[] = [],
+  extraArgs: readonly string[] = [],
 ): Promise<void> {
   const [eventArg, urlArg] = extraArgs;
   if (eventArg || urlArg) {
@@ -163,10 +166,10 @@ export async function handleWebhookTrigger(
       ctx.addBlock({ type: 'info', message: USAGE });
       return;
     }
-    if (value.startsWith('http://') || value.startsWith('https://')) {
+    if (isHttpUrl(value)) {
       endpoint = value;
     } else {
-      ctx.addBlock({ type: 'error', message: 'URL must start with http:// or https://' });
+      ctx.addBlock({ type: 'error', message: HTTP_SCHEME_ERROR });
     }
   }
 
