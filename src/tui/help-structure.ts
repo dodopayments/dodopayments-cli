@@ -37,6 +37,7 @@ export const HELP_GROUPS: HelpGroup[] = [
       { command: '/customers list', args: '<page>', description: 'List customers' },
       { command: '/customers create', description: 'Create a customer' },
       { command: '/customers update', args: '<id>', description: 'Update a customer' },
+      { command: '/customers portal', args: '<id>', description: 'Create a temporary customer portal session' },
     ],
   },
   {

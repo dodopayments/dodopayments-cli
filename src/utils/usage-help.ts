@@ -32,6 +32,7 @@ export const usage: Record<string, UsageCommand[]> = {
     { command: 'list', description: 'List your customers' },
     { command: 'create', description: 'Create a customer', interactive: true },
     { command: 'update <id>', description: 'Update a customer', interactive: true },
+    { command: 'portal <id>', description: 'Create a customer portal session' },
   ],
   discounts: [
     { command: 'list', description: 'List your discounts' },

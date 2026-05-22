@@ -7,6 +7,7 @@ export const COMMANDS = [
   { command: '/customers list',   description: 'List your customers' },
   { command: '/customers create', description: 'Create a customer' },
   { command: '/customers update', description: 'Update a customer' },
+  { command: '/customers portal', description: 'Create a temporary customer portal session' },
   { command: '/discounts list',   description: 'List your discounts' },
   { command: '/discounts create', description: 'Create a discount' },
   { command: '/discounts delete', description: 'Delete a discount' },

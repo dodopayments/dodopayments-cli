@@ -200,6 +200,7 @@ The assistant respects your active environment (Test / Live).
 | `/customers list <page>` | List customers |
 | `/customers create` | Create a new customer (TUI only) |
 | `/customers update <id>` | Update an existing customer (TUI only) |
+| `/customers portal <id>` | Create a temporary customer portal session |
 
 ### Discounts
 

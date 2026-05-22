@@ -3,6 +3,7 @@ import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
 import { unknownSubcommand } from '../../utils/usage-help';
+import { handleCustomerPortal } from '../customer-portal';
 
 export async function handleCustomers(
   client: DodoPayments,
@@ -132,6 +133,9 @@ export async function handleCustomers(
         ctx.addBlock({ type: 'error', message: e.message });
       }
     }
+  } else if (subCommand === 'portal') {
+    const customer_id = args[0];
+    await handleCustomerPortal(client, customer_id, ctx);
   } else {
     unknownSubcommand(ctx, 'customers', subCommand);
   }
