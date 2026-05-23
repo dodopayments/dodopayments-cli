@@ -64,11 +64,12 @@ When using Dodo Payments CLI, please follow these security best practices:
 
 ## Local Storage
 
-The CLI stores the following data locally:
+The CLI stores the following data locally within the `~/.dodopayments/` directory (created with strict `0o700` permissions):
 
 | Data | Location | Purpose |
 |------|----------|---------|
-| API Key | OS secret store (Credential Vault, Keychain, etc.) | Authentication |
+| API Key | `~/.dodopayments/config.json` | Encrypted authentication credentials (AES-256-GCM encrypted using a machine-derived key, stored with strict `0o600` permissions) |
+| Active Mode / Session State | `~/.dodopayments/state.json` | Remembers the active environment mode (`test_mode` or `live_mode`) for the session |
 
 ## Vulnerability Disclosure Policy
 
