@@ -137,7 +137,7 @@ export async function handleCustomers(
     if (!customer_id) {
       ctx.addBlock({
         type: 'error',
-        message: 'Customer ID required. Usage: /customer-portal <customer id>',
+        message: 'Customer ID required. Usage: /customers portal <customer id>',
       });
       return;
     }
