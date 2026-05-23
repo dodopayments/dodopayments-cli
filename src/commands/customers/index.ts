@@ -3,7 +3,6 @@ import { isDodoPaymentsAPIError } from '../../utils/error';
 import { paginationTip } from '../../utils/tips';
 import type { CommandContext } from '../../tui/CommandContext';
 import { unknownSubcommand } from '../../utils/usage-help';
-import { handleCustomerPortal } from '../customer-portal';
 
 export async function handleCustomers(
   client: DodoPayments,
@@ -135,7 +134,36 @@ export async function handleCustomers(
     }
   } else if (subCommand === 'portal') {
     const customer_id = args[0];
-    await handleCustomerPortal(client, customer_id, ctx);
+    if (!customer_id) {
+      ctx.addBlock({
+        type: 'error',
+        message: 'Customer ID required. Usage: /customer-portal <customer id>',
+      });
+      return;
+    }
+
+    const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Creating customer portal session…' });
+    try {
+      const session = await client.customers.customerPortal.create(customer_id);
+      ctx.removeBlock(spinnerId);
+
+      ctx.addBlock({ type: 'success', message: 'Customer portal session created.' });
+      ctx.addBlock({
+        type: 'link',
+        text: 'URL: ',
+        url: session.link,
+      });
+    } catch (e: any) {
+      ctx.removeBlock(spinnerId);
+      if (isDodoPaymentsAPIError(e)) {
+        ctx.addBlock({
+          type: 'error',
+          message: `Couldn't create customer portal session. ${e.error.message}`,
+        });
+      } else {
+        ctx.addBlock({ type: 'error', message: e.message });
+      }
+    }
   } else {
     unknownSubcommand(ctx, 'customers', subCommand);
   }
