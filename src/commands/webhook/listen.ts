@@ -89,12 +89,17 @@ export default async function WebhookListener({
       try {
         const data = JSON.parse(e.data.toString());
         if (data.requestId) {
+          // Build headers via Headers so casing is normalized and we don't end
+          // up with duplicate `Content-Type` entries when `data.headers`
+          // already includes one (e.g. `content-type`). Node/undici otherwise
+          // concatenates duplicates as `application/json, application/json`,
+          // which strict servers like Fastify reject with 415.
+          const forwardHeaders = new Headers(data.headers ?? {});
+          forwardHeaders.set('Content-Type', 'application/json');
+
           const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...data.headers,
-            },
+            headers: forwardHeaders,
             body: JSON.stringify(data.payload),
           });
 
