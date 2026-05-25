@@ -89,12 +89,23 @@ export default async function WebhookListener({
       try {
         const data = JSON.parse(e.data.toString());
         if (data.requestId) {
+          // Build headers via the Headers API so that lookups are case-insensitive
+          // and any forwarded `content-type` variants don't end up duplicated alongside
+          // our own `Content-Type` (which previously produced
+          // `content-type: application/json, application/json` and caused strict
+          // servers like Fastify to reject the request with 415).
+          const forwardedHeaders = new Headers();
+          if (data.headers && typeof data.headers === 'object') {
+            for (const [key, value] of Object.entries(data.headers as Record<string, unknown>)) {
+              if (value == null) continue;
+              forwardedHeaders.set(key, String(value));
+            }
+          }
+          forwardedHeaders.set('content-type', 'application/json');
+
           const response = await fetch(endpoint, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...data.headers,
-            },
+            headers: forwardedHeaders,
             body: JSON.stringify(data.payload),
           });
 
