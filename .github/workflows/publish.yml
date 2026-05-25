@@ -34,13 +34,12 @@ jobs:
           "
 
       - name: Install dependencies
-        env:
-          NODE_ENV: development # For devDependencies to be present
         run: bun install --frozen-lockfile
 
+      - name: Fetch cross-platform dependencies
+        run: bun run fetch-cross-deps.ts
+
       - name: Build cross-platform binaries
-        env:
-          NODE_ENV: development # For devDependencies to be present
         run: bun run build-native
 
       - name: Generate SHA256SUMS
