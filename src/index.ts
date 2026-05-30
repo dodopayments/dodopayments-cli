@@ -46,9 +46,9 @@ if (process.stdout.isTTY && !category) {
       const { handleWebhook } = await import('./commands/webhook');
       await handleWebhook(subCommand, defaultContext, undefined, extraArgs);
     } else if (category === 'init' || category === 'setup') {
-      // 🚀 Unauthenticated scaffolding command interceptor
+  
       const { handleInitCommand } = await import('./commands/init');
-      await handleInitCommand(subCommand);
+      await handleInitCommand(subCommand,  extraArgs[0]);
     } else if (!(await configExists())) {
       if (category && !subCommand) {
         renderHelp(category);
