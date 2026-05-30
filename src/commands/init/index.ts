@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 
-// ── ANSI colours ──────────────────────────────────────────────────────────────
+
 
 const c = {
   reset:   '\x1b[0m',
@@ -22,7 +22,7 @@ function warn(msg: string) { console.log(`${c.yellow}⚠${c.reset}  ${msg}`); }
 function dim(msg: string)  { console.log(`${c.dim}${msg}${c.reset}`); }
 function divider()         { console.log(`${c.dim}${'─'.repeat(52)}${c.reset}`); }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+
 
 function getPackageManager(): 'bun' | 'yarn' | 'npm' {
   const cwd = process.cwd();
@@ -71,7 +71,7 @@ function appendEnv(vars: string) {
   }
 }
 
-// ── Boilerplates ──────────────────────────────────────────────────────────────
+
 
 const boilerplates = {
   nextjs: {
@@ -152,7 +152,7 @@ export default router;
   },
 };
 
-// ── Better-Auth server generator (dynamic plugin selection) ───────────────────
+
 
 type BetterAuthPlugin = 'checkout' | 'portal' | 'usage' | 'webhooks';
 
@@ -213,7 +213,7 @@ export const authClient = createAuthClient({
 });
 `;
 
-// ── Scaffold functions ────────────────────────────────────────────────────────
+
 
 function scaffoldNextjs() {
   console.log('');
@@ -317,7 +317,7 @@ BETTER_AUTH_SECRET="your_better_auth_secret_32_chars"
   console.log('');
 }
 
-// ── Usage menu ────────────────────────────────────────────────────────────────
+
 
 function printUsage() {
   console.log('');
@@ -336,19 +336,7 @@ function printUsage() {
   console.log('');
 }
 
-// ── Entry point ───────────────────────────────────────────────────────────────
 
-/**
- * Called from src/index.ts:
- *   await handleInitCommand(subCommand);
- *
- * subCommand: undefined | 'nextjs' | 'express' | 'better-auth'
- *
- * For better-auth you can optionally pass a comma-separated plugin list as a
- * second positional arg via extraArgs, e.g.:
- *   dodo init better-auth checkout,webhooks
- * That wiring lives in index.ts; here we accept an optional pluginsArg string.
- */
 export async function handleInitCommand(subCommand?: string, pluginsArg?: string) {
   switch (subCommand) {
     case 'nextjs':
