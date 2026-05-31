@@ -16,11 +16,12 @@ const c = {
   gray:    '\x1b[90m',
 };
 
-function ok(msg: string)   { console.log(`${c.green}✔${c.reset}  ${msg}`); }
-function info(msg: string) { console.log(`${c.cyan}ℹ${c.reset}  ${msg}`); }
-function warn(msg: string) { console.log(`${c.yellow}⚠${c.reset}  ${msg}`); }
-function dim(msg: string)  { console.log(`${c.dim}${msg}${c.reset}`); }
-function divider()         { console.log(`${c.dim}${'─'.repeat(52)}${c.reset}`); }
+function ok(msg: string)    { console.log(`${c.green}✔${c.reset}  ${msg}`); }
+function info(msg: string)  { console.log(`${c.cyan}ℹ${c.reset}  ${msg}`); }
+function warn(msg: string)  { console.log(`${c.yellow}⚠${c.reset}  ${msg}`); }
+function error(msg: string) { console.log(`${c.red}✖${c.reset}  ${msg}`); }
+function dim(msg: string)   { console.log(`${c.dim}${msg}${c.reset}`); }
+function divider()          { console.log(`${c.dim}${'─'.repeat(52)}${c.reset}`); }
 
 
 
@@ -43,14 +44,20 @@ function writeFile(relPath: string, content: string) {
   console.log(`  ${existed ? c.yellow + '↺' : c.green + '+'} ${c.reset}${c.gray}${relPath}${c.reset}`);
 }
 
-function installDeps(packages: string) {
+/**
+ * FIX #5 — installDeps now returns a boolean indicating success/failure
+ * instead of swallowing the error and continuing silently.
+ */
+function installDeps(packages: string): boolean {
   const pm = getPackageManager();
   const cmd = pm === 'npm' ? `npm install ${packages}` : `${pm} add ${packages}`;
   info(`Running: ${c.dim}${cmd}${c.reset}`);
   try {
     execSync(cmd, { stdio: 'inherit' });
+    return true;
   } catch {
     warn('Dependency install failed — run the command above manually.');
+    return false;
   }
 }
 
@@ -154,7 +161,8 @@ export default router;
 
 
 
-type BetterAuthPlugin = 'checkout' | 'portal' | 'usage' | 'webhooks';
+export type BetterAuthPlugin = 'checkout' | 'portal' | 'usage' | 'webhooks';
+export const ALL_PLUGINS: BetterAuthPlugin[] = ['checkout', 'portal', 'usage', 'webhooks'];
 
 function generateBetterAuthServer(plugins: BetterAuthPlugin[]): string {
   const pluginBodies = plugins.map((p) => {
@@ -220,7 +228,12 @@ function scaffoldNextjs() {
   console.log(`${c.bold}Scaffolding Next.js App Router billing routes…${c.reset}`);
   divider();
 
-  installDeps('@dodopayments/nextjs');
+  // FIX #5 — abort if install fails
+  const installed = installDeps('@dodopayments/nextjs');
+  if (!installed) {
+    error('Aborting scaffold — please install dependencies first.');
+    process.exit(1);
+  }
   console.log('');
 
   const appRoot = hasSrcDir() ? 'src/app' : 'app';
@@ -252,7 +265,12 @@ function scaffoldExpress() {
   console.log(`${c.bold}Scaffolding Express billing routes…${c.reset}`);
   divider();
 
-  installDeps('@dodopayments/express');
+  // FIX #5 — abort if install fails
+  const installed = installDeps('@dodopayments/express');
+  if (!installed) {
+    error('Aborting scaffold — please install dependencies first.');
+    process.exit(1);
+  }
   console.log('');
 
   const routesDir = hasSrcDir() ? 'src/routes' : 'routes';
@@ -283,12 +301,17 @@ DODO_PAYMENTS_WEBHOOK_KEY="your_webhook_key_here"
   console.log('');
 }
 
-function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ['checkout', 'portal', 'usage', 'webhooks']) {
+function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
   console.log('');
   console.log(`${c.bold}Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…${c.reset}`);
   divider();
 
-  installDeps('@dodopayments/better-auth better-auth dodopayments zod');
+  // FIX #5 — abort if install fails
+  const installed = installDeps('@dodopayments/better-auth better-auth dodopayments zod');
+  if (!installed) {
+    error('Aborting scaffold — please install dependencies first.');
+    process.exit(1);
+  }
   console.log('');
 
   const libDir = hasSrcDir() ? 'src/lib' : 'lib';
@@ -329,10 +352,17 @@ function printUsage() {
   console.log('Available scaffolds:');
   console.log(`  ${c.green}nextjs${c.reset}        Next.js App Router billing routes`);
   console.log(`  ${c.green}express${c.reset}       Express server billing routes`);
+  // FIX #3 — document the 'all' keyword and available plugins
   console.log(`  ${c.green}better-auth${c.reset}   Better-Auth plugin configuration`);
   console.log('');
-  info('Example:');
+  info('Better-Auth plugin options (comma-separated, default: all):');
+  dim(`  ${ALL_PLUGINS.join(', ')}`);
+  console.log('');
+  info('Examples:');
   dim('  dodo init nextjs');
+  dim('  dodo init better-auth');
+  dim('  dodo init better-auth checkout,portal');
+  dim('  dodo init better-auth all');
   console.log('');
 }
 
@@ -348,13 +378,20 @@ export async function handleInitCommand(subCommand?: string, pluginsArg?: string
       break;
 
     case 'better-auth': {
-      const ALL_PLUGINS: BetterAuthPlugin[] = ['checkout', 'portal', 'usage', 'webhooks'];
       let plugins: BetterAuthPlugin[] = ALL_PLUGINS;
 
       if (pluginsArg && pluginsArg !== 'all') {
-        const requested = pluginsArg.split(',').map((p) => p.trim()) as BetterAuthPlugin[];
-        const valid = requested.filter((p) => ALL_PLUGINS.includes(p));
-        if (valid.length > 0) plugins = valid;
+        const requested = pluginsArg.split(',').map((p) => p.trim());
+
+        // FIX #4 — validate plugin names and warn on unknown ones instead of silently dropping
+        const invalid = requested.filter((p) => !ALL_PLUGINS.includes(p as BetterAuthPlugin));
+        if (invalid.length > 0) {
+          error(`Unknown plugin(s): ${invalid.join(', ')}`);
+          info(`Available plugins: ${ALL_PLUGINS.join(', ')}`);
+          process.exit(1);
+        }
+
+        plugins = requested as BetterAuthPlugin[];
       }
 
       scaffoldBetterAuth(plugins);
