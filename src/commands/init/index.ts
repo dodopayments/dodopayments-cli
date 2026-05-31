@@ -228,7 +228,7 @@ function scaffoldNextjs() {
   console.log(`${c.bold}Scaffolding Next.js App Router billing routes…${c.reset}`);
   divider();
 
-  // FIX #5 — abort if install fails
+  
   const installed = installDeps('@dodopayments/nextjs');
   if (!installed) {
     error('Aborting scaffold — please install dependencies first.');
@@ -265,7 +265,7 @@ function scaffoldExpress() {
   console.log(`${c.bold}Scaffolding Express billing routes…${c.reset}`);
   divider();
 
-  // FIX #5 — abort if install fails
+ 
   const installed = installDeps('@dodopayments/express');
   if (!installed) {
     error('Aborting scaffold — please install dependencies first.');
@@ -306,7 +306,7 @@ function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
   console.log(`${c.bold}Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…${c.reset}`);
   divider();
 
-  // FIX #5 — abort if install fails
+
   const installed = installDeps('@dodopayments/better-auth better-auth dodopayments zod');
   if (!installed) {
     error('Aborting scaffold — please install dependencies first.');
@@ -352,7 +352,7 @@ function printUsage() {
   console.log('Available scaffolds:');
   console.log(`  ${c.green}nextjs${c.reset}        Next.js App Router billing routes`);
   console.log(`  ${c.green}express${c.reset}       Express server billing routes`);
-  // FIX #3 — document the 'all' keyword and available plugins
+ 
   console.log(`  ${c.green}better-auth${c.reset}   Better-Auth plugin configuration`);
   console.log('');
   info('Better-Auth plugin options (comma-separated, default: all):');
@@ -383,7 +383,7 @@ export async function handleInitCommand(subCommand?: string, pluginsArg?: string
       if (pluginsArg && pluginsArg !== 'all') {
         const requested = pluginsArg.split(',').map((p) => p.trim());
 
-        // FIX #4 — validate plugin names and warn on unknown ones instead of silently dropping
+       
         const invalid = requested.filter((p) => !ALL_PLUGINS.includes(p as BetterAuthPlugin));
         if (invalid.length > 0) {
           error(`Unknown plugin(s): ${invalid.join(', ')}`);
