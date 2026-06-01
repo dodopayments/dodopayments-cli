@@ -1,25 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+import chalk from 'chalk';
+import { colors } from '../../tui/theme';
 
-const c = {
-  reset:   '\x1b[0m',
-  bold:    '\x1b[1m',
-  dim:     '\x1b[2m',
-  green:   '\x1b[32m',
-  yellow:  '\x1b[33m',
-  blue:    '\x1b[34m',
-  cyan:    '\x1b[36m',
-  red:     '\x1b[31m',
-  gray:    '\x1b[90m',
-};
-
-function ok(msg: string)    { console.log(`${c.green}✔${c.reset}  ${msg}`); }
-function info(msg: string)  { console.log(`${c.cyan}ℹ${c.reset}  ${msg}`); }
-function warn(msg: string)  { console.log(`${c.yellow}⚠${c.reset}  ${msg}`); }
-function error(msg: string) { console.log(`${c.red}✖${c.reset}  ${msg}`); }
-function dim(msg: string)   { console.log(`${c.dim}${msg}${c.reset}`); }
-function divider()          { console.log(`${c.dim}${'─'.repeat(52)}${c.reset}`); }
+function ok(msg: string)    { console.log(`${chalk.hex(colors.success)('✔')}  ${msg}`); }
+function info(msg: string)  { console.log(`${chalk.hex(colors.info)('ℹ')}  ${msg}`); }
+function warn(msg: string)  { console.log(`${chalk.hex(colors.warning)('⚠')}  ${msg}`); }
+function error(msg: string) { console.log(`${chalk.hex(colors.error)('✖')}  ${msg}`); }
+function dim(msg: string)   { console.log(chalk.dim(msg)); }
+function divider()          { console.log(chalk.dim('─'.repeat(52))); }
 
 function getPackageManager(): 'bun' | 'pnpm' | 'yarn' | 'npm' {
   const cwd = process.cwd();
@@ -33,10 +23,9 @@ function getPackageManager(): 'bun' | 'pnpm' | 'yarn' | 'npm' {
 function hasSrcDir(): boolean {
   return fs.existsSync(path.join(process.cwd(), 'src'));
 }
+
 function isTypeScriptProject(): boolean {
-  return fs.existsSync(
-    path.join(process.cwd(), 'tsconfig.json'),
-  );
+  return fs.existsSync(path.join(process.cwd(), 'tsconfig.json'));
 }
 
 function writeFile(relPath: string, content: string) {
@@ -53,15 +42,13 @@ function writeFile(relPath: string, content: string) {
 
   fs.writeFileSync(abs, content, 'utf8');
 
-  console.log(
-    `  ${c.green}+ ${c.reset}${c.gray}${relPath}${c.reset}`,
-  );
+  console.log(`  ${chalk.hex(colors.success)('+')} ${chalk.dim(relPath)}`);
 }
 
 function installDeps(packages: string): boolean {
   const pm = getPackageManager();
   const cmd = pm === 'npm' ? `npm install ${packages}` : `${pm} add ${packages}`;
-  info(`Running: ${c.dim}${cmd}${c.reset}`);
+  info(`Running: ${chalk.dim(cmd)}`);
   try {
     execSync(cmd, { stdio: 'inherit' });
     return true;
@@ -70,41 +57,44 @@ function installDeps(packages: string): boolean {
     return false;
   }
 }
+
 function hasEnvKey(content: string, key: string): boolean {
   const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   return new RegExp(`^\\s*${escapedKey}=`, 'm').test(content);
 }
 
-function appendEnv(vars: string) {
+function appendEnv(vars: Record<string, string>) {
   const envPath = path.join(process.cwd(), '.env');
 
-  if (!fs.existsSync(envPath)) {
-    fs.writeFileSync(envPath, vars.trimStart() + '\n', 'utf8');
-    ok('Created .env');
+  const existing = fs.existsSync(envPath)
+    ? fs.readFileSync(envPath, 'utf8')
+    : '';
+
+  const missing = Object.entries(vars).filter(
+    ([key]) => !hasEnvKey(existing, key),
+  );
+
+  if (missing.length === 0) {
+    warn('.env already contains all Dodo vars, skipping');
     return;
   }
 
-  const existing = fs.readFileSync(envPath, 'utf8');
+  const lines = missing.map(([key, val]) => `${key}=${val}`).join('\n');
+  const sep = existing.length > 0 && !existing.endsWith('\n') ? '\n' : '';
 
-  if (!hasEnvKey(existing, 'DODO_PAYMENTS_API_KEY')) {
-    const sep =
-      existing.endsWith('\n') || existing.length === 0 ? '' : '\n';
-
-    fs.appendFileSync(
-      envPath,
-      sep + vars.trimStart() + '\n',
-      'utf8',
-    );
-
-    ok('Appended Dodo vars to existing .env');
+  if (!fs.existsSync(envPath)) {
+    fs.writeFileSync(envPath, lines + '\n', 'utf8');
+    ok('Created .env');
   } else {
-    warn('.env already contains DODO_PAYMENTS_API_KEY, skipping');
+    fs.appendFileSync(envPath, sep + lines + '\n', 'utf8');
+    ok(`Appended ${missing.length} Dodo var(s) to existing .env`);
   }
 }
 
+
 const boilerplates = {
   nextjs: {
-    checkout: `import { Checkout } from "@dodopayments/nextjs";
+    checkoutTs: `import { Checkout } from "@dodopayments/nextjs";
 
 export const GET = Checkout({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
@@ -120,11 +110,34 @@ export const POST = Checkout({
   type: "session",
 });
 `,
-    portal: `import { CustomerPortal } from "@dodopayments/nextjs";
+    checkoutJs: `import { Checkout } from "@dodopayments/nextjs";
+
+export const GET = Checkout({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+  returnUrl: process.env.DODO_PAYMENTS_RETURN_URL,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
+  type: "static",
+});
+
+export const POST = Checkout({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+  returnUrl: process.env.DODO_PAYMENTS_RETURN_URL,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
+  type: "session",
+});
+`,
+    portalTs: `import { CustomerPortal } from "@dodopayments/nextjs";
 
 export const GET = CustomerPortal({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
   environment: process.env.DODO_PAYMENTS_ENVIRONMENT as "live_mode" | "test_mode" | undefined,
+});
+`,
+    portalJs: `import { CustomerPortal } from "@dodopayments/nextjs";
+
+export const GET = CustomerPortal({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
 });
 `,
     webhook: `import { Webhooks } from "@dodopayments/nextjs";
@@ -138,7 +151,7 @@ export const POST = Webhooks({
 `,
   },
   express: {
-    checkout: `import { checkoutHandler } from '@dodopayments/express';
+    checkoutTs: `import { checkoutHandler } from '@dodopayments/express';
 import express from 'express';
 
 const router = express.Router();
@@ -152,7 +165,21 @@ router.get('/checkout', checkoutHandler({
 
 export default router;
 `,
-    portal: `import { CustomerPortal } from "@dodopayments/express";
+    checkoutJs: `import { checkoutHandler } from '@dodopayments/express';
+import express from 'express';
+
+const router = express.Router();
+
+router.get('/checkout', checkoutHandler({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+  returnUrl: process.env.DODO_PAYMENTS_RETURN_URL,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
+  type: "static",
+}));
+
+export default router;
+`,
+    portalTs: `import { CustomerPortal } from "@dodopayments/express";
 import express from 'express';
 
 const router = express.Router();
@@ -160,6 +187,18 @@ const router = express.Router();
 router.get('/customer-portal', CustomerPortal({
   bearerToken: process.env.DODO_PAYMENTS_API_KEY,
   environment: process.env.DODO_PAYMENTS_ENVIRONMENT as "live_mode" | "test_mode" | undefined,
+}));
+
+export default router;
+`,
+    portalJs: `import { CustomerPortal } from "@dodopayments/express";
+import express from 'express';
+
+const router = express.Router();
+
+router.get('/customer-portal', CustomerPortal({
+  bearerToken: process.env.DODO_PAYMENTS_API_KEY,
+  environment: process.env.DODO_PAYMENTS_ENVIRONMENT,
 }));
 
 export default router;
@@ -241,34 +280,49 @@ export const authClient = createAuthClient({
 });
 `;
 
+
 function scaffoldNextjs() {
   console.log('');
-  console.log(`${c.bold}Scaffolding Next.js App Router billing routes…${c.reset}`);
+  console.log(chalk.bold('Scaffolding Next.js App Router billing routes…'));
   divider();
 
   const installed = installDeps('@dodopayments/nextjs');
   if (!installed) {
-    error('Aborting scaffold — please install dependencies first.');
-    process.exit(1);
+    throw new Error('Aborting scaffold — please install dependencies first.');
   }
   console.log('');
 
+  const isTs = isTypeScriptProject();
+  if (!isTs) {
+    warn('No tsconfig.json found — writing plain JS files (no type assertions).');
+  }
+
   const appRoot = hasSrcDir() ? 'src/app' : 'app';
+  const ext = isTs ? 'ts' : 'js';
 
-  writeFile(`${appRoot}/checkout/route.ts`,                      boilerplates.nextjs.checkout);
-  writeFile(`${appRoot}/customer-portal/route.ts`,               boilerplates.nextjs.portal);
-  writeFile(`${appRoot}/api/webhook/dodo-payments/route.ts`,     boilerplates.nextjs.webhook);
+  writeFile(
+    `${appRoot}/checkout/route.${ext}`,
+    isTs ? boilerplates.nextjs.checkoutTs : boilerplates.nextjs.checkoutJs,
+  );
+  writeFile(
+    `${appRoot}/customer-portal/route.${ext}`,
+    isTs ? boilerplates.nextjs.portalTs : boilerplates.nextjs.portalJs,
+  );
+  writeFile(
+    `${appRoot}/api/webhook/dodo-payments/route.${ext}`,
+    boilerplates.nextjs.webhook,
+  );
 
-  appendEnv(`
-DODO_PAYMENTS_API_KEY="your_api_key_here"
-DODO_PAYMENTS_RETURN_URL="http://localhost:3000/success"
-DODO_PAYMENTS_ENVIRONMENT="test_mode"
-DODO_PAYMENTS_WEBHOOK_KEY="your_webhook_key_here"
-`);
+  appendEnv({
+    DODO_PAYMENTS_API_KEY: '"your_api_key_here"',
+    DODO_PAYMENTS_RETURN_URL: '"http://localhost:3000/success"',
+    DODO_PAYMENTS_ENVIRONMENT: '"test_mode"',
+    DODO_PAYMENTS_WEBHOOK_KEY: '"your_webhook_key_here"',
+  });
 
   divider();
   console.log('');
-  ok(`${c.bold}Next.js billing routes ready!${c.reset}`);
+  ok(chalk.bold('Next.js billing routes ready!'));
   console.log('');
   info('Routes created:');
   dim('  GET/POST  /checkout');
@@ -279,32 +333,43 @@ DODO_PAYMENTS_WEBHOOK_KEY="your_webhook_key_here"
 
 function scaffoldExpress() {
   console.log('');
-  console.log(`${c.bold}Scaffolding Express billing routes…${c.reset}`);
+  console.log(chalk.bold('Scaffolding Express billing routes…'));
   divider();
 
   const installed = installDeps('@dodopayments/express');
   if (!installed) {
-    error('Aborting scaffold — please install dependencies first.');
-    process.exit(1);
+    throw new Error('Aborting scaffold — please install dependencies first.');
   }
   console.log('');
 
+  const isTs = isTypeScriptProject();
+  if (!isTs) {
+    warn('No tsconfig.json found — writing plain JS files (no type assertions).');
+  }
+
   const routesDir = hasSrcDir() ? 'src/routes' : 'routes';
+  const ext = isTs ? 'ts' : 'js';
 
-  writeFile(`${routesDir}/checkout.ts`,       boilerplates.express.checkout);
-  writeFile(`${routesDir}/customerPortal.ts`, boilerplates.express.portal);
-  writeFile(`${routesDir}/webhook.ts`,        boilerplates.express.webhook);
+  writeFile(
+    `${routesDir}/checkout.${ext}`,
+    isTs ? boilerplates.express.checkoutTs : boilerplates.express.checkoutJs,
+  );
+  writeFile(
+    `${routesDir}/customerPortal.${ext}`,
+    isTs ? boilerplates.express.portalTs : boilerplates.express.portalJs,
+  );
+  writeFile(`${routesDir}/webhook.${ext}`, boilerplates.express.webhook);
 
-  appendEnv(`
-DODO_PAYMENTS_API_KEY="your_api_key_here"
-DODO_PAYMENTS_RETURN_URL="http://localhost:3000/success"
-DODO_PAYMENTS_ENVIRONMENT="test_mode"
-DODO_PAYMENTS_WEBHOOK_KEY="your_webhook_key_here"
-`);
+  appendEnv({
+    DODO_PAYMENTS_API_KEY: '"your_api_key_here"',
+    DODO_PAYMENTS_RETURN_URL: '"http://localhost:3000/success"',
+    DODO_PAYMENTS_ENVIRONMENT: '"test_mode"',
+    DODO_PAYMENTS_WEBHOOK_KEY: '"your_webhook_key_here"',
+  });
 
   divider();
   console.log('');
-  ok(`${c.bold}Express billing routes ready!${c.reset}`);
+  ok(chalk.bold('Express billing routes ready!'));
   console.log('');
   info('Mount in your app:');
   dim(`  import checkoutRouter       from './${routesDir}/checkout';`);
@@ -319,13 +384,12 @@ DODO_PAYMENTS_WEBHOOK_KEY="your_webhook_key_here"
 
 function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
   console.log('');
-  console.log(`${c.bold}Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…${c.reset}`);
+  console.log(chalk.bold(`Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…`));
   divider();
 
   const installed = installDeps('@dodopayments/better-auth better-auth dodopayments zod');
   if (!installed) {
-    error('Aborting scaffold — please install dependencies first.');
-    process.exit(1);
+    throw new Error('Aborting scaffold — please install dependencies first.');
   }
   console.log('');
 
@@ -334,20 +398,20 @@ function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
   writeFile(`${libDir}/auth.ts`,        generateBetterAuthServer(plugins));
   writeFile(`${libDir}/auth-client.ts`, betterAuthClientBoilerplate);
 
-  let envVars = `
-DODO_PAYMENTS_API_KEY="your_api_key_here"
-DODO_PAYMENTS_ENVIRONMENT="test_mode"
-BETTER_AUTH_URL="http://localhost:3000"
-BETTER_AUTH_SECRET="your_better_auth_secret_32_chars"
-`;
+  const envVars: Record<string, string> = {
+    DODO_PAYMENTS_API_KEY: '"your_api_key_here"',
+    DODO_PAYMENTS_ENVIRONMENT: '"test_mode"',
+    BETTER_AUTH_URL: '"http://localhost:3000"',
+    BETTER_AUTH_SECRET: '"your_better_auth_secret_32_chars"',
+  };
   if (plugins.includes('webhooks')) {
-    envVars += `DODO_PAYMENTS_WEBHOOK_SECRET="your_webhook_secret_here"\n`;
+    envVars['DODO_PAYMENTS_WEBHOOK_SECRET'] = '"your_webhook_secret_here"';
   }
   appendEnv(envVars);
 
   divider();
   console.log('');
-  ok(`${c.bold}Better-Auth plugin config ready!${c.reset}`);
+  ok(chalk.bold('Better-Auth plugin config ready!'));
   console.log('');
   info('Files created:');
   dim(`  ${libDir}/auth.ts        — server auth instance`);
@@ -357,15 +421,15 @@ BETTER_AUTH_SECRET="your_better_auth_secret_32_chars"
 
 function printUsage() {
   console.log('');
-  console.log(`${c.bold}${c.cyan}dodo init${c.reset} — scaffold Dodo Payments into your project`);
+  console.log(`${chalk.bold(chalk.hex(colors.info)('dodo init'))} — scaffold Dodo Payments into your project`);
   console.log('');
   console.log('Usage:');
   dim('  dodo init <framework>');
   console.log('');
   console.log('Available scaffolds:');
-  console.log(`  ${c.green}nextjs${c.reset}        Next.js App Router billing routes`);
-  console.log(`  ${c.green}express${c.reset}       Express server billing routes`);
-  console.log(`  ${c.green}better-auth${c.reset}   Better-Auth plugin configuration`);
+  console.log(`  ${chalk.hex(colors.success)('nextjs')}        Next.js App Router billing routes`);
+  console.log(`  ${chalk.hex(colors.success)('express')}       Express server billing routes`);
+  console.log(`  ${chalk.hex(colors.success)('better-auth')}   Better-Auth plugin configuration`);
   console.log('');
   info('Better-Auth plugin options (comma-separated, default: all):');
   dim(`  ${ALL_PLUGINS.join(', ')}`);
@@ -398,7 +462,7 @@ export async function handleInitCommand(subCommand?: string, pluginsArg?: string
         if (invalid.length > 0) {
           error(`Unknown plugin(s): ${invalid.join(', ')}`);
           info(`Available plugins: ${ALL_PLUGINS.join(', ')}`);
-          process.exit(1);
+          throw new Error(`Unknown plugin(s): ${invalid.join(', ')}`);
         }
 
         plugins = requested as BetterAuthPlugin[];
