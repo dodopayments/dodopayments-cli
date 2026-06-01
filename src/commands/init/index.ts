@@ -33,13 +33,29 @@ function getPackageManager(): 'bun' | 'pnpm' | 'yarn' | 'npm' {
 function hasSrcDir(): boolean {
   return fs.existsSync(path.join(process.cwd(), 'src'));
 }
+function isTypeScriptProject(): boolean {
+  return fs.existsSync(
+    path.join(process.cwd(), 'tsconfig.json'),
+  );
+}
 
 function writeFile(relPath: string, content: string) {
   const abs = path.join(process.cwd(), relPath);
+
   fs.mkdirSync(path.dirname(abs), { recursive: true });
+
   const existed = fs.existsSync(abs);
+
+  if (existed) {
+    warn(`Skipped existing file: ${relPath}`);
+    return;
+  }
+
   fs.writeFileSync(abs, content, 'utf8');
-  console.log(`  ${existed ? c.yellow + '↺' : c.green + '+'} ${c.reset}${c.gray}${relPath}${c.reset}`);
+
+  console.log(
+    `  ${c.green}+ ${c.reset}${c.gray}${relPath}${c.reset}`,
+  );
 }
 
 function installDeps(packages: string): boolean {
@@ -54,21 +70,35 @@ function installDeps(packages: string): boolean {
     return false;
   }
 }
+function hasEnvKey(content: string, key: string): boolean {
+  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`^\\s*${escapedKey}=`, 'm').test(content);
+}
 
 function appendEnv(vars: string) {
   const envPath = path.join(process.cwd(), '.env');
+
   if (!fs.existsSync(envPath)) {
     fs.writeFileSync(envPath, vars.trimStart() + '\n', 'utf8');
     ok('Created .env');
+    return;
+  }
+
+  const existing = fs.readFileSync(envPath, 'utf8');
+
+  if (!hasEnvKey(existing, 'DODO_PAYMENTS_API_KEY')) {
+    const sep =
+      existing.endsWith('\n') || existing.length === 0 ? '' : '\n';
+
+    fs.appendFileSync(
+      envPath,
+      sep + vars.trimStart() + '\n',
+      'utf8',
+    );
+
+    ok('Appended Dodo vars to existing .env');
   } else {
-    const existing = fs.readFileSync(envPath, 'utf8');
-    if (!existing.includes('DODO_PAYMENTS_API_KEY')) {
-      const sep = existing.endsWith('\n') || existing.length === 0 ? '' : '\n';
-      fs.appendFileSync(envPath, sep + vars.trimStart() + '\n', 'utf8');
-      ok('Appended Dodo vars to existing .env');
-    } else {
-      warn('.env already contains DODO_PAYMENTS_API_KEY — skipping');
-    }
+    warn('.env already contains DODO_PAYMENTS_API_KEY, skipping');
   }
 }
 
