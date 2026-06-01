@@ -2,8 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
 
-
-
 const c = {
   reset:   '\x1b[0m',
   bold:    '\x1b[1m',
@@ -23,12 +21,12 @@ function error(msg: string) { console.log(`${c.red}✖${c.reset}  ${msg}`); }
 function dim(msg: string)   { console.log(`${c.dim}${msg}${c.reset}`); }
 function divider()          { console.log(`${c.dim}${'─'.repeat(52)}${c.reset}`); }
 
-
-
-function getPackageManager(): 'bun' | 'yarn' | 'npm' {
+function getPackageManager(): 'bun' | 'pnpm' | 'yarn' | 'npm' {
   const cwd = process.cwd();
-  if (fs.existsSync(path.join(cwd, 'bun.lockb')))  return 'bun';
-  if (fs.existsSync(path.join(cwd, 'yarn.lock')))  return 'yarn';
+  if (fs.existsSync(path.join(cwd, 'bun.lockb')))       return 'bun';
+  if (fs.existsSync(path.join(cwd, 'bun.lock')))        return 'bun';
+  if (fs.existsSync(path.join(cwd, 'pnpm-lock.yaml')))  return 'pnpm';
+  if (fs.existsSync(path.join(cwd, 'yarn.lock')))       return 'yarn';
   return 'npm';
 }
 
@@ -44,10 +42,6 @@ function writeFile(relPath: string, content: string) {
   console.log(`  ${existed ? c.yellow + '↺' : c.green + '+'} ${c.reset}${c.gray}${relPath}${c.reset}`);
 }
 
-/**
- * FIX #5 — installDeps now returns a boolean indicating success/failure
- * instead of swallowing the error and continuing silently.
- */
 function installDeps(packages: string): boolean {
   const pm = getPackageManager();
   const cmd = pm === 'npm' ? `npm install ${packages}` : `${pm} add ${packages}`;
@@ -77,8 +71,6 @@ function appendEnv(vars: string) {
     }
   }
 }
-
-
 
 const boilerplates = {
   nextjs: {
@@ -159,8 +151,6 @@ export default router;
   },
 };
 
-
-
 export type BetterAuthPlugin = 'checkout' | 'portal' | 'usage' | 'webhooks';
 export const ALL_PLUGINS: BetterAuthPlugin[] = ['checkout', 'portal', 'usage', 'webhooks'];
 
@@ -189,7 +179,7 @@ function generateBetterAuthServer(plugins: BetterAuthPlugin[]): string {
     return `${p}()`;
   });
 
-  return `import { BetterAuth } from "better-auth";
+  return `import { betterAuth } from "better-auth";
 import { ${['dodopayments', ...plugins].join(', ')} } from "@dodopayments/better-auth";
 import DodoPayments from "dodopayments";
 
@@ -198,7 +188,7 @@ export const dodoPayments = new DodoPayments({
   environment: (process.env.DODO_PAYMENTS_ENVIRONMENT || "test_mode") as "live_mode" | "test_mode",
 });
 
-export const { auth, endpoints, client } = BetterAuth({
+export const { auth, endpoints, client } = betterAuth({
   plugins: [
     dodopayments({
       client: dodoPayments,
@@ -221,14 +211,11 @@ export const authClient = createAuthClient({
 });
 `;
 
-
-
 function scaffoldNextjs() {
   console.log('');
   console.log(`${c.bold}Scaffolding Next.js App Router billing routes…${c.reset}`);
   divider();
 
-  
   const installed = installDeps('@dodopayments/nextjs');
   if (!installed) {
     error('Aborting scaffold — please install dependencies first.');
@@ -265,7 +252,6 @@ function scaffoldExpress() {
   console.log(`${c.bold}Scaffolding Express billing routes…${c.reset}`);
   divider();
 
- 
   const installed = installDeps('@dodopayments/express');
   if (!installed) {
     error('Aborting scaffold — please install dependencies first.');
@@ -306,7 +292,6 @@ function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
   console.log(`${c.bold}Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…${c.reset}`);
   divider();
 
-
   const installed = installDeps('@dodopayments/better-auth better-auth dodopayments zod');
   if (!installed) {
     error('Aborting scaffold — please install dependencies first.');
@@ -340,8 +325,6 @@ BETTER_AUTH_SECRET="your_better_auth_secret_32_chars"
   console.log('');
 }
 
-
-
 function printUsage() {
   console.log('');
   console.log(`${c.bold}${c.cyan}dodo init${c.reset} — scaffold Dodo Payments into your project`);
@@ -352,7 +335,6 @@ function printUsage() {
   console.log('Available scaffolds:');
   console.log(`  ${c.green}nextjs${c.reset}        Next.js App Router billing routes`);
   console.log(`  ${c.green}express${c.reset}       Express server billing routes`);
- 
   console.log(`  ${c.green}better-auth${c.reset}   Better-Auth plugin configuration`);
   console.log('');
   info('Better-Auth plugin options (comma-separated, default: all):');
@@ -365,7 +347,6 @@ function printUsage() {
   dim('  dodo init better-auth all');
   console.log('');
 }
-
 
 export async function handleInitCommand(subCommand?: string, pluginsArg?: string) {
   switch (subCommand) {
@@ -383,7 +364,6 @@ export async function handleInitCommand(subCommand?: string, pluginsArg?: string
       if (pluginsArg && pluginsArg !== 'all') {
         const requested = pluginsArg.split(',').map((p) => p.trim());
 
-       
         const invalid = requested.filter((p) => !ALL_PLUGINS.includes(p as BetterAuthPlugin));
         if (invalid.length > 0) {
           error(`Unknown plugin(s): ${invalid.join(', ')}`);
