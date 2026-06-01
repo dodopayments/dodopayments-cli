@@ -45,16 +45,9 @@ if (process.stdout.isTTY && !category) {
     } else if (category === 'wh' && subCommand === 'trigger') {
       const { handleWebhook } = await import('./commands/webhook');
       await handleWebhook(subCommand, defaultContext, undefined, extraArgs);
-
-    
     } else if (category === 'init') {
-      const pluginFlag = flags.find((f) => f.startsWith('--plugins='));
-    
-      const pluginsArg = extraArgs[0] ?? (pluginFlag ? pluginFlag.split('=')[1] : undefined);
-
       const { handleInitCommand } = await import('./commands/init');
-      await handleInitCommand(subCommand, pluginsArg);
-
+      await handleInitCommand(subCommand, extraArgs[0]);
     } else if (!(await configExists())) {
       if (category && !subCommand) {
         renderHelp(category);
