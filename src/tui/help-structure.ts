@@ -91,6 +91,14 @@ export const HELP_GROUPS: HelpGroup[] = [
     ],
   },
   {
+    heading: 'INIT',
+    items: [
+      { command: '/init nextjs', description: 'Initialize Next.js App Router billing routes' },
+      { command: '/init express', description: 'Initialize Express server billing routes' },
+      { command: '/init better-auth', description: 'Initialize Better-Auth plugin configuration' },
+    ],
+  },
+  {
     heading: 'SESSION',
     items: [
       { command: '/clear', description: 'Clear message history' },

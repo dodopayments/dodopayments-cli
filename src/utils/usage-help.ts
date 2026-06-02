@@ -49,6 +49,11 @@ export const usage: Record<string, UsageCommand[]> = {
     { command: 'list', description: 'List refunds' },
     { command: 'info <id>', description: 'Get refund info' },
   ],
+  init: [
+    { command: 'nextjs', description: 'Next.js App Router billing routes' },
+    { command: 'express', description: 'Express server billing routes' },
+    { command: 'better-auth', description: 'Better-Auth plugin configuration' },
+  ],
   wh: [
     {
       command: 'listen <url>',
