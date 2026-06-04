@@ -40,6 +40,7 @@ Manage your [Dodo Payments](https://dodopayments.com/) resources, test webhooks,
 - **Encrypted at rest** — API keys are stored in `~/.dodopayments/config.json`, AES-256-GCM encrypted with a machine-derived key. No plaintext credentials on disk.
 - **Auto update** — the CLI checks for new versions and notifies you in-app. Run `/update` to upgrade in place.
 - **Webhook tooling** — listen for live webhooks or trigger payloads offline for local development.
+- **Scaffolding support** - supports creating scaffolds for nextjs, express & better auth.
 
 ## Installation
 
@@ -268,6 +269,15 @@ The interactive `/wh trigger` flow guides you through:
 | **Refund** | `success`, `failed` |
 | **Dispute** | `opened`, `expired`, `accepted`, `cancelled`, `challenged`, `won`, `lost` |
 | **License** | `created` |
+
+### Initializer commands
+
+| Command | Description |
+| --- | --- |
+| `/init nextjs` | Initialize Next.js App Router billing routes |
+| `/init express` | Initialize Express server billing routes |
+| `/init better-auth` | Initialize Better-Auth plugin configuration |
+
 
 ### Session commands
 
