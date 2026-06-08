@@ -129,8 +129,8 @@ export async function handleAI(query: string, ctx: CommandContext) {
       throw Object.assign(new Error(classifyError(e, 'Auth')), { _classified: true });
     }
 
-    const isCompiledBinary = process.argv[1] && process.argv[1].startsWith('/$bunfs/');
-    const scriptArgs = isCompiledBinary ? [] : [process.argv[1]];
+    const isCompiledBinary = !!(process.argv[1] && process.argv[1].startsWith('/$bunfs/'));
+    const scriptArgs: string[] = isCompiledBinary || !process.argv[1] ? [] : [process.argv[1]];
     const spawnCommand = process.execPath;
 
     // Phase 2: Initialize MCP clients (with timeouts)
@@ -142,7 +142,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
           createMCPClient({
             transport: new StdioClientTransport({
               command: spawnCommand,
-              args: [...(scriptArgs as unknown as string), 'https://knowledge.dodopayments.com/mcp'],
+              args: [...scriptArgs, 'https://knowledge.dodopayments.com/mcp'],
               env: { ...(process.env as Record<string, string>), DODO_INTERNAL_MCP_CMD: 'remote' },
               stderr: 'pipe',
             }),
@@ -166,7 +166,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
           createMCPClient({
             transport: new StdioClientTransport({
               command: spawnCommand,
-              args: scriptArgs as string[],
+              args: scriptArgs,
               env: {
                 ...(process.env as Record<string, string>),
                 DODO_PAYMENTS_API_KEY: apiKey,
