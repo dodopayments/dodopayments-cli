@@ -69,7 +69,7 @@ function classifyError(error: any, phase: string): string {
   }
 
   if (raw.includes('spawn') || raw.includes('ENOENT')) {
-    return `Couldn't start the assistant. Make sure 'npx' is installed and in your PATH. (${phase})`;
+    return `Couldn't start the assistant. The internal CLI process failed to spawn. (${phase})`;
   }
   if (/MCP|transport/i.test(raw)) {
     return `Communication error: ${raw.slice(0, 200)} (${phase})`;
@@ -129,6 +129,10 @@ export async function handleAI(query: string, ctx: CommandContext) {
       throw Object.assign(new Error(classifyError(e, 'Auth')), { _classified: true });
     }
 
+    const isCompiledBinary = process.argv[1] && process.argv[1].startsWith('/$bunfs/');
+    const scriptArgs = isCompiledBinary ? [] : [process.argv[1]];
+    const spawnCommand = process.execPath;
+
     // Phase 2: Initialize MCP clients (with timeouts)
     if (!cachedKnowledgeClient) {
       ctx.updateBlock(spinnerId, { label: 'Loading knowledge base…' });
@@ -137,9 +141,9 @@ export async function handleAI(query: string, ctx: CommandContext) {
         cachedKnowledgeClient = await withTimeout(
           createMCPClient({
             transport: new StdioClientTransport({
-              command: 'npx',
-              args: ['-y', 'mcp-remote@latest', 'https://knowledge.dodopayments.com/mcp'],
-              env: process.env as Record<string, string>,
+              command: spawnCommand,
+              args: [...(scriptArgs as unknown as string), 'https://knowledge.dodopayments.com/mcp'],
+              env: { ...(process.env as Record<string, string>), DODO_INTERNAL_MCP_CMD: 'remote' },
               stderr: 'pipe',
             }),
           }),
@@ -153,7 +157,7 @@ export async function handleAI(query: string, ctx: CommandContext) {
 
     if (!cachedExecClient || cachedApiKey !== apiKey || cachedMode !== mode) {
       if (cachedExecClient) {
-        try { await cachedExecClient.close(); } catch {}
+        try { await cachedExecClient.close(); } catch { }
       }
       ctx.updateBlock(spinnerId, { label: 'Loading workspace…' });
 
@@ -161,12 +165,13 @@ export async function handleAI(query: string, ctx: CommandContext) {
         cachedExecClient = await withTimeout(
           createMCPClient({
             transport: new StdioClientTransport({
-              command: 'npx',
-              args: ['-y', 'dodopayments-mcp'],
+              command: spawnCommand,
+              args: scriptArgs as string[],
               env: {
                 ...(process.env as Record<string, string>),
                 DODO_PAYMENTS_API_KEY: apiKey,
                 DODO_PAYMENTS_ENVIRONMENT: mode,
+                DODO_INTERNAL_MCP_CMD: 'exec',
               },
               stderr: 'pipe',
             }),
