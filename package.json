@@ -41,6 +41,7 @@
     "dodopayments": "dist/index.js"
   },
   "scripts": {
+    "setup-dev": "npm i && bun ./fetch-cross-deps",
     "build": "bun run scripts/build.ts",
     "build-native": "bun run build-binaries.ts",
     "dev": "bun src/index.ts"
@@ -48,6 +49,8 @@
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.36",
     "@ai-sdk/openai": "^3.0.54",
+    "@dodopayments/express": "^0.2.8",
+    "@dodopayments/nextjs": "^0.3.6",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@openrouter/ai-sdk-provider": "^2.8.0",
     "@opentui/core": "0.2.3",
@@ -55,17 +58,21 @@
     "ai": "^6.0.168",
     "chalk": "^5.6.2",
     "dodopayments": "^2.19.0",
+    "dodopayments-mcp": "^2.32.0",
+    "mcp-remote": "^0.1.38",
     "node-machine-id": "^1.1.12",
     "open": "^11.0.0",
     "solid-js": "^1.9.12"
   },
   "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "optionalDependencies": {
     "@opentui/core-darwin-arm64": "0.2.3",
     "@opentui/core-darwin-x64": "0.2.3",
     "@opentui/core-linux-arm64": "0.2.3",
     "@opentui/core-linux-x64": "0.2.3",
-    "@opentui/core-win32-x64": "0.2.3",
-    "@types/bun": "latest"
+    "@opentui/core-win32-x64": "0.2.3"
   },
   "peerDependencies": {
     "typescript": "^5.9.3"

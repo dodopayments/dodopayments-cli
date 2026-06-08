@@ -3,13 +3,55 @@ import path from 'path';
 import { execSync } from 'child_process';
 import chalk from 'chalk';
 import { colors } from '../../tui/theme';
+import type { CommandContext } from '../../tui/CommandContext';
 
-function ok(msg: string)    { console.log(`${chalk.hex(colors.success)('✔')}  ${msg}`); }
-function info(msg: string)  { console.log(`${chalk.hex(colors.info)('ℹ')}  ${msg}`); }
-function warn(msg: string)  { console.log(`${chalk.hex(colors.warning)('⚠')}  ${msg}`); }
-function error(msg: string) { console.log(`${chalk.hex(colors.error)('✖')}  ${msg}`); }
-function dim(msg: string)   { console.log(chalk.dim(msg)); }
-function divider()          { console.log(chalk.dim('─'.repeat(52))); }
+function ok(msg: string, ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'success', message: msg });
+  } else {
+    console.log(`${chalk.hex(colors.success)('✔')}  ${msg}`);
+  }
+}
+
+function info(msg: string, ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'info', message: msg });
+  } else {
+    console.log(`${chalk.hex(colors.info)('ℹ')}  ${msg}`);
+  }
+}
+
+function warn(msg: string, ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'info', message: chalk.yellow(`⚠  ${msg}`) });
+  } else {
+    console.log(`${chalk.hex(colors.warning)('⚠')}  ${msg}`);
+  }
+}
+
+function error(msg: string, ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'error', message: msg });
+  } else {
+    console.log(`${chalk.hex(colors.error)('✖')}  ${msg}`);
+  }
+}
+
+function dim(msg: string, ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'info', message: chalk.dim(msg) });
+  } else {
+    console.log(chalk.dim(msg));
+  }
+}
+
+function divider(ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'empty' });
+  } else {
+    console.log(chalk.dim('─'.repeat(52)));
+  }
+}
 
 function getPackageManager(): 'bun' | 'pnpm' | 'yarn' | 'npm' {
   const cwd = process.cwd();
@@ -28,7 +70,7 @@ function isTypeScriptProject(): boolean {
   return fs.existsSync(path.join(process.cwd(), 'tsconfig.json'));
 }
 
-function writeFile(relPath: string, content: string) {
+function writeFile(relPath: string, content: string, ctx?: CommandContext) {
   const abs = path.join(process.cwd(), relPath);
 
   fs.mkdirSync(path.dirname(abs), { recursive: true });
@@ -36,25 +78,58 @@ function writeFile(relPath: string, content: string) {
   const existed = fs.existsSync(abs);
 
   if (existed) {
-    warn(`Skipped existing file: ${relPath}`);
+    warn(`Skipped existing file: ${relPath}`, ctx);
     return;
   }
 
   fs.writeFileSync(abs, content, 'utf8');
 
-  console.log(`  ${chalk.hex(colors.success)('+')} ${chalk.dim(relPath)}`);
+  if (ctx) {
+    ctx.addBlock({
+      type: 'success',
+      message: `Created file: ${relPath}`,
+    });
+  } else {
+    console.log(`  ${chalk.hex(colors.success)('+')} ${chalk.dim(relPath)}`);
+  }
 }
 
-function installDeps(packages: string): boolean {
+function installDeps(packages: string, ctx?: CommandContext): Promise<boolean> | boolean {
   const pm = getPackageManager();
   const cmd = pm === 'npm' ? `npm install ${packages}` : `${pm} add ${packages}`;
-  info(`Running: ${chalk.dim(cmd)}`);
-  try {
-    execSync(cmd, { stdio: 'inherit' });
-    return true;
-  } catch {
-    warn('Dependency install failed — run the command above manually.');
-    return false;
+  if (ctx) {
+    const spinnerId = ctx.addBlock({
+      type: 'spinner',
+      label: `Installing dependencies: ${cmd}…`,
+    });
+    return new Promise<boolean>((resolve) => {
+      const { exec } = require('child_process');
+      exec(cmd, (err: any) => {
+        ctx.removeBlock(spinnerId);
+        if (err) {
+          ctx.addBlock({
+            type: 'error',
+            message: `Dependency install failed — run \`${cmd}\` manually.`,
+          });
+          resolve(false);
+        } else {
+          ctx.addBlock({
+            type: 'success',
+            message: 'Dependencies installed successfully.',
+          });
+          resolve(true);
+        }
+      });
+    });
+  } else {
+    info(`Running: ${chalk.dim(cmd)}`);
+    try {
+      execSync(cmd, { stdio: 'inherit' });
+      return true;
+    } catch {
+      warn('Dependency install failed — run the command above manually.');
+      return false;
+    }
   }
 }
 
@@ -63,7 +138,7 @@ function hasEnvKey(content: string, key: string): boolean {
   return new RegExp(`^\\s*${escapedKey}=`, 'm').test(content);
 }
 
-function appendEnv(vars: Record<string, string>) {
+function appendEnv(vars: Record<string, string>, ctx?: CommandContext) {
   const envPath = path.join(process.cwd(), '.env');
 
   const existing = fs.existsSync(envPath)
@@ -75,7 +150,7 @@ function appendEnv(vars: Record<string, string>) {
   );
 
   if (missing.length === 0) {
-    warn('.env already contains all Dodo vars, skipping');
+    warn('.env already contains all Dodo vars, skipping', ctx);
     return;
   }
 
@@ -84,10 +159,10 @@ function appendEnv(vars: Record<string, string>) {
 
   if (!fs.existsSync(envPath)) {
     fs.writeFileSync(envPath, lines + '\n', 'utf8');
-    ok('Created .env');
+    ok('Created .env', ctx);
   } else {
     fs.appendFileSync(envPath, sep + lines + '\n', 'utf8');
-    ok(`Appended ${missing.length} Dodo var(s) to existing .env`);
+    ok(`Appended ${missing.length} Dodo var(s) to existing .env`, ctx);
   }
 }
 
@@ -281,20 +356,24 @@ export const authClient = createAuthClient({
 `;
 
 
-function scaffoldNextjs() {
-  console.log('');
-  console.log(chalk.bold('Scaffolding Next.js App Router billing routes…'));
-  divider();
+async function scaffoldNextjs(ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'info', message: 'Scaffolding Next.js App Router billing routes…' });
+  } else {
+    console.log('');
+    console.log(chalk.bold('Scaffolding Next.js App Router billing routes…'));
+    divider();
+  }
 
-  const installed = installDeps('@dodopayments/nextjs');
+  const installed = await installDeps('@dodopayments/nextjs', ctx);
   if (!installed) {
     throw new Error('Aborting scaffold — please install dependencies first.');
   }
-  console.log('');
+  if (!ctx) console.log('');
 
   const isTs = isTypeScriptProject();
   if (!isTs) {
-    warn('No tsconfig.json found — writing plain JS files (no type assertions).');
+    warn('No tsconfig.json found — writing plain JS files (no type assertions).', ctx);
   }
 
   const appRoot = hasSrcDir() ? 'src/app' : 'app';
@@ -303,14 +382,17 @@ function scaffoldNextjs() {
   writeFile(
     `${appRoot}/checkout/route.${ext}`,
     isTs ? boilerplates.nextjs.checkoutTs : boilerplates.nextjs.checkoutJs,
+    ctx,
   );
   writeFile(
     `${appRoot}/customer-portal/route.${ext}`,
     isTs ? boilerplates.nextjs.portalTs : boilerplates.nextjs.portalJs,
+    ctx,
   );
   writeFile(
     `${appRoot}/api/webhook/dodo-payments/route.${ext}`,
     boilerplates.nextjs.webhook,
+    ctx,
   );
 
   appendEnv({
@@ -318,33 +400,47 @@ function scaffoldNextjs() {
     DODO_PAYMENTS_RETURN_URL: '"http://localhost:3000/success"',
     DODO_PAYMENTS_ENVIRONMENT: '"test_mode"',
     DODO_PAYMENTS_WEBHOOK_KEY: '"your_webhook_key_here"',
-  });
+  }, ctx);
 
-  divider();
-  console.log('');
-  ok(chalk.bold('Next.js billing routes ready!'));
-  console.log('');
-  info('Routes created:');
-  dim('  GET/POST  /checkout');
-  dim('  GET       /customer-portal');
-  dim('  POST      /api/webhook/dodo-payments');
-  console.log('');
+  if (ctx) {
+    const md = `### Next.js billing routes ready!
+
+**Routes created:**
+* \`GET/POST\`  \`/checkout\`
+* \`GET\`       \`/customer-portal\`
+* \`POST\`      \`/api/webhook/dodo-payments\``;
+    ctx.addBlock({ type: 'markdown', text: md });
+  } else {
+    divider();
+    console.log('');
+    ok(chalk.bold('Next.js billing routes ready!'));
+    console.log('');
+    info('Routes created:');
+    dim('  GET/POST  /checkout');
+    dim('  GET       /customer-portal');
+    dim('  POST      /api/webhook/dodo-payments');
+    console.log('');
+  }
 }
 
-function scaffoldExpress() {
-  console.log('');
-  console.log(chalk.bold('Scaffolding Express billing routes…'));
-  divider();
+async function scaffoldExpress(ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'info', message: 'Scaffolding Express billing routes…' });
+  } else {
+    console.log('');
+    console.log(chalk.bold('Scaffolding Express billing routes…'));
+    divider();
+  }
 
-  const installed = installDeps('@dodopayments/express');
+  const installed = await installDeps('@dodopayments/express', ctx);
   if (!installed) {
     throw new Error('Aborting scaffold — please install dependencies first.');
   }
-  console.log('');
+  if (!ctx) console.log('');
 
   const isTs = isTypeScriptProject();
   if (!isTs) {
-    warn('No tsconfig.json found — writing plain JS files (no type assertions).');
+    warn('No tsconfig.json found — writing plain JS files (no type assertions).', ctx);
   }
 
   const routesDir = hasSrcDir() ? 'src/routes' : 'routes';
@@ -353,50 +449,72 @@ function scaffoldExpress() {
   writeFile(
     `${routesDir}/checkout.${ext}`,
     isTs ? boilerplates.express.checkoutTs : boilerplates.express.checkoutJs,
+    ctx,
   );
   writeFile(
     `${routesDir}/customerPortal.${ext}`,
     isTs ? boilerplates.express.portalTs : boilerplates.express.portalJs,
+    ctx,
   );
-  writeFile(`${routesDir}/webhook.${ext}`, boilerplates.express.webhook);
+  writeFile(`${routesDir}/webhook.${ext}`, boilerplates.express.webhook, ctx);
 
   appendEnv({
     DODO_PAYMENTS_API_KEY: '"your_api_key_here"',
     DODO_PAYMENTS_RETURN_URL: '"http://localhost:3000/success"',
     DODO_PAYMENTS_ENVIRONMENT: '"test_mode"',
     DODO_PAYMENTS_WEBHOOK_KEY: '"your_webhook_key_here"',
-  });
+  }, ctx);
 
-  divider();
-  console.log('');
-  ok(chalk.bold('Express billing routes ready!'));
-  console.log('');
-  info('Mount in your app:');
-  dim(`  import checkoutRouter       from './${routesDir}/checkout';`);
-  dim(`  import customerPortalRouter from './${routesDir}/customerPortal';`);
-  dim(`  import webhookRouter        from './${routesDir}/webhook';`);
-  dim('');
-  dim('  app.use(checkoutRouter);');
-  dim('  app.use(customerPortalRouter);');
-  dim('  app.use(webhookRouter);');
-  console.log('');
+  if (ctx) {
+    const md = `### Express billing routes ready!
+
+**Mount in your app:**
+\`\`\`typescript
+import checkoutRouter       from './${routesDir}/checkout';
+import customerPortalRouter from './${routesDir}/customerPortal';
+import webhookRouter        from './${routesDir}/webhook';
+
+app.use(checkoutRouter);
+app.use(customerPortalRouter);
+app.use(webhookRouter);
+\`\`\``;
+    ctx.addBlock({ type: 'markdown', text: md });
+  } else {
+    divider();
+    console.log('');
+    ok(chalk.bold('Express billing routes ready!'));
+    console.log('');
+    info('Mount in your app:');
+    dim(`  import checkoutRouter       from './${routesDir}/checkout';`);
+    dim(`  import customerPortalRouter from './${routesDir}/customerPortal';`);
+    dim(`  import webhookRouter        from './${routesDir}/webhook';`);
+    dim('');
+    dim('  app.use(checkoutRouter);');
+    dim('  app.use(customerPortalRouter);');
+    dim('  app.use(webhookRouter);');
+    console.log('');
+  }
 }
 
-function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
-  console.log('');
-  console.log(chalk.bold(`Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…`));
-  divider();
+async function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS, ctx?: CommandContext) {
+  if (ctx) {
+    ctx.addBlock({ type: 'info', message: `Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…` });
+  } else {
+    console.log('');
+    console.log(chalk.bold(`Scaffolding Better-Auth plugin (plugins: ${plugins.join(', ')})…`));
+    divider();
+  }
 
-  const installed = installDeps('@dodopayments/better-auth better-auth dodopayments zod');
+  const installed = await installDeps('@dodopayments/better-auth better-auth dodopayments zod', ctx);
   if (!installed) {
     throw new Error('Aborting scaffold — please install dependencies first.');
   }
-  console.log('');
+  if (!ctx) console.log('');
 
   const libDir = hasSrcDir() ? 'src/lib' : 'lib';
 
-  writeFile(`${libDir}/auth.ts`,        generateBetterAuthServer(plugins));
-  writeFile(`${libDir}/auth-client.ts`, betterAuthClientBoilerplate);
+  writeFile(`${libDir}/auth.ts`,        generateBetterAuthServer(plugins), ctx);
+  writeFile(`${libDir}/auth-client.ts`, betterAuthClientBoilerplate, ctx);
 
   const envVars: Record<string, string> = {
     DODO_PAYMENTS_API_KEY: '"your_api_key_here"',
@@ -407,19 +525,51 @@ function scaffoldBetterAuth(plugins: BetterAuthPlugin[] = ALL_PLUGINS) {
   if (plugins.includes('webhooks')) {
     envVars['DODO_PAYMENTS_WEBHOOK_SECRET'] = '"your_webhook_secret_here"';
   }
-  appendEnv(envVars);
+  appendEnv(envVars, ctx);
 
-  divider();
-  console.log('');
-  ok(chalk.bold('Better-Auth plugin config ready!'));
-  console.log('');
-  info('Files created:');
-  dim(`  ${libDir}/auth.ts        — server auth instance`);
-  dim(`  ${libDir}/auth-client.ts — client-side hooks`);
-  console.log('');
+  if (ctx) {
+    const md = `### Better-Auth plugin config ready!
+
+**Files created:**
+* \`${libDir}/auth.ts\` — server auth instance
+* \`${libDir}/auth-client.ts\` — client-side hooks`;
+    ctx.addBlock({ type: 'markdown', text: md });
+  } else {
+    divider();
+    console.log('');
+    ok(chalk.bold('Better-Auth plugin config ready!'));
+    console.log('');
+    info('Files created:');
+    dim(`  ${libDir}/auth.ts        — server auth instance`);
+    dim(`  ${libDir}/auth-client.ts — client-side hooks`);
+    console.log('');
+  }
 }
 
-function printUsage() {
+function printUsage(ctx?: CommandContext) {
+  if (ctx) {
+    const md = `### /init — scaffold Dodo Payments into your project
+
+**Usage:**
+  \`/init <framework>\`
+
+**Available scaffolds:**
+* **nextjs** — Next.js App Router billing routes
+* **express** — Express server billing routes
+* **better-auth** — Better-Auth plugin configuration
+
+**Better-Auth plugin options (comma-separated, default: all):**
+  \`checkout\`, \`portal\`, \`usage\`, \`webhooks\`
+
+**Examples:**
+* \`/init nextjs\`
+* \`/init better-auth\`
+* \`/init better-auth checkout,portal\``;
+
+    ctx.addBlock({ type: 'markdown', text: md });
+    return;
+  }
+
   console.log('');
   console.log(`${chalk.bold(chalk.hex(colors.info)('dodo init'))} — scaffold Dodo Payments into your project`);
   console.log('');
@@ -442,14 +592,14 @@ function printUsage() {
   console.log('');
 }
 
-export async function handleInitCommand(subCommand?: string, pluginsArg?: string) {
+export async function handleInitCommand(subCommand?: string, pluginsArg?: string, ctx?: CommandContext) {
   switch (subCommand) {
     case 'nextjs':
-      scaffoldNextjs();
+      await scaffoldNextjs(ctx);
       break;
 
     case 'express':
-      scaffoldExpress();
+      await scaffoldExpress(ctx);
       break;
 
     case 'better-auth': {
@@ -460,19 +610,19 @@ export async function handleInitCommand(subCommand?: string, pluginsArg?: string
 
         const invalid = requested.filter((p) => !ALL_PLUGINS.includes(p as BetterAuthPlugin));
         if (invalid.length > 0) {
-          error(`Unknown plugin(s): ${invalid.join(', ')}`);
-          info(`Available plugins: ${ALL_PLUGINS.join(', ')}`);
+          error(`Unknown plugin(s): ${invalid.join(', ')}`, ctx);
+          info(`Available plugins: ${ALL_PLUGINS.join(', ')}`, ctx);
           throw new Error(`Unknown plugin(s): ${invalid.join(', ')}`);
         }
 
         plugins = requested as BetterAuthPlugin[];
       }
 
-      scaffoldBetterAuth(plugins);
+      await scaffoldBetterAuth(plugins, ctx);
       break;
     }
 
     default:
-      printUsage();
+      printUsage(ctx);
   }
 }

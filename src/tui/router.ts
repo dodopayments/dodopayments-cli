@@ -74,6 +74,12 @@ export async function handleCommand(
     return;
   }
 
+  if (cmd === '/init') {
+    const { handleInitCommand } = await import('../commands/init');
+    await handleInitCommand(subCmd, extraArgs[0], ctx);
+    return;
+  }
+
   const { apiKey, mode } = await resolveCredentials(ctx);
   const { default: DodoPayments } = await import('dodopayments');
 

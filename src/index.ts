@@ -5,11 +5,36 @@ import { configExists, resolveCredentials } from './utils/auth';
 import { defaultContext } from './tui/DefaultContext';
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
-const flags = process.argv.slice(2).filter((a) => a.startsWith('--'));
 
-const category = positional[0];
-const subCommand = positional[1];
-const extraArgs = positional.slice(2);
+if (process.env.DODO_INTERNAL_MCP_CMD === 'remote') {
+  await import('mcp-remote/dist/proxy.js');
+  // mcp-remote uses floating promises at the module level, so import resolves immediately.
+  // We must keep the process alive to allow it to run its stdio server.
+  await new Promise(() => {});
+} else if (process.env.DODO_INTERNAL_MCP_CMD === 'exec') {
+  const { parseCLIOptions } = await import('dodopayments-mcp/options');
+  const { launchStdioServer } = await import('dodopayments-mcp/stdio');
+  const { configureLogger, getLogger } = await import('dodopayments-mcp/logger');
+  const { selectTools } = await import('dodopayments-mcp/server');
+  
+  const options = parseCLIOptions();
+  configureLogger({
+      level: options.debug ? 'debug' : 'info',
+      pretty: options.logFormat === 'pretty',
+  });
+  const selectedTools = selectTools(options);
+  if (selectedTools.length === 0) {
+      getLogger().error('No tools match the provided filters');
+      process.exit(1);
+  }
+  getLogger().info({ tools: selectedTools.map((e: any) => e.tool.name) }, `MCP Server starting with ${selectedTools.length} tools`);
+  await launchStdioServer(options);
+} else {
+  const flags = process.argv.slice(2).filter((a) => a.startsWith('--'));
+
+  const category = positional[0];
+  const subCommand = positional[1];
+  const extraArgs = positional.slice(2);
 
 if (
   category === '--version' ||
@@ -131,4 +156,5 @@ if (process.stdout.isTTY && !category) {
     console.error('Unexpected error.', e);
     process.exit(1);
   }
+}
 }
