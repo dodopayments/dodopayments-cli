@@ -144,6 +144,30 @@ const genSubscriptionExpired = (args: baseArgs) => {
     };
 }
 
+const genSubscriptionPaused = (args: baseArgs) => {
+    const base = genBaseSubscriptionData(args);
+    return {
+        ...base,
+        "type": "subscription.paused",
+        data: {
+            ...base.data,
+            status: "paused"
+        }
+    };
+}
+
+const genSubscriptionUpdatePaymentMethod = (args: baseArgs) => {
+    const base = genBaseSubscriptionData(args);
+    return {
+        ...base,
+        "type": "subscription.update_payment_method",
+        data: {
+            ...base.data,
+            status: "active"
+        }
+    };
+}
+
 export {
     genSubscriptionActive,
     genSubscriptionUpdated,
@@ -152,5 +176,7 @@ export {
     genSubscriptionPlanChanged,
     genSubscriptionCancelled,
     genSubscriptionFailed,
-    genSubscriptionExpired
+    genSubscriptionExpired,
+    genSubscriptionPaused,
+    genSubscriptionUpdatePaymentMethod
 };

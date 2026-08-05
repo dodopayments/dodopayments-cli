@@ -15,6 +15,8 @@ import {
   genSubscriptionCancelled,
   genSubscriptionFailed,
   genSubscriptionExpired,
+  genSubscriptionPaused,
+  genSubscriptionUpdatePaymentMethod,
 } from './functions/generate-subscription-data';
 
 import {
@@ -38,6 +40,40 @@ import {
 
 import { genLicenceCreated } from './functions/generate-licence-data';
 
+import {
+  genPayoutCreated,
+  genPayoutInProgress,
+  genPayoutOnHold,
+  genPayoutFailed,
+  genPayoutSuccess,
+} from './functions/generate-payout-data';
+
+import {
+  genCreditAdded,
+  genCreditDeducted,
+  genCreditExpired,
+  genCreditRolledOver,
+  genCreditRolloverForfeited,
+  genCreditOverageCharged,
+  genCreditOverageReset,
+  genCreditManualAdjustment,
+  genCreditBalanceLow,
+} from './functions/generate-credit-data';
+
+import {
+  genAbandonedCheckoutDetected,
+  genAbandonedCheckoutRecovered,
+  genDunningStarted,
+  genDunningRecovered,
+} from './functions/generate-recovery-data';
+
+import {
+  genEntitlementGrantCreated,
+  genEntitlementGrantDelivered,
+  genEntitlementGrantFailed,
+  genEntitlementGrantRevoked,
+} from './functions/generate-entitlement-grant-data';
+
 type PayloadGenerator = (args: baseArgs) => unknown;
 
 const eventGenerators: Record<SupportedEvent, PayloadGenerator> = {
@@ -49,6 +85,8 @@ const eventGenerators: Record<SupportedEvent, PayloadGenerator> = {
   'subscription.cancelled': genSubscriptionCancelled,
   'subscription.failed': genSubscriptionFailed,
   'subscription.expired': genSubscriptionExpired,
+  'subscription.paused': genSubscriptionPaused,
+  'subscription.update_payment_method': genSubscriptionUpdatePaymentMethod,
   'payment.success': genPaymentSuccess,
   'payment.failed': genPaymentFailed,
   'payment.processing': genPaymentProcessing,
@@ -63,6 +101,28 @@ const eventGenerators: Record<SupportedEvent, PayloadGenerator> = {
   'dispute.challenged': genDisputeChallenged,
   'dispute.won': genDisputeWon,
   'dispute.lost': genDisputeLost,
+  'payout.created': genPayoutCreated,
+  'payout.in_progress': genPayoutInProgress,
+  'payout.on_hold': genPayoutOnHold,
+  'payout.failed': genPayoutFailed,
+  'payout.success': genPayoutSuccess,
+  'credit.added': genCreditAdded,
+  'credit.deducted': genCreditDeducted,
+  'credit.expired': genCreditExpired,
+  'credit.rolled_over': genCreditRolledOver,
+  'credit.rollover_forfeited': genCreditRolloverForfeited,
+  'credit.overage_charged': genCreditOverageCharged,
+  'credit.overage_reset': genCreditOverageReset,
+  'credit.manual_adjustment': genCreditManualAdjustment,
+  'credit.balance_low': genCreditBalanceLow,
+  'abandoned_checkout.detected': genAbandonedCheckoutDetected,
+  'abandoned_checkout.recovered': genAbandonedCheckoutRecovered,
+  'dunning.started': genDunningStarted,
+  'dunning.recovered': genDunningRecovered,
+  'entitlement_grant.created': genEntitlementGrantCreated,
+  'entitlement_grant.delivered': genEntitlementGrantDelivered,
+  'entitlement_grant.failed': genEntitlementGrantFailed,
+  'entitlement_grant.revoked': genEntitlementGrantRevoked,
 };
 
 function parseMetadata(metadataInput: string): Record<string, unknown> {
