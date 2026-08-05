@@ -144,6 +144,32 @@ const genSubscriptionExpired = (args: baseArgs) => {
     };
 }
 
+// SubscriptionStatus has no `paused` member, so a paused subscription reports
+// the nearest legal value rather than a seventh one a typed consumer can't read.
+const genSubscriptionPaused = (args: baseArgs) => {
+    const base = genBaseSubscriptionData(args);
+    return {
+        ...base,
+        "type": "subscription.paused",
+        data: {
+            ...base.data,
+            status: "on_hold"
+        }
+    };
+}
+
+const genSubscriptionUpdatePaymentMethod = (args: baseArgs) => {
+    const base = genBaseSubscriptionData(args);
+    return {
+        ...base,
+        "type": "subscription.update_payment_method",
+        data: {
+            ...base.data,
+            status: "active"
+        }
+    };
+}
+
 export {
     genSubscriptionActive,
     genSubscriptionUpdated,
@@ -152,5 +178,7 @@ export {
     genSubscriptionPlanChanged,
     genSubscriptionCancelled,
     genSubscriptionFailed,
-    genSubscriptionExpired
+    genSubscriptionExpired,
+    genSubscriptionPaused,
+    genSubscriptionUpdatePaymentMethod
 };
