@@ -82,7 +82,7 @@ const genCreditRolledOver = (args: baseArgs) => {
         data: {
             ...base.data,
             amount: "40",
-            balance_before: "40",
+            balance_before: "100",
             balance_after: "140",
             description: "Unused credits rolled over into the new billing cycle",
             transaction_type: "credit_rolled_over"

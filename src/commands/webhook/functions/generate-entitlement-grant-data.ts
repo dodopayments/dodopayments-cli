@@ -4,6 +4,7 @@ import { type baseArgs } from "../types/baseArgs"
 // Pending | Delivered | Failed | Revoked, unlike every other status enum here.
 const genBaseEntitlementGrantData = ({
     business_id = 'bus_test',
+    metadata,
     customer_id
 }: baseArgs) => {
     return {
@@ -18,13 +19,14 @@ const genBaseEntitlementGrantData = ({
             "entitlement_id": "ent_test",
             "error_code": null,
             "error_message": null,
-            "external_id": null,
+            "feature": null,
             "id": "grant_test",
             "integration_type": "license_key",
             "license_key": null,
-            "metadata": null,
+            "metadata": metadata ?? {},
             "oauth_expires_at": null,
             "oauth_url": null,
+            "payload_type": "EntitlementGrant",
             "payment_id": "pay_test",
             "revocation_reason": null,
             "revoked_at": null,
@@ -51,7 +53,6 @@ const genEntitlementGrantDelivered = (args: baseArgs) => {
         data: {
             ...base.data,
             status: "Delivered",
-            external_id: "lk_AAA111BBB222",
             delivered_at: new Date().toISOString(),
             license_key: {
                 "key": "PRO-AAAA-BBBB-CCCC-DDDD",
@@ -85,7 +86,6 @@ const genEntitlementGrantRevoked = (args: baseArgs) => {
         data: {
             ...base.data,
             status: "Revoked",
-            external_id: "lk_AAA111BBB222",
             delivered_at: new Date().toISOString(),
             revoked_at: new Date().toISOString(),
             revocation_reason: "subscription_cancelled"
