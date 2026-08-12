@@ -123,6 +123,9 @@ jobs:
       - name: Build
         run: bun run build
 
+      - name: Test npm artifact under Node.js
+        run: bun test
+
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

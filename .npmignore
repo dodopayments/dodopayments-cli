@@ -3,6 +3,7 @@
 bun.lock
 bun.lockb
 src
+scripts/
 
 # Ignore binaries just in case
 dist/dodopayments-cli-*

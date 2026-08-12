@@ -46,7 +46,9 @@ Manage your [Dodo Payments](https://dodopayments.com/) resources, test webhooks,
 
 We provide multiple ways to install the CLI.
 
-> **Note:** If you already have Node or Bun installed, the package-manager installs are the simplest path and always pull the latest version.
+> **Note:** Node.js 18+ is enough for CLI subcommands such as `dodo login`.
+> The interactive TUI (`dodo` with no arguments) requires Bun when installed
+> through a package manager. Standalone release binaries require neither runtime.
 
 ### Using npm
 

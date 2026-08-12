@@ -43,6 +43,7 @@
   "scripts": {
     "setup-dev": "npm i && bun ./fetch-cross-deps",
     "build": "bun run scripts/build.ts",
+    "test": "bun run build && bun test",
     "build-native": "bun run build-binaries.ts",
     "dev": "bun src/index.ts"
   },
