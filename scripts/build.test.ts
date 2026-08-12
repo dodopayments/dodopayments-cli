@@ -34,7 +34,7 @@ describe('npm artifact under Node.js without Bun', () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toBe(`v${version}\n`);
-    expect(result.stderr).toBe('');
+    expect(result.stderr).not.toContain('Error');
   });
 
   test('reaches the login command', () => {

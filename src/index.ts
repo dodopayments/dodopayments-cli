@@ -8,7 +8,7 @@ import { version } from '../package.json';
 import { configExists, resolveCredentials } from './utils/auth';
 import { defaultContext } from './tui/DefaultContext';
 
-async function relaunchTuiWithBun(): Promise<never> {
+function relaunchTuiWithBun(): never {
   const executable = process.platform === 'win32' ? 'bun.exe' : 'bun';
   const candidates = [
     executable,
@@ -90,7 +90,7 @@ if (
 }
 
 if (process.stdout.isTTY && !category) {
-  if (typeof Bun === 'undefined') await relaunchTuiWithBun();
+  if (typeof Bun === 'undefined') relaunchTuiWithBun();
   const { mountTui } = await import('./tui/bootstrap');
   await mountTui();
 } else {
