@@ -1,8 +1,51 @@
 #!/usr/bin/env node
+import { spawnSync } from 'node:child_process';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { renderHelp } from './ui';
 import { version } from '../package.json';
 import { configExists, resolveCredentials } from './utils/auth';
 import { defaultContext } from './tui/DefaultContext';
+
+async function relaunchTuiWithBun(): Promise<never> {
+  const executable = process.platform === 'win32' ? 'bun.exe' : 'bun';
+  const candidates = [
+    executable,
+    join(homedir(), '.bun', 'bin', executable),
+    '/usr/local/bin/bun',
+    '/opt/homebrew/bin/bun',
+  ];
+
+  for (const bunPath of candidates) {
+    const child = spawnSync(
+      bunPath,
+      [fileURLToPath(import.meta.url), ...process.argv.slice(2)],
+      {
+        stdio: 'inherit',
+        env: process.env,
+      },
+    );
+    if (!child.error) {
+      if (child.signal) process.kill(process.pid, child.signal);
+      process.exit(child.status ?? 1);
+    }
+    if ((child.error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      process.stderr.write(`Failed to launch Bun: ${child.error.message}\n`);
+      process.exit(1);
+    }
+  }
+
+  process.stderr.write(
+    'The interactive Dodo Payments TUI requires the Bun runtime.\n' +
+      '\n' +
+      'Install Bun:    https://bun.com/docs/installation\n' +
+      'CLI subcommands such as `dodo login` work with Node.js alone.\n' +
+      'Or download a standalone binary:\n' +
+      '                https://github.com/dodopayments/dodopayments-cli/releases\n',
+  );
+  process.exit(1);
+}
 
 const positional = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 
@@ -47,6 +90,7 @@ if (
 }
 
 if (process.stdout.isTTY && !category) {
+  if (typeof Bun === 'undefined') await relaunchTuiWithBun();
   const { mountTui } = await import('./tui/bootstrap');
   await mountTui();
 } else {
