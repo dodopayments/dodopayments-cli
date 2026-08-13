@@ -3,6 +3,7 @@ import { generateText } from 'ai';
 import type { ModelMessage } from 'ai';
 import { createMCPClient } from '@ai-sdk/mcp';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { fileURLToPath } from 'node:url';
 import { resolveCredentials } from '../../utils/auth';
 import type { CommandContext } from '../../tui/CommandContext';
 
@@ -129,8 +130,9 @@ export async function handleAI(query: string, ctx: CommandContext) {
       throw Object.assign(new Error(classifyError(e, 'Auth')), { _classified: true });
     }
 
-    const isCompiledBinary = !!(process.argv[1] && process.argv[1].startsWith('/$bunfs/'));
-    const scriptArgs: string[] = isCompiledBinary || !process.argv[1] ? [] : [process.argv[1]];
+    const scriptPath = fileURLToPath(import.meta.url);
+    const isCompiledBinary = scriptPath.includes('/$bunfs/');
+    const scriptArgs: string[] = isCompiledBinary ? [] : [scriptPath];
     const spawnCommand = process.execPath;
 
     // Phase 2: Initialize MCP clients (with timeouts)
