@@ -59,7 +59,7 @@
     "ai": "^6.0.168",
     "chalk": "^5.6.2",
     "dodopayments": "^2.45.0",
-    "dodopayments-mcp": "^2.45.0",
+    "dodopayments-mcp": "^2.32.0",
     "mcp-remote": "^0.1.38",
     "node-machine-id": "^1.1.12",
     "open": "^11.0.0",
