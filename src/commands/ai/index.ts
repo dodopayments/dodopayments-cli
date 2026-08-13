@@ -233,7 +233,6 @@ Today is ${new Date().toDateString()}. Do not accept questions that are not rela
     // Phase 4: Multi-step LLM loop
     const MAX_STEPS = 20;
     let messages: ModelMessage[] = [
-      { role: 'system', content: systemPrompt },
       { role: 'user', content: query },
     ];
 
@@ -245,6 +244,7 @@ Today is ${new Date().toDateString()}. Do not accept questions that are not rela
         result = await withTimeout(
           generateText({
             model,
+            system: systemPrompt,
             tools,
             messages,
           }),

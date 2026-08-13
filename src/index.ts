@@ -191,6 +191,13 @@ if (process.stdout.isTTY && !category) {
           await handleWebhook(subCommand, defaultContext, { apiKey, client: dodoClient }, extraArgs);
           break;
         }
+        case 'ai': {
+          const { handleAI } = await import('./commands/ai');
+          const query = [subCommand, ...extraArgs].filter(Boolean).join(' ');
+          await handleAI(query, defaultContext);
+          process.exit(0);
+          break;
+        }
         default:
           renderHelp();
       }
