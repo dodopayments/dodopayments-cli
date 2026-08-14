@@ -5,6 +5,7 @@
  * pipelines should not call promptInput/promptSelect/promptConfirm.
  */
 
+import * as p from '@clack/prompts';
 import type { CommandContext } from './CommandContext';
 import type { BlockVariant } from './types';
 import { renderHelp } from '../ui/help';
@@ -26,14 +27,35 @@ export const defaultContext: CommandContext = {
   },
   updateBlock: () => {},
   removeBlock: () => {},
-  promptInput: async () => {
-    throw new Error('Cannot prompt in non-TTY mode');
+  promptInput: async (label: string) => {
+    if (!process.stdout.isTTY) {
+      throw new Error('Cannot prompt in non-TTY mode');
+    }
+    const result = await p.text({ message: label });
+    if (p.isCancel(result)) {
+      process.exit(0);
+    }
+    return result as string;
   },
-  promptSelect: async () => {
-    throw new Error('Cannot prompt in non-TTY mode');
+  promptSelect: async (label: string, options: { label: string; value: string }[]) => {
+    if (!process.stdout.isTTY) {
+      throw new Error('Cannot prompt in non-TTY mode');
+    }
+    const result = await p.select({ message: label, options });
+    if (p.isCancel(result)) {
+      process.exit(0);
+    }
+    return result as string;
   },
-  promptConfirm: async () => {
-    throw new Error('Cannot prompt in non-TTY mode');
+  promptConfirm: async (label: string) => {
+    if (!process.stdout.isTTY) {
+      throw new Error('Cannot prompt in non-TTY mode');
+    }
+    const result = await p.confirm({ message: label });
+    if (p.isCancel(result)) {
+      process.exit(0);
+    }
+    return result as boolean;
   },
   clear: () => console.clear(),
   invocation: 'cli',
