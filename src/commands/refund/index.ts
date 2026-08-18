@@ -64,7 +64,8 @@ export async function handleRefund(
           ...(Object.keys(info.metadata).length > 0 && {
             metadata: info.metadata,
           }),
-          'customer id': info.customer.email,
+          'customer id': info.customer.customer_id,
+          'customer email': info.customer.email,
           'refund type': info.is_partial ? 'Partial' : 'Full',
           price: `${currencyToSymbolMap[info.currency || ''] || info.currency + ' '}${((info.amount || 0) * 0.01).toFixed(2)}`,
           ...(info.reason?.trim() !== '' && { reason: info.reason }),
