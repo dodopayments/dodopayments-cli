@@ -24,7 +24,7 @@ function buildModel(apiKey: string, mode: 'test_mode' | 'live_mode') {
     apiKey,
     headers: { 'X-Dodo-Mode': proxyMode },
   });
-  return openrouter('openai/gpt-5.4-mini');
+  return openrouter('gpt-6-luna');
 }
 
 function classifyError(error: any, phase: string): string {
