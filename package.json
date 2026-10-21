@@ -79,5 +79,9 @@
   "peerDependencies": {
     "typescript": "^5.9.3"
   },
-  "module": "index.ts"
+  "module": "index.ts",
+  "overrides": {
+    "seroval": "~1.6.12",
+    "seroval-plugins": "~1.6.12"
+  }
 }
