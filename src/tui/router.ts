@@ -55,6 +55,12 @@ export async function handleCommand(
     return;
   }
 
+  if (cmd === '/whoami') {
+    const { handleWhoami } = await import('../commands/whoami');
+    await handleWhoami(ctx);
+    return;
+  }
+
   if (cmd === '/logout') {
     const { handleLogout } = await import('../commands/logout');
     await handleLogout(ctx, exit);

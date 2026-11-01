@@ -38,10 +38,10 @@ describe('npm artifact under Node.js without Bun', () => {
   });
 
   test('reaches the login command', () => {
-    const result = runWithNode(['login']);
+    const result = runWithNode(['login', 'sk_test']);
 
-    expect(result.status).toBe(0);
-    expect(result.stdout).toContain('Usage: dodo login <api-key> <test|live>');
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain('dodo login <api-key> <test|live>');
     expect(result.stderr).toBe('API key and mode are required.\n');
   });
 });

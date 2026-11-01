@@ -107,7 +107,10 @@ if (process.stdout.isTTY && !category) {
 
     if (category === 'login') {
       const { handleLogin } = await import('./commands/login');
-      await handleLogin(defaultContext, subCommand, extraArgs[0]);
+      await handleLogin(defaultContext, subCommand, extraArgs[0], { device: flags.includes('--device') });
+    } else if (category === 'whoami') {
+      const { handleWhoami } = await import('./commands/whoami');
+      await handleWhoami(defaultContext);
     } else if (category === 'logout') {
       const { handleLogout } = await import('./commands/logout');
       await handleLogout(defaultContext, undefined, subCommand);
