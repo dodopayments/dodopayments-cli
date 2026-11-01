@@ -3,6 +3,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import http from 'node:http';
+import { version } from '../../package.json';
 import { CONFIG_DIR, decrypt, writeEncrypted } from './secure-store';
 
 export type Mode = 'test_mode' | 'live_mode';
@@ -109,6 +110,9 @@ export function deviceName(env: NodeJS.ProcessEnv = process.env): string {
   return env.DODO_DEVICE_NAME ?? `${os.userInfo().username}@${os.hostname()}`;
 }
 
+/** The sign-in server shows this value on the device confirm page. */
+const USER_AGENT = `dodopayments-cli/${version} (${process.platform} ${process.arch})`;
+
 async function postForm(url: string, fields: Record<string, string | string[]>): Promise<{ status: number; body: TokenResponse }> {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(fields)) {
@@ -116,7 +120,11 @@ async function postForm(url: string, fields: Record<string, string | string[]>):
   }
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json' },
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      accept: 'application/json',
+      'user-agent': USER_AGENT,
+    },
     body: params,
   });
   const text = await response.text();
@@ -200,6 +208,7 @@ export async function startDeviceFlow(ep: OAuthEndpoints = endpoints()): Promise
     client_id: CLIENT_ID,
     scope: REQUESTED_SCOPES,
     resource: authorizationResources(ep),
+    device_name: deviceName(),
   });
   const start = body as unknown as Partial<DeviceStart> & TokenResponse;
   if (status !== 200 || !start.device_code || !start.user_code || !start.verification_uri) {
@@ -296,6 +305,7 @@ export async function loopbackSignIn(
           state,
           code_challenge: challenge,
           code_challenge_method: 'S256',
+          device_name: deviceName(),
         });
         for (const resource of authorizationResources(ep)) params.append('resource', resource);
         openUrl(`${ep.issuer}/oauth2/authorize?${params.toString()}`).catch((e: unknown) => {

@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:tes
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { version } from '../../package.json';
 
 const home = mkdtempSync(join(tmpdir(), 'dodo-oauth-test-'));
 process.env.HOME = home;
@@ -13,14 +14,14 @@ const oauth = await import('./oauth');
 
 type Form = URLSearchParams;
 let handler: (path: string, form: Form) => { status: number; body: unknown } = () => ({ status: 500, body: {} });
-const calls: { path: string; form: Form }[] = [];
+const calls: { path: string; form: Form; headers: Headers }[] = [];
 
 const server = Bun.serve({
   port: 0,
   async fetch(request) {
     const path = new URL(request.url).pathname;
     const form = new URLSearchParams(await request.text());
-    calls.push({ path, form });
+    calls.push({ path, form, headers: request.headers });
     const { status, body } = handler(path, form);
     return Response.json(body, { status });
   },
@@ -90,6 +91,16 @@ describe('device flow', () => {
     expect(await oauth.oauthCredentials('test_mode', ep)).toBe(store.tokens[ep.resources.test_mode]!.access_token);
   });
 
+  test('sends the CLI User-Agent on each call and the device name on device_authorization', async () => {
+    handler = testOnlyGrant;
+    await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
+    expect(calls[0]!.path).toBe('/oauth2/device_authorization');
+    expect(calls[0]!.form.get('device_name')).toBe('tester@box');
+    const userAgent = `dodopayments-cli/${version} (${process.platform} ${process.arch})`;
+    expect(calls.length).toBeGreaterThan(1);
+    for (const call of calls) expect(call.headers.get('user-agent')).toBe(userAgent);
+  });
+
   test('stops on access_denied', async () => {
     handler = (path, form) =>
       path === '/oauth2/token' ? { status: 400, body: { error: 'access_denied' } } : testOnlyGrant(path, form);
@@ -148,6 +159,20 @@ describe('logout', () => {
     handler = () => ({ status: 503, body: {} });
     await expect(oauth.oauthLogout(ep)).rejects.toMatchObject({ code: 'server_error' });
     expect(oauth.readStore()).toBeNull();
+  });
+});
+
+describe('loopback flow', () => {
+  test('puts the device name in the authorize URL', async () => {
+    let opened = '';
+    const noBrowser = async (url: string) => {
+      opened = url;
+      throw new Error('no browser');
+    };
+    await expect(oauth.loopbackSignIn(noBrowser, ep)).rejects.toThrow('no browser');
+    const url = new URL(opened);
+    expect(url.pathname).toBe('/oauth2/authorize');
+    expect(url.searchParams.get('device_name')).toBe('tester@box');
   });
 });
 
