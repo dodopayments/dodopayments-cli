@@ -391,11 +391,14 @@ export async function oauthLogout(ep: OAuthEndpoints = endpoints()): Promise<boo
   const store = readStore();
   if (!store) return false;
   try {
-    await postForm(`${store.issuer || ep.issuer}/oauth2/revoke`, {
+    const { status, body } = await postForm(`${store.issuer || ep.issuer}/oauth2/revoke`, {
       token: store.refresh_token,
       token_type_hint: 'refresh_token',
       client_id: CLIENT_ID,
     });
+    if (status !== 200) {
+      throw new OAuthError(body.error ?? 'server_error', body.error_description ?? `HTTP ${status}`);
+    }
   } finally {
     deleteStore();
   }

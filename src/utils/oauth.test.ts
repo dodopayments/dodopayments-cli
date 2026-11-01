@@ -141,6 +141,14 @@ describe('logout', () => {
     expect(oauth.readStore()).toBeNull();
     expect(await oauth.oauthLogout(ep)).toBe(false);
   });
+
+  test('reports a failed server revoke and still deletes the store', async () => {
+    handler = testOnlyGrant;
+    await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
+    handler = () => ({ status: 503, body: {} });
+    await expect(oauth.oauthLogout(ep)).rejects.toMatchObject({ code: 'server_error' });
+    expect(oauth.readStore()).toBeNull();
+  });
 });
 
 describe('flow choice', () => {

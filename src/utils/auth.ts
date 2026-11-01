@@ -138,6 +138,7 @@ export async function readConfig(): Promise<Config> {
 
 export async function configExists(): Promise<boolean> {
   await migrate();
+  if (process.env.DODO_PAYMENTS_API_KEY) return true;
   if (oauthModes().length > 0) return true;
   if (!fs.existsSync(CONFIG_PATH)) return false;
   
@@ -225,6 +226,11 @@ async function readConfigOrEmpty(): Promise<Config> {
   } catch {
     return {};
   }
+}
+
+/** The modes that have a pasted API key. */
+export async function apiKeyModes(): Promise<Mode[]> {
+  return getConfiguredModesFromConfig(await readConfigOrEmpty());
 }
 
 /** The modes that have a pasted API key or an OAuth sign-in. */
