@@ -1,4 +1,5 @@
 import { clearConfig } from '../../utils/auth';
+import { oauthLogout, oauthModes } from '../../utils/oauth';
 import type { CommandContext } from '../../tui/CommandContext';
 
 type LogoutChoice = 'all' | 'test_mode' | 'live_mode';
@@ -55,6 +56,18 @@ export async function handleLogout(
   }
 
   const result = await clearConfig(target);
+  let signedOut = false;
+  if (target === 'all') {
+    try {
+      signedOut = await oauthLogout();
+    } catch (error) {
+      // The local sign-in is deleted. The server revoke can fail when the network is down.
+      ctx.addBlock({ type: 'error', message: `The server did not confirm the revoke: ${error instanceof Error ? error.message : String(error)}` });
+      signedOut = true;
+    }
+  } else if (oauthModes().includes(target)) {
+    ctx.addBlock({ type: 'info', message: 'Your browser sign-in includes this mode. Run `dodo logout all` to end it.' });
+  }
 
   if (result.hadInvalidConfig) {
     ctx.addBlock({ type: 'error', message: 'Stored credentials were invalid and have been cleared.' });
@@ -63,7 +76,7 @@ export async function handleLogout(
   }
 
   if (target === 'all') {
-    if (result.removedModes.length === 0) {
+    if (result.removedModes.length === 0 && !signedOut) {
       ctx.addBlock({ type: 'error', message: 'No stored accounts found.' });
       exitCli();
       return;

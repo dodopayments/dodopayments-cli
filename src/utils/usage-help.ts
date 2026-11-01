@@ -10,7 +10,15 @@ type UsageCommand = {
 export const standaloneUsage: UsageCommand[] = [
   {
     command: 'login',
+    description: 'Sign in with your browser (--device for a code on another device)',
+  },
+  {
+    command: 'login <api-key> <test|live>',
     description: 'Login with a Dodo Payments API key',
+  },
+  {
+    command: 'whoami',
+    description: 'Show the stored sign-in',
   },
   {
     command: 'logout',

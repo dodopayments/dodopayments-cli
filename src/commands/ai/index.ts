@@ -4,7 +4,8 @@ import type { ModelMessage } from 'ai';
 import { createMCPClient } from '@ai-sdk/mcp';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { fileURLToPath } from 'node:url';
-import { resolveCredentials } from '../../utils/auth';
+import { resolveCredentials, type ResolvedCredentials } from '../../utils/auth';
+import { accessTokenFor, endpoints } from '../../utils/oauth';
 import type { CommandContext } from '../../tui/CommandContext';
 
 let cachedKnowledgeClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
@@ -105,6 +106,22 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
+/**
+ * An OAuth sign-in uses the remote Dodo MCP server with the MCP token of the grant. The server
+ * exchanges it for an API token of the mode in the `Dodo-Mode` header.
+ */
+async function remoteExecClient(mode: 'test_mode' | 'live_mode') {
+  const ep = endpoints();
+  const token = await accessTokenFor(ep.resources.mcp, ep);
+  return createMCPClient({
+    transport: {
+      type: 'http',
+      url: ep.resources.mcp,
+      headers: { Authorization: `Bearer ${token}`, 'Dodo-Mode': mode === 'live_mode' ? 'live' : 'test' },
+    },
+  });
+}
+
 const MCP_INIT_TIMEOUT = 60_000; // 60 seconds for MCP subprocess to start
 const LLM_REQUEST_TIMEOUT = 60_000; // 60 seconds per LLM step
 
@@ -121,8 +138,9 @@ export async function handleAI(query: string, ctx: CommandContext) {
     let model;
     let apiKey: string;
     let mode: 'test_mode' | 'live_mode';
+    let creds: ResolvedCredentials;
     try {
-      const creds = await resolveCredentials(ctx, false);
+      creds = await resolveCredentials(ctx, false);
       apiKey = creds.apiKey;
       mode = creds.mode;
       model = buildModel(apiKey, mode);
@@ -165,7 +183,9 @@ export async function handleAI(query: string, ctx: CommandContext) {
 
       try {
         cachedExecClient = await withTimeout(
-          createMCPClient({
+          creds.source === 'oauth'
+            ? remoteExecClient(mode)
+            : createMCPClient({
             transport: new StdioClientTransport({
               command: spawnCommand,
               args: scriptArgs,

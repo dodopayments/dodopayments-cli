@@ -1,26 +1,24 @@
-import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
-import crypto from 'node:crypto';
-import { machineIdSync } from 'node-machine-id';
+import { CONFIG_DIR, decrypt, ensureConfigDir, writeEncrypted } from './secure-store';
+import { oauthCredentials, oauthModes } from './oauth';
 
 export type Mode = 'test_mode' | 'live_mode';
 export type Config = Partial<Record<Mode, string>>;
 export type ResolvedCredentials = {
   apiKey: string;
   mode: Mode;
+  /** `oauth` when the token comes from `dodo login` in the browser or with a device code. */
+  source?: 'api_key' | 'oauth';
 };
 export type LogoutTarget = Mode | 'all';
 
-const CONFIG_DIR = path.join(os.homedir(), '.dodopayments');
 const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
 const STATE_PATH = path.join(CONFIG_DIR, 'state.json');
 const LEGACY_CONFIG_PATH = path.join(CONFIG_DIR, 'api-key');
 const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
-const ALGORITHM = 'aes-256-gcm';
 
 let sessionMode: Mode | null = null;
-let cachedKey: Buffer | null = null;
 
 export type State = {
   mode?: Mode;
@@ -60,48 +58,6 @@ export function getSessionMode(): Mode | null {
 export function clearSessionMode() {
   sessionMode = null;
   writeState({});
-}
-
-function getEncryptionKey(): Buffer {
-  if (cachedKey) return cachedKey;
-  let id: string;
-  try {
-    id = machineIdSync();
-  } catch {
-    id = `${os.hostname()}-${os.userInfo().username}`;
-  }
-  cachedKey = crypto.pbkdf2Sync(id, 'dodopayments-cli-salt', 100000, 32, 'sha256');
-  return cachedKey;
-}
-
-function encrypt(text: string): string {
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv(ALGORITHM, getEncryptionKey(), iv);
-  let encrypted = cipher.update(text, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  const authTag = cipher.getAuthTag().toString('hex');
-  return `${iv.toString('hex')}:${authTag}:${encrypted}`;
-}
-
-function decrypt(text: string): string {
-  const parts = text.split(':');
-  if (parts.length !== 3) throw new Error('Invalid encrypted format');
-  const [ivHex, tagHex, encrypted] = parts;
-  if (!ivHex || !tagHex || !encrypted) throw new Error('Invalid encrypted format');
-  const iv = Buffer.from(ivHex, 'hex');
-  const authTag = Buffer.from(tagHex, 'hex');
-
-  const decipher = crypto.createDecipheriv(ALGORITHM, getEncryptionKey(), iv);
-  decipher.setAuthTag(authTag);
-  let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-  decrypted += decipher.final('utf8');
-  return decrypted;
-}
-
-function ensureConfigDir() {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
-  }
 }
 
 async function migrate(): Promise<void> {
@@ -146,17 +102,7 @@ async function writeConfig(config: Config): Promise<void> {
     filteredConfig[mode] = config[mode];
   }
 
-  const jsonStr = JSON.stringify(filteredConfig, null, 2);
-  const encrypted = encrypt(jsonStr);
-
-  fs.writeFileSync(CONFIG_PATH, encrypted, { mode: 0o600 });
-  
-  try {
-    // Ensure permissions are strictly 0o600 even if the file already existed
-    fs.chmodSync(CONFIG_PATH, 0o600);
-  } catch {
-    // Ignore if chmod fails (e.g. on Windows)
-  }
+  writeEncrypted(CONFIG_PATH, JSON.stringify(filteredConfig, null, 2));
 }
 
 export async function readConfig(): Promise<Config> {
@@ -192,6 +138,8 @@ export async function readConfig(): Promise<Config> {
 
 export async function configExists(): Promise<boolean> {
   await migrate();
+  if (process.env.DODO_PAYMENTS_API_KEY) return true;
+  if (oauthModes().length > 0) return true;
   if (!fs.existsSync(CONFIG_PATH)) return false;
   
   try {
@@ -270,11 +218,45 @@ export async function clearConfig(target: LogoutTarget): Promise<{
 
 import type { CommandContext } from '../tui/CommandContext';
 
+async function readConfigOrEmpty(): Promise<Config> {
+  await migrate();
+  if (!fs.existsSync(CONFIG_PATH)) return {};
+  try {
+    return await readConfig();
+  } catch {
+    return {};
+  }
+}
+
+/** The modes that have a pasted API key. */
+export async function apiKeyModes(): Promise<Mode[]> {
+  return getConfiguredModesFromConfig(await readConfigOrEmpty());
+}
+
+/** The modes that have a pasted API key or an OAuth sign-in. */
+async function availableModes(config: Config): Promise<Mode[]> {
+  const oauth = oauthModes();
+  return ALL_MODES.filter((mode) => Boolean(config[mode]) || oauth.includes(mode));
+}
+
+/** A pasted API key comes first, then the OAuth sign-in. */
+async function credentialFor(config: Config, mode: Mode): Promise<ResolvedCredentials> {
+  const apiKey = config[mode];
+  if (apiKey) return { mode, apiKey, source: 'api_key' };
+  return { mode, apiKey: await oauthCredentials(mode), source: 'oauth' };
+}
+
 export async function resolveCredentials(
   ctx?: CommandContext,
   prompt: boolean = true,
   forcePrompt: boolean = false,
 ): Promise<ResolvedCredentials> {
+  const envKey = process.env.DODO_PAYMENTS_API_KEY;
+  if (envKey) {
+    const envMode = process.env.DODO_PAYMENTS_ENVIRONMENT === 'live_mode' ? 'live_mode' : 'test_mode';
+    return { mode: envMode, apiKey: envKey };
+  }
+
   if (!sessionMode) {
     const state = readState();
     if (state.mode) {
@@ -282,38 +264,25 @@ export async function resolveCredentials(
     }
   }
 
-  if (sessionMode && !forcePrompt) {
-    const config = await readConfig();
-    // If the persisted mode is no longer in config, we should ignore it
-    if (config[sessionMode]) {
-      return { mode: sessionMode, apiKey: config[sessionMode]! };
-    }
-    sessionMode = null;
-  }
+  const config = await readConfigOrEmpty();
+  const modes = await availableModes(config);
 
-  if (!(await configExists())) {
+  if (modes.length === 0) {
     throw new Error('Sign in first. Run /login to get started.');
   }
 
-  let config: Config;
-  try {
-    config = await readConfig();
-  } catch {
-    await resetConfig();
-    throw new Error("Couldn't load credentials. Run /login to retry.");
-  }
-
-  const modes = getConfiguredModesFromConfig(config);
-
-  if (modes.length === 0) {
-    await resetConfig();
-    throw new Error('No valid credentials. Run /login to retry.');
+  if (sessionMode && !forcePrompt) {
+    // A persisted mode with no credentials is ignored.
+    if (modes.includes(sessionMode)) {
+      return credentialFor(config, sessionMode);
+    }
+    sessionMode = null;
   }
 
   if (modes.length === 1 || (!prompt && !forcePrompt)) {
     const mode = modes[0] as Mode;
     if (prompt) setSessionMode(mode);
-    return { mode, apiKey: config[mode]! };
+    return credentialFor(config, mode);
   }
 
   if (!ctx) {
@@ -329,5 +298,5 @@ export async function resolveCredentials(
   )) as Mode;
 
   setSessionMode(selectedMode);
-  return { mode: selectedMode, apiKey: config[selectedMode]! };
+  return credentialFor(config, selectedMode);
 }
