@@ -106,6 +106,15 @@ async function oauthLogin(ctx: CommandContext, options: LoginOptions): Promise<b
   const modes = grant.modes.map(modeLabel).join(', ');
   if (replaced.length > 0) {
     ctx.addBlock({ type: 'info', message: `This sign-in replaces the earlier ${modes} sign-in. The CLI revoked the earlier one.` });
+    // A v3.7 grant can hold both modes. Its revoke also ends the mode that the new grant does not have.
+    const lost = [...new Set(replaced.flatMap((old) => old.modes))].filter((mode) => !grant.modes.includes(mode));
+    if (lost.length > 0) {
+      const lostModes = lost.map(modeLabel).join(', ');
+      ctx.addBlock({
+        type: 'info',
+        message: `The earlier sign-in also held ${lostModes}. It is signed out too. Run dodo login and choose ${lostModes} to sign in again.`,
+      });
+    }
   }
   for (const error of revokeErrors) {
     ctx.addBlock({
