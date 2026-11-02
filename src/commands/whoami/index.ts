@@ -1,5 +1,5 @@
 import { readGrants, storePath } from '../../utils/oauth';
-import { apiKeyModes, configPath, getSessionMode, type Mode } from '../../utils/auth';
+import { apiKeyModes, configPath, getSessionMode, unreadableStoreMessages, type Mode } from '../../utils/auth';
 import type { CommandContext } from '../../tui/CommandContext';
 
 const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
@@ -15,8 +15,11 @@ export async function handleWhoami(ctx: CommandContext): Promise<void> {
   const grants = readGrants();
   const pasted = await apiKeyModes();
   const modes = ALL_MODES.filter((mode) => pasted.includes(mode) || grants.some((grant) => grant.modes.includes(mode)));
+  const unreadable = await unreadableStoreMessages();
+  for (const message of unreadable) ctx.addBlock({ type: 'error', message });
+  if (unreadable.length > 0) process.exitCode = 1;
   if (modes.length === 0) {
-    ctx.addBlock({ type: 'error', message: 'Not signed in. Run `dodo login`.' });
+    if (unreadable.length === 0) ctx.addBlock({ type: 'error', message: 'Not signed in. Run `dodo login`.' });
     process.exitCode = 1;
     return;
   }

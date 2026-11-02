@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { renderHelp } from './ui';
 import { version } from '../package.json';
-import { configExists, resolveCredentials } from './utils/auth';
+import { configExists, resolveCredentials, unreadableStoreMessages } from './utils/auth';
 import { defaultContext } from './tui/DefaultContext';
 
 function relaunchTuiWithBun(): never {
@@ -136,6 +136,11 @@ if (process.stdout.isTTY && !category) {
         console.log();
       }
 
+      const unreadable = await unreadableStoreMessages();
+      if (unreadable.length > 0) {
+        for (const message of unreadable) console.error(message);
+        process.exit(1);
+      }
       console.log(
         'Please login with `dodo login` to use authenticated commands!',
       );
