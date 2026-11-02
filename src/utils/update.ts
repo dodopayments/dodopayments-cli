@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
 import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { configDir } from './secure-store';
 
-const UPDATE_CACHE_PATH = path.join(os.homedir(), '.dodopayments', 'update-cache.json');
+const updateCachePath = () => path.join(configDir(), 'update-cache.json');
 const PACKAGE_NAME = 'dodopayments-cli';
 const SIX_HOURS = 6 * 60 * 60 * 1000;
 
@@ -41,9 +41,9 @@ export async function checkForUpdates(currentVersion: string): Promise<UpdateInf
 }
 
 async function refreshUpdateCache(): Promise<UpdateCache | null> {
-  const configDir = path.dirname(UPDATE_CACHE_PATH);
-  if (!fs.existsSync(configDir)) {
-    fs.mkdirSync(configDir, { recursive: true });
+  const dir = configDir();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 
   let cache: UpdateCache | null = readCache();
@@ -69,9 +69,9 @@ async function refreshUpdateCache(): Promise<UpdateCache | null> {
 }
 
 function readCache(): UpdateCache | null {
-  if (!fs.existsSync(UPDATE_CACHE_PATH)) return null;
+  if (!fs.existsSync(updateCachePath())) return null;
   try {
-    return JSON.parse(fs.readFileSync(UPDATE_CACHE_PATH, 'utf-8')) as UpdateCache;
+    return JSON.parse(fs.readFileSync(updateCachePath(), 'utf-8')) as UpdateCache;
   } catch {
     return null;
   }
@@ -79,7 +79,7 @@ function readCache(): UpdateCache | null {
 
 function writeCache(cache: UpdateCache): void {
   try {
-    fs.writeFileSync(UPDATE_CACHE_PATH, JSON.stringify(cache));
+    fs.writeFileSync(updateCachePath(), JSON.stringify(cache));
   } catch {}
 }
 

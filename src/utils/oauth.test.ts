@@ -1,16 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, spyOn, test } from 'bun:test';
-import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { createCipheriv, pbkdf2Sync, randomBytes } from 'node:crypto';
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { version } from '../../package.json';
-
-const home = mkdtempSync(join(tmpdir(), 'dodo-oauth-test-'));
-process.env.HOME = home;
-process.env.USERPROFILE = home;
-
+import { configPath, unreadableStoreMessages } from './auth';
+import * as oauth from './oauth';
 import type { OAuthEndpoints } from './oauth';
 
-const oauth = await import('./oauth');
+// scripts/test-preload.ts sets DODO_CONFIG_DIR to a temporary directory.
 
 type Form = URLSearchParams;
 type Reply = { status: number; body: unknown };
@@ -52,7 +50,6 @@ beforeEach(() => {
 
 afterAll(() => {
   server.stop(true);
-  rmSync(home, { recursive: true, force: true });
 });
 
 /** A grant with one mode: the resource of the other mode gets `invalid_target`. */
@@ -213,7 +210,6 @@ describe('refresh lock', () => {
   });
 
   test('Ctrl-C during a refresh exits with 130 and removes the lock', async () => {
-    // Bun's os.homedir() ignores a HOME that changes at run time. The child reads HOME when it starts.
     const childHome = mkdtempSync(join(tmpdir(), 'dodo-sigint-test-'));
     const configDir = join(childHome, '.dodopayments');
     mkdirSync(configDir, { mode: 0o700 });
@@ -239,6 +235,7 @@ describe('refresh lock', () => {
         ...env,
         HOME: childHome,
         USERPROFILE: childHome,
+        DODO_CONFIG_DIR: configDir,
         DODO_AUTH_ISSUER: ep.issuer,
         DODO_AUTH_RESOURCE_TEST: ep.resources.test_mode,
       },
@@ -295,12 +292,109 @@ describe('logout', () => {
   });
 
   test('logout all deletes a store that this computer cannot read', async () => {
-    const { writeFileSync } = await import('node:fs');
     writeFileSync(oauth.storePath(), 'not encrypted');
-    expect(oauth.readGrants()).toEqual([]);
-    await oauth.oauthLogout('all', ep);
-    const { existsSync } = await import('node:fs');
+    expect(oauth.readStore()).toEqual({ grants: [], unreadable: true });
+    expect(await oauth.oauthLogout('all', ep)).toEqual({ removed: [], revokeErrors: [], unreadable: true });
     expect(existsSync(oauth.storePath())).toBe(false);
+  });
+
+  test('logout of one mode also deletes a store that this computer cannot read', async () => {
+    writeForeignStore(oauth.storePath(), { version: 2, grants: [] });
+    expect((await oauth.oauthLogout('live_mode', ep)).unreadable).toBe(true);
+    expect(existsSync(oauth.storePath())).toBe(false);
+  });
+});
+
+/** Encrypts `value` with the key of another computer, as after a change of the machine ID or the host name. */
+function writeForeignStore(file: string, value: unknown) {
+  const key = pbkdf2Sync('other-host-other-user', 'dodopayments-cli-salt', 100000, 32, 'sha256');
+  const iv = randomBytes(16);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = cipher.update(JSON.stringify(value), 'utf8', 'hex') + cipher.final('hex');
+  mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
+  writeFileSync(file, `${iv.toString('hex')}:${cipher.getAuthTag().toString('hex')}:${encrypted}`, { mode: 0o600 });
+}
+
+/** Runs the CLI in a child process. The child inherits DODO_CONFIG_DIR. */
+async function runDodo(...args: string[]) {
+  const { DODO_PAYMENTS_API_KEY: _apiKey, ...env } = process.env;
+  const child = Bun.spawn([process.execPath, 'src/index.ts', ...args], {
+    cwd: join(import.meta.dir, '..', '..'),
+    env: { ...env, DODO_AUTH_ISSUER: ep.issuer, DODO_AUTH_RESOURCE_TEST: ep.resources.test_mode },
+    stdin: 'ignore',
+    stdout: 'pipe',
+    stderr: 'pipe',
+  });
+  const [code, stdout, stderr] = await Promise.all([
+    child.exited,
+    new Response(child.stdout).text(),
+    new Response(child.stderr).text(),
+  ]);
+  return { code, stdout, stderr };
+}
+
+describe('a store that this computer cannot read', () => {
+  const foreignGrant = {
+    id: 'foreign',
+    issuer: 'https://auth.example',
+    refresh_token: 'rt_foreign',
+    modes: ['test_mode'],
+    scope: 'payments:read',
+    device_name: 'old@host',
+    signed_in_at: new Date().toISOString(),
+    tokens: {},
+  };
+
+  test('whoami explains it, keeps the file, and exits with 1', async () => {
+    writeForeignStore(oauth.storePath(), { version: 2, grants: [foreignGrant] });
+    expect(oauth.readStore()).toEqual({ grants: [], unreadable: true });
+
+    const { code, stderr } = await runDodo('whoami');
+    expect(code).toBe(1);
+    expect(stderr).toContain(`The stored sign-in in ${oauth.storePath()} cannot be read on this machine.`);
+    expect(stderr).toContain('The machine ID or the host name changed.');
+    expect(stderr).toContain('revoke it in the dashboard (Profile, Connected apps)');
+    expect(stderr).not.toContain('Not signed in');
+    expect(existsSync(oauth.storePath())).toBe(true);
+  }, 30_000);
+
+  test('a command that needs credentials explains it and exits with 1', async () => {
+    writeForeignStore(oauth.storePath(), { version: 2, grants: [foreignGrant] });
+    const { code, stdout, stderr } = await runDodo('products', 'list');
+    expect(code).toBe(1);
+    expect(stderr).toContain('cannot be read on this machine');
+    expect(stdout).not.toContain('Please login');
+    expect(existsSync(oauth.storePath())).toBe(true);
+  }, 30_000);
+
+  test('a new sign-in replaces it', async () => {
+    writeForeignStore(oauth.storePath(), { version: 2, grants: [foreignGrant] });
+    const { grant, replaced } = await signIn(testOnlyGrant);
+    expect(replaced).toEqual([]);
+    expect(oauth.readStore()).toEqual({ grants: [grant], unreadable: false });
+    expect(await unreadableStoreMessages()).toEqual([]);
+  });
+
+  test('logout deletes it and says that the server sign-in is not revoked', async () => {
+    writeForeignStore(oauth.storePath(), { version: 2, grants: [foreignGrant] });
+    const { code, stdout, stderr } = await runDodo('logout', 'all');
+    expect(code).toBe(0);
+    expect(stderr).toContain('The CLI did not revoke the sign-in on the server.');
+    expect(stderr).toContain('revoke it in the dashboard (Profile, Connected apps)');
+    expect(stdout).toContain('Logged out from all accounts.');
+    expect(existsSync(oauth.storePath())).toBe(false);
+    expect(calls.some((c) => c.path === '/oauth2/revoke')).toBe(false);
+  }, 30_000);
+
+  test('an API key file that this computer cannot read gets its own message', async () => {
+    writeForeignStore(configPath(), { test_mode: 'sk_test' });
+    try {
+      const messages = await unreadableStoreMessages();
+      expect(messages).toEqual([expect.stringContaining(`The stored API keys in ${configPath()} cannot be read on this machine.`)]);
+      expect(existsSync(configPath())).toBe(true);
+    } finally {
+      rmSync(configPath(), { force: true });
+    }
   });
 });
 

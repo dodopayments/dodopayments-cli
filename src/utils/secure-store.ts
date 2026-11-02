@@ -4,7 +4,14 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 import { machineIdSync } from 'node-machine-id';
 
-export const CONFIG_DIR = path.join(os.homedir(), '.dodopayments');
+/**
+ * The directory of the CLI files. DODO_CONFIG_DIR changes it, for tests and advanced use. The CLI
+ * reads it at each call, because Bun's os.homedir() ignores a HOME that changes at run time.
+ */
+export function configDir(): string {
+  return process.env.DODO_CONFIG_DIR || path.join(os.homedir(), '.dodopayments');
+}
+
 const ALGORITHM = 'aes-256-gcm';
 
 let cachedKey: Buffer | null = null;
@@ -46,8 +53,9 @@ export function decrypt(text: string): string {
 }
 
 export function ensureConfigDir() {
-  if (!fs.existsSync(CONFIG_DIR)) {
-    fs.mkdirSync(CONFIG_DIR, { recursive: true, mode: 0o700 });
+  const dir = configDir();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
   }
 }
 

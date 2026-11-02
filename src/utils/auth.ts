@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs';
-import { CONFIG_DIR, decrypt, ensureConfigDir, writeEncrypted } from './secure-store';
-import { oauthCredentials, oauthModes } from './oauth';
+import { configDir, decrypt, ensureConfigDir, writeEncrypted } from './secure-store';
+import { oauthCredentials, oauthModes, readStore, unreadableStoreMessage } from './oauth';
 
 export type Mode = 'test_mode' | 'live_mode';
 export type Config = Partial<Record<Mode, string>>;
@@ -13,9 +13,8 @@ export type ResolvedCredentials = {
 };
 export type LogoutTarget = Mode | 'all';
 
-const CONFIG_PATH = path.join(CONFIG_DIR, 'config.json');
-const STATE_PATH = path.join(CONFIG_DIR, 'state.json');
-const LEGACY_CONFIG_PATH = path.join(CONFIG_DIR, 'api-key');
+const statePath = () => path.join(configDir(), 'state.json');
+const legacyConfigPath = () => path.join(configDir(), 'api-key');
 const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
 
 let sessionMode: Mode | null = null;
@@ -26,8 +25,8 @@ export type State = {
 
 function readState(): State {
   try {
-    if (fs.existsSync(STATE_PATH)) {
-      return JSON.parse(fs.readFileSync(STATE_PATH, 'utf-8'));
+    if (fs.existsSync(statePath())) {
+      return JSON.parse(fs.readFileSync(statePath(), 'utf-8'));
     }
   } catch {
     // Ignore errors
@@ -37,7 +36,7 @@ function readState(): State {
 
 function writeState(state: State) {
   ensureConfigDir();
-  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2));
+  fs.writeFileSync(statePath(), JSON.stringify(state, null, 2));
 }
 
 export function setSessionMode(mode: Mode) {
@@ -62,16 +61,16 @@ export function clearSessionMode() {
 
 async function migrate(): Promise<void> {
   // Try to migrate from legacy api-key file if config.json doesn't exist
-  if (!fs.existsSync(CONFIG_PATH) && fs.existsSync(LEGACY_CONFIG_PATH)) {
+  if (!fs.existsSync(configPath()) && fs.existsSync(legacyConfigPath())) {
     try {
-      const content = fs.readFileSync(LEGACY_CONFIG_PATH, 'utf-8');
+      const content = fs.readFileSync(legacyConfigPath(), 'utf-8');
       const legacyConfig = JSON.parse(content) as Config;
       await writeConfig(legacyConfig);
     } catch {
       // Ignore migration errors
     } finally {
       try {
-        fs.rmSync(LEGACY_CONFIG_PATH, { force: true });
+        fs.rmSync(legacyConfigPath(), { force: true });
       } catch {
         // Ignore rm errors
       }
@@ -102,16 +101,16 @@ async function writeConfig(config: Config): Promise<void> {
     filteredConfig[mode] = config[mode];
   }
 
-  writeEncrypted(CONFIG_PATH, JSON.stringify(filteredConfig, null, 2));
+  writeEncrypted(configPath(), JSON.stringify(filteredConfig, null, 2));
 }
 
 export async function readConfig(): Promise<Config> {
   await migrate();
-  if (!fs.existsSync(CONFIG_PATH)) {
+  if (!fs.existsSync(configPath())) {
     throw new Error('CONFIG_NOT_FOUND');
   }
 
-  const raw = fs.readFileSync(CONFIG_PATH, 'utf-8');
+  const raw = fs.readFileSync(configPath(), 'utf-8');
   let config: Config;
 
   try {
@@ -125,7 +124,7 @@ export async function readConfig(): Promise<Config> {
       // Re-save as encrypted
       await writeConfig(config);
     } catch {
-      throw new Error('CONFIG_NOT_FOUND');
+      throw new Error('CONFIG_UNREADABLE');
     }
   }
 
@@ -140,7 +139,7 @@ export async function configExists(): Promise<boolean> {
   await migrate();
   if (process.env.DODO_PAYMENTS_API_KEY) return true;
   if (oauthModes().length > 0) return true;
-  if (!fs.existsSync(CONFIG_PATH)) return false;
+  if (!fs.existsSync(configPath())) return false;
   
   try {
     const config = await readConfig();
@@ -166,9 +165,9 @@ export async function saveConfig(mode: Mode, apiKey: string): Promise<void> {
 }
 
 export async function resetConfig(): Promise<void> {
-  if (fs.existsSync(CONFIG_PATH)) {
+  if (fs.existsSync(configPath())) {
     try {
-      fs.unlinkSync(CONFIG_PATH);
+      fs.unlinkSync(configPath());
     } catch {
       // Ignore errors
     }
@@ -182,7 +181,7 @@ export async function clearConfig(target: LogoutTarget): Promise<{
 }> {
   // Only the API key file. The OAuth sign-in and the environment variable are not in it.
   await migrate();
-  if (!fs.existsSync(CONFIG_PATH)) {
+  if (!fs.existsSync(configPath())) {
     return { hadInvalidConfig: false, removedModes: [] };
   }
 
@@ -221,7 +220,7 @@ import type { CommandContext } from '../tui/CommandContext';
 
 async function readConfigOrEmpty(): Promise<Config> {
   await migrate();
-  if (!fs.existsSync(CONFIG_PATH)) return {};
+  if (!fs.existsSync(configPath())) return {};
   try {
     return await readConfig();
   } catch {
@@ -235,7 +234,32 @@ export async function apiKeyModes(): Promise<Mode[]> {
 }
 
 export function configPath(): string {
-  return CONFIG_PATH;
+  return path.join(configDir(), 'config.json');
+}
+
+/** True when the API key file exists, but this computer cannot decrypt it or parse it. */
+async function apiKeyStoreUnreadable(): Promise<boolean> {
+  await migrate();
+  if (!fs.existsSync(configPath())) return false;
+  try {
+    await readConfig();
+    return false;
+  } catch (error) {
+    return error instanceof Error && error.message === 'CONFIG_UNREADABLE';
+  }
+}
+
+/** One message for each store file that exists, but that this computer cannot read. */
+export async function unreadableStoreMessages(): Promise<string[]> {
+  const messages: string[] = [];
+  if (await apiKeyStoreUnreadable()) {
+    messages.push(
+      `The stored API keys in ${configPath()} cannot be read on this machine. The machine ID or the host name changed. ` +
+        'Run `dodo login` to sign in again.',
+    );
+  }
+  if (readStore().unreadable) messages.push(unreadableStoreMessage());
+  return messages;
 }
 
 /** The modes that have a pasted API key or an OAuth sign-in. */
@@ -277,7 +301,8 @@ export async function resolveCredentials(
   const modes = await availableModes(config);
 
   if (modes.length === 0) {
-    throw new Error('Sign in first. Run /login to get started.');
+    const unreadable = await unreadableStoreMessages();
+    throw new Error(unreadable.length > 0 ? unreadable.join('\n') : 'Sign in first. Run /login to get started.');
   }
 
   if (sessionMode && !forcePrompt) {

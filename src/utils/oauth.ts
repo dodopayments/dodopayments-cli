@@ -4,14 +4,13 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import http from 'node:http';
 import { version } from '../../package.json';
-import { CONFIG_DIR, decrypt, ensureConfigDir, writeEncrypted } from './secure-store';
+import { configDir, decrypt, ensureConfigDir, writeEncrypted } from './secure-store';
 
 export type Mode = 'test_mode' | 'live_mode';
 
 const CLIENT_ID = 'dodo_cli';
 const DEVICE_GRANT = 'urn:ietf:params:oauth:grant-type:device_code';
-const STORE_PATH = path.join(CONFIG_DIR, 'oauth.json');
-const LOCK_PATH = path.join(CONFIG_DIR, 'refresh.lock');
+const lockPath = () => path.join(configDir(), 'refresh.lock');
 const REFRESH_MARGIN_MS = 60_000;
 const REFRESH_TIMEOUT_MS = 10_000;
 /** Two times the refresh timeout. A live process releases the lock before this age. */
@@ -95,20 +94,41 @@ export interface SignInResult {
 const isGrant = (value: Partial<OAuthStore> | undefined): value is OAuthStore =>
   Boolean(value?.refresh_token) && Array.isArray(value?.modes) && value.modes.length > 0;
 
+export interface StoreRead {
+  grants: OAuthStore[];
+  /** True when the store file exists, but this computer cannot decrypt it or parse it. */
+  unreadable: boolean;
+}
+
 /**
- * The stored grants. v3.7 stored one grant with no `grants` list and no `id`. A store that this
- * computer cannot decrypt counts as no sign-in. The next sign-in or sign-out writes it again.
+ * The stored grants. v3.7 stored one grant with no `grants` list and no `id`. The CLI keeps an
+ * unreadable store until the next sign-in writes a new store, or a sign-out deletes it.
  */
-export function readGrants(): OAuthStore[] {
-  if (!fs.existsSync(STORE_PATH)) return [];
+export function readStore(): StoreRead {
+  const file = storePath();
+  if (!fs.existsSync(file)) return { grants: [], unreadable: false };
   let data: { grants?: Partial<OAuthStore>[] } & Partial<OAuthStore>;
   try {
-    data = JSON.parse(decrypt(fs.readFileSync(STORE_PATH, 'utf-8')));
+    data = JSON.parse(decrypt(fs.readFileSync(file, 'utf-8')));
   } catch {
-    return [];
+    return { grants: [], unreadable: true };
   }
   const list = Array.isArray(data.grants) ? data.grants : [data];
-  return list.filter(isGrant).map((grant) => ({ ...grant, id: grant.id ?? 'v3.7', tokens: grant.tokens ?? {} }));
+  const grants = list.filter(isGrant).map((grant) => ({ ...grant, id: grant.id ?? 'v3.7', tokens: grant.tokens ?? {} }));
+  return { grants, unreadable: false };
+}
+
+/** The stored grants. An unreadable store gives an empty list. */
+export function readGrants(): OAuthStore[] {
+  return readStore().grants;
+}
+
+/** The message for a store that this computer cannot read. */
+export function unreadableStoreMessage(): string {
+  return (
+    `The stored sign-in in ${storePath()} cannot be read on this machine. The machine ID or the host name changed. ` +
+    'Run `dodo login` to sign in again. To end the old sign-in, revoke it in the dashboard (Profile, Connected apps).'
+  );
 }
 
 function writeGrants(grants: OAuthStore[]) {
@@ -116,7 +136,7 @@ function writeGrants(grants: OAuthStore[]) {
     deleteStore();
     return;
   }
-  writeEncrypted(STORE_PATH, JSON.stringify({ version: 2, grants }));
+  writeEncrypted(storePath(), JSON.stringify({ version: 2, grants }));
 }
 
 /** The grant that holds `mode`, or null. */
@@ -125,11 +145,11 @@ export function grantFor(mode: Mode): OAuthStore | null {
 }
 
 export function deleteStore() {
-  fs.rmSync(STORE_PATH, { force: true });
+  fs.rmSync(storePath(), { force: true });
 }
 
 export function storePath(): string {
-  return STORE_PATH;
+  return path.join(configDir(), 'oauth.json');
 }
 
 /** The modes of the stored grants. An empty list means no OAuth sign-in. */
@@ -400,28 +420,29 @@ process.on('exit', () => {
 
 async function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
   ensureConfigDir();
+  const lock = lockPath();
   const deadline = Date.now() + LOCK_WAIT_MS;
   let fd: number | undefined;
   while (fd === undefined) {
     try {
-      fd = fs.openSync(LOCK_PATH, 'wx', 0o600);
+      fd = fs.openSync(lock, 'wx', 0o600);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
       try {
-        if (Date.now() - fs.statSync(LOCK_PATH).mtimeMs > LOCK_STALE_MS) fs.rmSync(LOCK_PATH, { force: true });
+        if (Date.now() - fs.statSync(lock).mtimeMs > LOCK_STALE_MS) fs.rmSync(lock, { force: true });
       } catch {
         // The other process removed the lock.
       }
-      if (Date.now() > deadline) throw new OAuthError('lock_timeout', `Another dodo process holds ${LOCK_PATH}.`);
+      if (Date.now() > deadline) throw new OAuthError('lock_timeout', `Another dodo process holds ${lock}.`);
       await sleep(100);
     }
   }
-  heldLock = LOCK_PATH;
+  heldLock = lock;
   try {
     return await work();
   } finally {
     fs.closeSync(fd);
-    fs.rmSync(LOCK_PATH, { force: true });
+    fs.rmSync(lock, { force: true });
     heldLock = undefined;
   }
 }
@@ -495,18 +516,23 @@ async function revokeAll(grants: OAuthStore[], ep: OAuthEndpoints): Promise<stri
 
 /**
  * Deletes the grants of `target` from this computer, then revokes them on the server. A v3.7 grant
- * with both modes ends for both modes.
+ * with both modes ends for both modes. The CLI cannot revoke the grants of an unreadable store, and
+ * cannot know their modes, so it deletes that store for each `target` and sets `unreadable`.
  */
 export async function oauthLogout(
   target: Mode | 'all',
   ep: OAuthEndpoints = endpoints(),
-): Promise<{ removed: OAuthStore[]; revokeErrors: string[] }> {
-  const removed = await withRefreshLock(async () => {
-    const grants = readGrants();
-    const matches = grants.filter((grant) => target === 'all' || grant.modes.includes(target));
+): Promise<{ removed: OAuthStore[]; revokeErrors: string[]; unreadable: boolean }> {
+  const { removed, unreadable } = await withRefreshLock(async () => {
+    const store = readStore();
+    if (store.unreadable) {
+      deleteStore();
+      return { removed: [], unreadable: true };
+    }
+    const matches = store.grants.filter((grant) => target === 'all' || grant.modes.includes(target));
     if (target === 'all') deleteStore();
-    else if (matches.length > 0) writeGrants(grants.filter((grant) => !matches.includes(grant)));
-    return matches;
+    else if (matches.length > 0) writeGrants(store.grants.filter((grant) => !matches.includes(grant)));
+    return { removed: matches, unreadable: false };
   });
-  return { removed, revokeErrors: await revokeAll(removed, ep) };
+  return { removed, revokeErrors: await revokeAll(removed, ep), unreadable };
 }

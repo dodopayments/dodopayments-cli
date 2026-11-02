@@ -1,4 +1,4 @@
-import { clearConfig, clearSessionMode, getSessionMode, signedInModes, type Mode } from '../../utils/auth';
+import { clearConfig, clearSessionMode, getSessionMode, signedInModes, unreadableStoreMessages, type Mode } from '../../utils/auth';
 import { oauthLogout } from '../../utils/oauth';
 import type { CommandContext } from '../../tui/CommandContext';
 
@@ -46,7 +46,8 @@ export async function handleLogout(
     target = normalized;
   } else {
     const modes = await signedInModes();
-    if (modes.length === 0) {
+    // A store that cannot be read has no modes. "All accounts" deletes it.
+    if (modes.length === 0 && (await unreadableStoreMessages()).length === 0) {
       ctx.addBlock({ type: 'error', message: 'Not signed in.' });
       return;
     }
@@ -75,6 +76,14 @@ export async function handleLogout(
   if (apiKeys.hadInvalidConfig) {
     ctx.addBlock({ type: 'error', message: 'The stored API keys could not be read. They are deleted.' });
   }
+  if (oauth.unreadable) {
+    ctx.addBlock({
+      type: 'error',
+      message:
+        'The stored sign-in could not be read on this machine. It is deleted from this computer. ' +
+        'The CLI did not revoke the sign-in on the server. To end it, revoke it in the dashboard (Profile, Connected apps).',
+    });
+  }
 
   const oauthModes = oauth.removed.flatMap((grant) => grant.modes);
   const removed = [...new Set([...apiKeys.removedModes, ...oauthModes])];
@@ -92,7 +101,7 @@ export async function handleLogout(
   const active = getSessionMode();
   if (active && removed.includes(active)) clearSessionMode();
 
-  if (removed.length === 0 && !apiKeys.hadInvalidConfig) {
+  if (removed.length === 0 && !apiKeys.hadInvalidConfig && !oauth.unreadable) {
     ctx.addBlock({
       type: 'error',
       message: target === 'all' ? 'No stored accounts found.' : `No ${modeLabels[target]} account is signed in.`,
