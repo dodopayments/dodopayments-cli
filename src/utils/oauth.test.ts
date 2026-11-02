@@ -1,7 +1,7 @@
-import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'bun:test';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { afterAll, beforeAll, beforeEach, describe, expect, spyOn, test } from 'bun:test';
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { version } from '../../package.json';
 
 const home = mkdtempSync(join(tmpdir(), 'dodo-oauth-test-'));
@@ -13,7 +13,8 @@ import type { OAuthEndpoints } from './oauth';
 const oauth = await import('./oauth');
 
 type Form = URLSearchParams;
-let handler: (path: string, form: Form) => { status: number; body: unknown } = () => ({ status: 500, body: {} });
+type Reply = { status: number; body: unknown };
+let handler: (path: string, form: Form) => Reply | Promise<Reply> = () => ({ status: 500, body: {} });
 const calls: { path: string; form: Form; headers: Headers }[] = [];
 
 const server = Bun.serve({
@@ -22,7 +23,7 @@ const server = Bun.serve({
     const path = new URL(request.url).pathname;
     const form = new URLSearchParams(await request.text());
     calls.push({ path, form, headers: request.headers });
-    const { status, body } = handler(path, form);
+    const { status, body } = await handler(path, form);
     return Response.json(body, { status });
   },
 });
@@ -189,6 +190,78 @@ describe('refresh', () => {
     await signIn(testOnlyGrant);
     await expect(oauth.oauthCredentials('live_mode', ep)).rejects.toThrow('No Live Mode sign-in');
   });
+});
+
+describe('refresh lock', () => {
+  const noRefreshReply = (path: string, form: Form): Reply | Promise<Reply> =>
+    form.get('grant_type') === 'refresh_token' ? new Promise<Reply>(() => {}) : testOnlyGrant(path, form);
+
+  test('a refresh with no reply stops at the timeout and releases the lock', async () => {
+    const { grant } = await signIn(testOnlyGrant);
+    grant.tokens = {};
+    await writeRaw({ version: 2, grants: [grant] });
+    handler = noRefreshReply;
+    const timeout = AbortSignal.timeout.bind(AbortSignal);
+    const spy = spyOn(AbortSignal, 'timeout').mockImplementation(() => timeout(50));
+    try {
+      await expect(oauth.oauthCredentials('test_mode', ep)).rejects.toMatchObject({ code: 'timeout' });
+      expect(spy).toHaveBeenCalledWith(10_000);
+    } finally {
+      spy.mockRestore();
+    }
+    expect(existsSync(join(dirname(oauth.storePath()), 'refresh.lock'))).toBe(false);
+  });
+
+  test('Ctrl-C during a refresh exits with 130 and removes the lock', async () => {
+    // Bun's os.homedir() ignores a HOME that changes at run time. The child reads HOME when it starts.
+    const childHome = mkdtempSync(join(tmpdir(), 'dodo-sigint-test-'));
+    const configDir = join(childHome, '.dodopayments');
+    mkdirSync(configDir, { mode: 0o700 });
+    const lockPath = join(configDir, 'refresh.lock');
+    const { writeEncrypted } = await import('./secure-store');
+    const grant = {
+      id: 'sigint',
+      issuer: ep.issuer,
+      refresh_token: 'rt_sigint',
+      modes: ['test_mode'],
+      scope: 'payments:read',
+      device_name: 'tester@box',
+      signed_in_at: new Date().toISOString(),
+      tokens: {},
+    };
+    writeEncrypted(join(configDir, 'oauth.json'), JSON.stringify({ version: 2, grants: [grant] }));
+    handler = noRefreshReply;
+
+    const { DODO_PAYMENTS_API_KEY: _apiKey, ...env } = process.env;
+    const child = Bun.spawn([process.execPath, 'src/index.ts', 'products', 'list'], {
+      cwd: join(import.meta.dir, '..', '..'),
+      env: {
+        ...env,
+        HOME: childHome,
+        USERPROFILE: childHome,
+        DODO_AUTH_ISSUER: ep.issuer,
+        DODO_AUTH_RESOURCE_TEST: ep.resources.test_mode,
+      },
+      stdin: 'ignore',
+      stdout: 'pipe',
+      stderr: 'pipe',
+    });
+    try {
+      while (!(calls.some((c) => c.form.get('refresh_token') === 'rt_sigint') && existsSync(lockPath))) {
+        if (child.exitCode !== null) {
+          const output = (await new Response(child.stdout).text()) + (await new Response(child.stderr).text());
+          throw new Error(`dodo stopped before the refresh: ${output}`);
+        }
+        await Bun.sleep(50);
+      }
+      child.kill('SIGINT');
+      expect(await child.exited).toBe(130);
+      expect(existsSync(lockPath)).toBe(false);
+    } finally {
+      if (child.exitCode === null) child.kill();
+      rmSync(childHome, { recursive: true, force: true });
+    }
+  }, 30_000);
 });
 
 describe('logout', () => {

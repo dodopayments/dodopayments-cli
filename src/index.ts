@@ -94,8 +94,9 @@ if (process.stdout.isTTY && !category) {
   const { mountTui } = await import('./tui/bootstrap');
   await mountTui();
 } else {
-  process.on('SIGINT', () => process.exit(0));
-  process.on('SIGTERM', () => process.exit(0));
+  // 128 + the signal number, as in a shell.
+  process.on('SIGINT', () => process.exit(130));
+  process.on('SIGTERM', () => process.exit(143));
   try {
     if (category && subCommand) {
       const { isInteractiveOnly } = await import('./utils/usage-help');

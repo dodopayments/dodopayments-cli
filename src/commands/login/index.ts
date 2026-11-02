@@ -150,6 +150,7 @@ export async function handleLogin(
         message: 'No terminal for the sign-in. Set DODO_PAYMENTS_API_KEY, or run `dodo login --device`.',
       });
       ctx.addBlock({ type: 'info', message: USAGE });
+      process.exitCode = 1;
       return false;
     }
     return oauthLogin(ctx, options);
