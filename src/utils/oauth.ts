@@ -13,8 +13,11 @@ const DEVICE_GRANT = 'urn:ietf:params:oauth:grant-type:device_code';
 const STORE_PATH = path.join(CONFIG_DIR, 'oauth.json');
 const LOCK_PATH = path.join(CONFIG_DIR, 'refresh.lock');
 const REFRESH_MARGIN_MS = 60_000;
-const LOCK_WAIT_MS = 15_000;
-const LOCK_STALE_MS = 30_000;
+const REFRESH_TIMEOUT_MS = 10_000;
+/** Two times the refresh timeout. A live process releases the lock before this age. */
+const LOCK_STALE_MS = 20_000;
+/** More than the stale age. A waiter can then remove the lock of a killed process and continue. */
+const LOCK_WAIT_MS = 25_000;
 const LOOPBACK_TIMEOUT_MS = 5 * 60_000;
 const ALL_MODES: Mode[] = ['test_mode', 'live_mode'];
 
@@ -142,7 +145,11 @@ export function deviceName(env: NodeJS.ProcessEnv = process.env): string {
 /** The sign-in server shows this value on the device confirm page. */
 const USER_AGENT = `dodopayments-cli/${version} (${process.platform} ${process.arch})`;
 
-async function postForm(url: string, fields: Record<string, string | string[]>): Promise<{ status: number; body: TokenResponse }> {
+async function postForm(
+  url: string,
+  fields: Record<string, string | string[]>,
+  signal?: AbortSignal,
+): Promise<{ status: number; body: TokenResponse }> {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(fields)) {
     for (const item of Array.isArray(value) ? value : [value]) params.append(key, item);
@@ -155,6 +162,7 @@ async function postForm(url: string, fields: Record<string, string | string[]>):
       'user-agent': USER_AGENT,
     },
     body: params,
+    signal,
   });
   const text = await response.text();
   let body: TokenResponse = {};
@@ -176,12 +184,19 @@ async function refreshFor(
   refreshToken: string,
   resource: string,
 ): Promise<{ status: number; body: TokenResponse }> {
-  return postForm(`${ep.issuer}/oauth2/token`, {
-    grant_type: 'refresh_token',
-    refresh_token: refreshToken,
-    client_id: CLIENT_ID,
-    resource,
-  });
+  const signal = AbortSignal.timeout(REFRESH_TIMEOUT_MS);
+  try {
+    return await postForm(
+      `${ep.issuer}/oauth2/token`,
+      { grant_type: 'refresh_token', refresh_token: refreshToken, client_id: CLIENT_ID, resource },
+      signal,
+    );
+  } catch (error) {
+    if (signal.aborted) {
+      throw new OAuthError('timeout', `The sign-in server did not reply in ${REFRESH_TIMEOUT_MS / 1000} seconds. Try again.`);
+    }
+    throw error;
+  }
 }
 
 /**
@@ -370,6 +385,19 @@ export function preferDeviceFlow(env: NodeJS.ProcessEnv = process.env, platform 
   return platform === 'linux' && !env.DISPLAY && !env.WAYLAND_DISPLAY;
 }
 
+/** The lock file that this process holds. */
+let heldLock: string | undefined;
+
+// process.exit() does not run `finally` blocks. Ctrl-C calls process.exit(), so the lock must also go here.
+process.on('exit', () => {
+  if (heldLock === undefined) return;
+  try {
+    fs.unlinkSync(heldLock);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+});
+
 async function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
   ensureConfigDir();
   const deadline = Date.now() + LOCK_WAIT_MS;
@@ -388,11 +416,13 @@ async function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
       await sleep(100);
     }
   }
+  heldLock = LOCK_PATH;
   try {
     return await work();
   } finally {
     fs.closeSync(fd);
     fs.rmSync(LOCK_PATH, { force: true });
+    heldLock = undefined;
   }
 }
 
