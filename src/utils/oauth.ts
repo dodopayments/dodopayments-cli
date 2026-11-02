@@ -4,7 +4,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import http from 'node:http';
 import { version } from '../../package.json';
-import { CONFIG_DIR, decrypt, writeEncrypted } from './secure-store';
+import { CONFIG_DIR, decrypt, ensureConfigDir, writeEncrypted } from './secure-store';
 
 export type Mode = 'test_mode' | 'live_mode';
 
@@ -48,7 +48,9 @@ interface CachedToken {
   expires_at: number;
 }
 
+/** One approval on the consent page. A grant has one mode. A grant from v3.7 can have both modes. */
 export interface OAuthStore {
+  id: string;
   issuer: string;
   refresh_token: string;
   modes: Mode[];
@@ -79,18 +81,44 @@ export class OAuthError extends Error {
   }
 }
 
-export function readStore(): OAuthStore | null {
-  try {
-    if (!fs.existsSync(STORE_PATH)) return null;
-    const store = JSON.parse(decrypt(fs.readFileSync(STORE_PATH, 'utf-8'))) as OAuthStore;
-    return store.refresh_token && Array.isArray(store.modes) ? store : null;
-  } catch {
-    return null;
-  }
+export interface SignInResult {
+  grant: OAuthStore;
+  /** The earlier grants of the same modes. The new grant replaces them, and the CLI revokes them. */
+  replaced: OAuthStore[];
+  /** The revokes that the server did not confirm. */
+  revokeErrors: string[];
 }
 
-function writeStore(store: OAuthStore) {
-  writeEncrypted(STORE_PATH, JSON.stringify(store));
+const isGrant = (value: Partial<OAuthStore> | undefined): value is OAuthStore =>
+  Boolean(value?.refresh_token) && Array.isArray(value?.modes) && value.modes.length > 0;
+
+/**
+ * The stored grants. v3.7 stored one grant with no `grants` list and no `id`. A store that this
+ * computer cannot decrypt counts as no sign-in. The next sign-in or sign-out writes it again.
+ */
+export function readGrants(): OAuthStore[] {
+  if (!fs.existsSync(STORE_PATH)) return [];
+  let data: { grants?: Partial<OAuthStore>[] } & Partial<OAuthStore>;
+  try {
+    data = JSON.parse(decrypt(fs.readFileSync(STORE_PATH, 'utf-8')));
+  } catch {
+    return [];
+  }
+  const list = Array.isArray(data.grants) ? data.grants : [data];
+  return list.filter(isGrant).map((grant) => ({ ...grant, id: grant.id ?? 'v3.7', tokens: grant.tokens ?? {} }));
+}
+
+function writeGrants(grants: OAuthStore[]) {
+  if (grants.length === 0) {
+    deleteStore();
+    return;
+  }
+  writeEncrypted(STORE_PATH, JSON.stringify({ version: 2, grants }));
+}
+
+/** The grant that holds `mode`, or null. */
+export function grantFor(mode: Mode): OAuthStore | null {
+  return readGrants().find((grant) => grant.modes.includes(mode)) ?? null;
 }
 
 export function deleteStore() {
@@ -101,9 +129,10 @@ export function storePath(): string {
   return STORE_PATH;
 }
 
-/** The modes of the stored grant. An empty list means no OAuth sign-in. */
+/** The modes of the stored grants. An empty list means no OAuth sign-in. */
 export function oauthModes(): Mode[] {
-  return readStore()?.modes ?? [];
+  const grants = readGrants();
+  return ALL_MODES.filter((mode) => grants.some((grant) => grant.modes.includes(mode)));
 }
 
 export function deviceName(env: NodeJS.ProcessEnv = process.env): string {
@@ -159,10 +188,11 @@ async function refreshFor(
  * Makes the store from the first token response. The grant modes are not in the response, so the
  * CLI asks for the API token of each mode. The grant refuses a mode that the user did not approve.
  */
-async function finishSignIn(ep: OAuthEndpoints, first: TokenResponse): Promise<OAuthStore> {
+async function finishSignIn(ep: OAuthEndpoints, first: TokenResponse): Promise<SignInResult> {
   const now = Date.now();
   if (!first.refresh_token) throw new OAuthError('invalid_response', 'The sign-in server returned no refresh token.');
   const store: OAuthStore = {
+    id: crypto.randomUUID(),
     issuer: ep.issuer,
     refresh_token: first.refresh_token,
     modes: [],
@@ -182,8 +212,13 @@ async function finishSignIn(ep: OAuthEndpoints, first: TokenResponse): Promise<O
     }
   }
   if (store.modes.length === 0) throw new OAuthError('invalid_grant', 'The approval has no test mode or live mode.');
-  writeStore(store);
-  return store;
+  const replaced = await withRefreshLock(async () => {
+    const grants = readGrants();
+    const old = grants.filter((grant) => grant.modes.some((mode) => store.modes.includes(mode)));
+    writeGrants([...grants.filter((grant) => !old.includes(grant)), store]);
+    return old;
+  });
+  return { grant: store, replaced, revokeErrors: await revokeAll(replaced, ep) };
 }
 
 function sleep(ms: number) {
@@ -218,7 +253,7 @@ export async function startDeviceFlow(ep: OAuthEndpoints = endpoints()): Promise
 }
 
 /** Polls the token endpoint until the user approves, denies, or the code expires. */
-export async function pollDeviceFlow(start: DeviceStart, ep: OAuthEndpoints = endpoints()): Promise<OAuthStore> {
+export async function pollDeviceFlow(start: DeviceStart, ep: OAuthEndpoints = endpoints()): Promise<SignInResult> {
   let interval = (start.interval ?? 5) * 1000;
   const deadline = Date.now() + start.expires_in * 1000;
   while (Date.now() < deadline) {
@@ -257,7 +292,7 @@ const CALLBACK_PAGE = (title: string, text: string) =>
 export async function loopbackSignIn(
   openUrl: (url: string) => Promise<void>,
   ep: OAuthEndpoints = endpoints(),
-): Promise<OAuthStore> {
+): Promise<SignInResult> {
   const verifier = base64url(crypto.randomBytes(32));
   const challenge = base64url(crypto.createHash('sha256').update(verifier).digest());
   const state = base64url(crypto.randomBytes(16));
@@ -336,6 +371,7 @@ export function preferDeviceFlow(env: NodeJS.ProcessEnv = process.env, platform 
 }
 
 async function withRefreshLock<T>(work: () => Promise<T>): Promise<T> {
+  ensureConfigDir();
   const deadline = Date.now() + LOCK_WAIT_MS;
   let fd: number | undefined;
   while (fd === undefined) {
@@ -364,53 +400,83 @@ function fresh(token: CachedToken | undefined, now: number): token is CachedToke
   return token !== undefined && token.expires_at - REFRESH_MARGIN_MS > now;
 }
 
-/** An access token for one resource of the grant. It refreshes 60 seconds before the expiry. */
-export async function accessTokenFor(resource: string, ep: OAuthEndpoints = endpoints()): Promise<string> {
-  const cached = readStore();
-  if (!cached) throw new OAuthError('not_signed_in', 'Sign in first. Run dodo login.');
+const modeLabel = (mode: Mode) => (mode === 'test_mode' ? 'Test Mode' : 'Live Mode');
+
+/** An access token for one resource of the grant of `mode`. It refreshes 60 seconds before the expiry. */
+async function accessTokenFor(mode: Mode, resource: string, ep: OAuthEndpoints): Promise<string> {
+  const notSignedIn = () => new OAuthError('not_signed_in', `No ${modeLabel(mode)} sign-in. Run dodo login.`);
+  const cached = grantFor(mode);
+  if (!cached) throw notSignedIn();
   if (fresh(cached.tokens[resource], Date.now())) return cached.tokens[resource].access_token;
 
   return withRefreshLock(async () => {
     // Another process can refresh while this one waits for the lock.
-    const store = readStore();
-    if (!store) throw new OAuthError('not_signed_in', 'Sign in first. Run dodo login.');
-    if (fresh(store.tokens[resource], Date.now())) return store.tokens[resource].access_token;
-    const { status, body } = await refreshFor(ep, store.refresh_token, resource);
+    const grants = readGrants();
+    const grant = grants.find(({ id }) => id === cached.id) ?? grants.find(({ modes }) => modes.includes(mode));
+    if (!grant) throw notSignedIn();
+    if (fresh(grant.tokens[resource], Date.now())) return grant.tokens[resource].access_token;
+    const { status, body } = await refreshFor(ep, grant.refresh_token, resource);
     if (status !== 200) {
       if (body.error === 'invalid_grant') {
-        deleteStore();
-        throw new OAuthError('invalid_grant', 'Your sign-in ended or was revoked. Run dodo login again.');
+        writeGrants(grants.filter((other) => other !== grant));
+        throw new OAuthError('invalid_grant', `Your ${modeLabel(mode)} sign-in ended or was revoked. Run dodo login again.`);
       }
       throw new OAuthError(body.error ?? 'server_error', body.error_description ?? `HTTP ${status}`);
     }
     const token = tokenOf(body, Date.now());
-    store.tokens[resource] = token;
-    if (body.refresh_token) store.refresh_token = body.refresh_token;
-    writeStore(store);
+    grant.tokens[resource] = token;
+    if (body.refresh_token) grant.refresh_token = body.refresh_token;
+    writeGrants(grants);
     return token.access_token;
   });
 }
 
 /** The API token of one mode. */
 export async function oauthCredentials(mode: Mode, ep: OAuthEndpoints = endpoints()): Promise<string> {
-  return accessTokenFor(ep.resources[mode], ep);
+  return accessTokenFor(mode, ep.resources[mode], ep);
 }
 
-/** Revokes the grant on the server and deletes the store. Gives false when no sign-in was stored. */
-export async function oauthLogout(ep: OAuthEndpoints = endpoints()): Promise<boolean> {
-  const store = readStore();
-  if (!store) return false;
-  try {
-    const { status, body } = await postForm(`${store.issuer || ep.issuer}/oauth2/revoke`, {
-      token: store.refresh_token,
-      token_type_hint: 'refresh_token',
-      client_id: CLIENT_ID,
-    });
-    if (status !== 200) {
-      throw new OAuthError(body.error ?? 'server_error', body.error_description ?? `HTTP ${status}`);
+/** The token for the remote Dodo MCP server, from the grant of `mode`. */
+export async function mcpAccessToken(mode: Mode, ep: OAuthEndpoints = endpoints()): Promise<string> {
+  return accessTokenFor(mode, ep.resources.mcp, ep);
+}
+
+async function revoke(grant: OAuthStore, ep: OAuthEndpoints): Promise<void> {
+  const { status, body } = await postForm(`${grant.issuer || ep.issuer}/oauth2/revoke`, {
+    token: grant.refresh_token,
+    token_type_hint: 'refresh_token',
+    client_id: CLIENT_ID,
+  });
+  if (status !== 200) throw new OAuthError(body.error ?? 'server_error', body.error_description ?? `HTTP ${status}`);
+}
+
+/** Revokes each grant on the server. Gives the errors, one for each revoke that failed. */
+async function revokeAll(grants: OAuthStore[], ep: OAuthEndpoints): Promise<string[]> {
+  const errors: string[] = [];
+  for (const grant of grants) {
+    try {
+      await revoke(grant, ep);
+    } catch (error) {
+      errors.push(`${grant.modes.map(modeLabel).join(', ')}: ${error instanceof Error ? error.message : String(error)}`);
     }
-  } finally {
-    deleteStore();
   }
-  return true;
+  return errors;
+}
+
+/**
+ * Deletes the grants of `target` from this computer, then revokes them on the server. A v3.7 grant
+ * with both modes ends for both modes.
+ */
+export async function oauthLogout(
+  target: Mode | 'all',
+  ep: OAuthEndpoints = endpoints(),
+): Promise<{ removed: OAuthStore[]; revokeErrors: string[] }> {
+  const removed = await withRefreshLock(async () => {
+    const grants = readGrants();
+    const matches = grants.filter((grant) => target === 'all' || grant.modes.includes(target));
+    if (target === 'all') deleteStore();
+    else if (matches.length > 0) writeGrants(grants.filter((grant) => !matches.includes(grant)));
+    return matches;
+  });
+  return { removed, revokeErrors: await revokeAll(removed, ep) };
 }

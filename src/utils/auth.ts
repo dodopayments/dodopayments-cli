@@ -180,7 +180,9 @@ export async function clearConfig(target: LogoutTarget): Promise<{
   hadInvalidConfig: boolean;
   removedModes: Mode[];
 }> {
-  if (!(await configExists())) {
+  // Only the API key file. The OAuth sign-in and the environment variable are not in it.
+  await migrate();
+  if (!fs.existsSync(CONFIG_PATH)) {
     return { hadInvalidConfig: false, removedModes: [] };
   }
 
@@ -196,7 +198,6 @@ export async function clearConfig(target: LogoutTarget): Promise<{
 
   if (target === 'all') {
     await resetConfig();
-    clearSessionMode();
     return { hadInvalidConfig: false, removedModes: configuredModes };
   }
 
@@ -209,7 +210,7 @@ export async function clearConfig(target: LogoutTarget): Promise<{
   delete config[target];
   await writeConfig(config);
 
-  if (sessionMode === target) {
+  if (getSessionMode() === target) {
     clearSessionMode();
   }
 
@@ -233,7 +234,15 @@ export async function apiKeyModes(): Promise<Mode[]> {
   return getConfiguredModesFromConfig(await readConfigOrEmpty());
 }
 
+export function configPath(): string {
+  return CONFIG_PATH;
+}
+
 /** The modes that have a pasted API key or an OAuth sign-in. */
+export async function signedInModes(): Promise<Mode[]> {
+  return availableModes(await readConfigOrEmpty());
+}
+
 async function availableModes(config: Config): Promise<Mode[]> {
   const oauth = oauthModes();
   return ALL_MODES.filter((mode) => Boolean(config[mode]) || oauth.includes(mode));

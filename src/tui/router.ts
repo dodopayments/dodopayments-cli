@@ -6,7 +6,7 @@
  */
 
 import type { CommandContext } from './CommandContext';
-import { resolveCredentials, clearSessionMode } from '../utils/auth';
+import { resolveCredentials, clearSessionMode, signedInModes } from '../utils/auth';
 
 export async function handleCommand(
   input: string,
@@ -64,13 +64,30 @@ export async function handleCommand(
   if (cmd === '/logout') {
     const { handleLogout } = await import('../commands/logout');
     await handleLogout(ctx, exit);
+    refreshAuth();
     return;
   }
 
   if (cmd === '/switch') {
-    await resolveCredentials(ctx, true, true);
+    if (process.env.DODO_PAYMENTS_API_KEY) {
+      ctx.addBlock({ type: 'info', message: 'The DODO_PAYMENTS_API_KEY environment variable sets the mode. Unset it to switch.' });
+      return;
+    }
+    const modes = await signedInModes();
+    if (modes.length < 2) {
+      const label = (mode: string) => (mode === 'live_mode' ? 'Live Mode' : 'Test Mode');
+      const other = modes[0] === 'live_mode' ? 'test_mode' : 'live_mode';
+      ctx.addBlock({
+        type: 'info',
+        message: modes[0]
+          ? `Only ${label(modes[0])} is signed in. Run /login and choose ${label(other)} to add it.`
+          : 'Not signed in. Run /login.',
+      });
+      return;
+    }
+    const { mode } = await resolveCredentials(ctx, true, true);
     refreshAuth();
-    ctx.addBlock({ type: 'success', message: 'Environment switched.' });
+    ctx.addBlock({ type: 'success', message: `Switched to ${mode === 'live_mode' ? 'Live Mode' : 'Test Mode'}.` });
     return;
   }
 

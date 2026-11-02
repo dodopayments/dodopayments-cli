@@ -54,25 +54,42 @@ afterAll(() => {
   rmSync(home, { recursive: true, force: true });
 });
 
-/** A grant with test mode only: the live resource gets `invalid_target`. */
-function testOnlyGrant(path: string, form: Form) {
-  if (path === '/oauth2/device_authorization') {
-    return {
-      status: 200,
-      body: { device_code: 'dc', user_code: 'BCDF-GHJK', verification_uri: `${ep.issuer}/device`, expires_in: 60, interval: 0 },
-    };
-  }
-  if (path === '/oauth2/token') {
-    const grant = form.get('grant_type');
-    if (grant === 'urn:ietf:params:oauth:grant-type:device_code') {
-      const pending = calls.filter((c) => c.form.get('grant_type') === grant).length < 2;
-      return pending ? { status: 400, body: { error: 'authorization_pending' } } : { status: 200, body: token('mcp') };
+/** A grant with one mode: the resource of the other mode gets `invalid_target`. */
+const singleModeGrant =
+  (mode: 'test_mode' | 'live_mode') =>
+  (path: string, form: Form): { status: number; body: unknown } => {
+    if (path === '/oauth2/device_authorization') {
+      return {
+        status: 200,
+        body: { device_code: 'dc', user_code: 'BCDF-GHJK', verification_uri: `${ep.issuer}/device`, expires_in: 60, interval: 0 },
+      };
     }
-    if (form.get('resource') === ep.resources.live_mode) return { status: 400, body: { error: 'invalid_target' } };
-    return { status: 200, body: token(String(form.get('resource'))) };
-  }
-  if (path === '/oauth2/revoke') return { status: 200, body: {} };
-  return { status: 404, body: {} };
+    if (path === '/oauth2/token') {
+      const grant = form.get('grant_type');
+      if (grant === 'urn:ietf:params:oauth:grant-type:device_code') {
+        const pending = calls.filter((c) => c.form.get('grant_type') === grant).length < 2;
+        return pending ? { status: 400, body: { error: 'authorization_pending' } } : { status: 200, body: token('mcp') };
+      }
+      const other = mode === 'test_mode' ? ep.resources.live_mode : ep.resources.test_mode;
+      if (form.get('resource') === other) return { status: 400, body: { error: 'invalid_target' } };
+      return { status: 200, body: token(String(form.get('resource'))) };
+    }
+    if (path === '/oauth2/revoke') return { status: 200, body: {} };
+    return { status: 404, body: {} };
+  };
+const testOnlyGrant = singleModeGrant('test_mode');
+const liveOnlyGrant = singleModeGrant('live_mode');
+
+async function signIn(handle: typeof testOnlyGrant) {
+  handler = handle;
+  const result = await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
+  calls.length = 0;
+  return result;
+}
+
+async function writeRaw(value: unknown) {
+  const { writeEncrypted } = await import('./secure-store');
+  writeEncrypted(oauth.storePath(), JSON.stringify(value));
 }
 
 describe('device flow', () => {
@@ -84,11 +101,12 @@ describe('device flow', () => {
     expect(authorize.get('client_id')).toBe('dodo_cli');
     expect(authorize.getAll('resource')).toEqual([ep.resources.test_mode, ep.resources.live_mode, ep.resources.mcp]);
 
-    const store = await oauth.pollDeviceFlow(start, ep);
-    expect(store.modes).toEqual(['test_mode']);
-    expect(store.device_name).toBe('tester@box');
+    const { grant, replaced } = await oauth.pollDeviceFlow(start, ep);
+    expect(grant.modes).toEqual(['test_mode']);
+    expect(grant.device_name).toBe('tester@box');
+    expect(replaced).toEqual([]);
     expect(oauth.oauthModes()).toEqual(['test_mode']);
-    expect(await oauth.oauthCredentials('test_mode', ep)).toBe(store.tokens[ep.resources.test_mode]!.access_token);
+    expect(await oauth.oauthCredentials('test_mode', ep)).toBe(grant.tokens[ep.resources.test_mode]!.access_token);
   });
 
   test('sends the CLI User-Agent on each call and the device name on device_authorization', async () => {
@@ -106,59 +124,110 @@ describe('device flow', () => {
       path === '/oauth2/token' ? { status: 400, body: { error: 'access_denied' } } : testOnlyGrant(path, form);
     const start = await oauth.startDeviceFlow(ep);
     await expect(oauth.pollDeviceFlow(start, ep)).rejects.toMatchObject({ code: 'access_denied' });
-    expect(oauth.readStore()).toBeNull();
+    expect(oauth.readGrants()).toEqual([]);
+  });
+});
+
+describe('one grant for each mode', () => {
+  test('a live sign-in keeps the test sign-in, and each mode uses its own grant', async () => {
+    const test = (await signIn(testOnlyGrant)).grant;
+    const live = await signIn(liveOnlyGrant);
+    expect(live.replaced).toEqual([]);
+    expect(calls.some((c) => c.path === '/oauth2/revoke')).toBe(false);
+    expect(oauth.oauthModes()).toEqual(['test_mode', 'live_mode']);
+    expect(oauth.grantFor('test_mode')!.id).toBe(test.id);
+    expect(oauth.grantFor('live_mode')!.id).toBe(live.grant.id);
+    expect(await oauth.oauthCredentials('live_mode', ep)).toBe(live.grant.tokens[ep.resources.live_mode]!.access_token);
+  });
+
+  test('a second sign-in of the same mode replaces the first and revokes it', async () => {
+    const first = (await signIn(testOnlyGrant)).grant;
+    handler = testOnlyGrant;
+    const second = await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
+    expect(second.replaced.map((grant) => grant.id)).toEqual([first.id]);
+    expect(second.revokeErrors).toEqual([]);
+    const revoke = calls.find((c) => c.path === '/oauth2/revoke');
+    expect(revoke!.form.get('token')).toBe(first.refresh_token);
+    expect(oauth.readGrants().map((grant) => grant.id)).toEqual([second.grant.id]);
+  });
+
+  test('reads the v3.7 store with one grant', async () => {
+    const { grant } = await signIn(testOnlyGrant);
+    const { id: _id, ...legacy } = { ...grant, modes: ['test_mode', 'live_mode'] };
+    await writeRaw(legacy);
+    expect(oauth.oauthModes()).toEqual(['test_mode', 'live_mode']);
+    expect(oauth.grantFor('live_mode')!.id).toBe('v3.7');
   });
 });
 
 describe('refresh', () => {
   test('refreshes a token that is near the expiry and keeps the new refresh token', async () => {
-    handler = testOnlyGrant;
-    const store = await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
-    const cached = store.tokens[ep.resources.mcp]!.access_token;
-    expect(await oauth.accessTokenFor(ep.resources.mcp, ep)).toBe(cached);
+    const { grant } = await signIn(testOnlyGrant);
+    const cached = grant.tokens[ep.resources.mcp]!.access_token;
+    expect(await oauth.mcpAccessToken('test_mode', ep)).toBe(cached);
 
-    // Expire the MCP token in the store.
-    const { writeEncrypted } = await import('./secure-store');
-    store.tokens[ep.resources.mcp]!.expires_at = Date.now();
-    writeEncrypted(oauth.storePath(), JSON.stringify(store));
+    grant.tokens[ep.resources.mcp]!.expires_at = Date.now();
+    await writeRaw({ version: 2, grants: [grant] });
 
-    calls.length = 0;
-    const next = await oauth.accessTokenFor(ep.resources.mcp, ep);
+    const next = await oauth.mcpAccessToken('test_mode', ep);
     expect(next).not.toBe(cached);
-    expect(calls[0]!.form.get('refresh_token')).toBe(store.refresh_token);
-    expect(oauth.readStore()!.refresh_token).not.toBe(store.refresh_token);
+    expect(calls[0]!.form.get('refresh_token')).toBe(grant.refresh_token);
+    expect(oauth.grantFor('test_mode')!.refresh_token).not.toBe(grant.refresh_token);
   });
 
-  test('deletes the sign-in on invalid_grant', async () => {
-    handler = testOnlyGrant;
-    const store = await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
+  test('deletes only the grant that gets invalid_grant', async () => {
+    const test = (await signIn(testOnlyGrant)).grant;
+    const live = (await signIn(liveOnlyGrant)).grant;
+    test.tokens = {};
+    await writeRaw({ version: 2, grants: [test, live] });
     handler = () => ({ status: 400, body: { error: 'invalid_grant' } });
-    const { writeEncrypted } = await import('./secure-store');
-    store.tokens = {};
-    writeEncrypted(oauth.storePath(), JSON.stringify(store));
-    await expect(oauth.accessTokenFor(ep.resources.test_mode, ep)).rejects.toMatchObject({ code: 'invalid_grant' });
-    expect(oauth.readStore()).toBeNull();
+    await expect(oauth.oauthCredentials('test_mode', ep)).rejects.toMatchObject({ code: 'invalid_grant' });
+    expect(oauth.oauthModes()).toEqual(['live_mode']);
+  });
+
+  test('says which mode has no sign-in', async () => {
+    await signIn(testOnlyGrant);
+    await expect(oauth.oauthCredentials('live_mode', ep)).rejects.toThrow('No Live Mode sign-in');
   });
 });
 
 describe('logout', () => {
-  test('revokes the refresh token and deletes the store', async () => {
-    handler = testOnlyGrant;
-    const store = await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
-    calls.length = 0;
-    expect(await oauth.oauthLogout(ep)).toBe(true);
-    expect(calls[0]!.path).toBe('/oauth2/revoke');
-    expect(calls[0]!.form.get('token')).toBe(store.refresh_token);
-    expect(oauth.readStore()).toBeNull();
-    expect(await oauth.oauthLogout(ep)).toBe(false);
+  test('logout of one mode revokes only the grant of that mode', async () => {
+    const test = (await signIn(testOnlyGrant)).grant;
+    await signIn(liveOnlyGrant);
+    const { removed, revokeErrors } = await oauth.oauthLogout('test_mode', ep);
+    expect(removed.map((grant) => grant.id)).toEqual([test.id]);
+    expect(revokeErrors).toEqual([]);
+    expect(calls.map((c) => c.form.get('token'))).toEqual([test.refresh_token]);
+    expect(oauth.oauthModes()).toEqual(['live_mode']);
   });
 
-  test('reports a failed server revoke and still deletes the store', async () => {
-    handler = testOnlyGrant;
-    await oauth.pollDeviceFlow(await oauth.startDeviceFlow(ep), ep);
+  test('logout all revokes each grant and deletes the store', async () => {
+    await signIn(testOnlyGrant);
+    await signIn(liveOnlyGrant);
+    const { removed } = await oauth.oauthLogout('all', ep);
+    expect(removed).toHaveLength(2);
+    expect(calls.filter((c) => c.path === '/oauth2/revoke')).toHaveLength(2);
+    expect(oauth.readGrants()).toEqual([]);
+    expect((await oauth.oauthLogout('all', ep)).removed).toEqual([]);
+  });
+
+  test('reports a failed server revoke and still deletes the grant', async () => {
+    await signIn(testOnlyGrant);
     handler = () => ({ status: 503, body: {} });
-    await expect(oauth.oauthLogout(ep)).rejects.toMatchObject({ code: 'server_error' });
-    expect(oauth.readStore()).toBeNull();
+    const { removed, revokeErrors } = await oauth.oauthLogout('all', ep);
+    expect(removed).toHaveLength(1);
+    expect(revokeErrors).toEqual(['Test Mode: HTTP 503']);
+    expect(oauth.readGrants()).toEqual([]);
+  });
+
+  test('logout all deletes a store that this computer cannot read', async () => {
+    const { writeFileSync } = await import('node:fs');
+    writeFileSync(oauth.storePath(), 'not encrypted');
+    expect(oauth.readGrants()).toEqual([]);
+    await oauth.oauthLogout('all', ep);
+    const { existsSync } = await import('node:fs');
+    expect(existsSync(oauth.storePath())).toBe(false);
   });
 });
 

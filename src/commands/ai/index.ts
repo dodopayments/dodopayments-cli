@@ -5,7 +5,7 @@ import { createMCPClient } from '@ai-sdk/mcp';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { fileURLToPath } from 'node:url';
 import { resolveCredentials, type ResolvedCredentials } from '../../utils/auth';
-import { accessTokenFor, endpoints } from '../../utils/oauth';
+import { endpoints, mcpAccessToken } from '../../utils/oauth';
 import type { CommandContext } from '../../tui/CommandContext';
 
 let cachedKnowledgeClient: Awaited<ReturnType<typeof createMCPClient>> | null = null;
@@ -107,12 +107,12 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
 }
 
 /**
- * An OAuth sign-in uses the remote Dodo MCP server with the MCP token of the grant. The server
- * exchanges it for an API token of the mode in the `Dodo-Mode` header.
+ * An OAuth sign-in uses the remote Dodo MCP server with the MCP token of the grant of `mode`. The
+ * server exchanges it for an API token of the mode in the `Dodo-Mode` header.
  */
 async function remoteExecClient(mode: 'test_mode' | 'live_mode') {
   const ep = endpoints();
-  const token = await accessTokenFor(ep.resources.mcp, ep);
+  const token = await mcpAccessToken(mode, ep);
   return createMCPClient({
     transport: {
       type: 'http',
