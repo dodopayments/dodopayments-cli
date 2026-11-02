@@ -7,7 +7,7 @@ import {
   pollDeviceFlow,
   preferDeviceFlow,
   startDeviceFlow,
-  type OAuthStore,
+  type SignInResult,
 } from '../../utils/oauth';
 import type { CommandContext } from '../../tui/CommandContext';
 
@@ -51,7 +51,7 @@ async function apiKeyLogin(ctx: CommandContext, apiKey: string, mode: Mode): Pro
   return true;
 }
 
-async function deviceLogin(ctx: CommandContext): Promise<OAuthStore> {
+async function deviceLogin(ctx: CommandContext): Promise<SignInResult> {
   const start = await startDeviceFlow();
   const url = start.verification_uri_complete ?? start.verification_uri;
   ctx.addBlock({
@@ -69,7 +69,7 @@ async function deviceLogin(ctx: CommandContext): Promise<OAuthStore> {
   }
 }
 
-async function browserLogin(ctx: CommandContext): Promise<OAuthStore> {
+async function browserLogin(ctx: CommandContext): Promise<SignInResult> {
   const spinnerId = ctx.addBlock({ type: 'spinner', label: 'Waiting for the approval in your browser…' });
   try {
     return await loopbackSignIn(async (url) => {
@@ -82,17 +82,17 @@ async function browserLogin(ctx: CommandContext): Promise<OAuthStore> {
 }
 
 async function oauthLogin(ctx: CommandContext, options: LoginOptions): Promise<boolean> {
-  let store: OAuthStore;
+  let result: SignInResult;
   try {
     if (options.device || preferDeviceFlow()) {
-      store = await deviceLogin(ctx);
+      result = await deviceLogin(ctx);
     } else {
       try {
-        store = await browserLogin(ctx);
+        result = await browserLogin(ctx);
       } catch (error) {
         if (error instanceof OAuthError) throw error;
         // No browser could open. The device flow works from any device.
-        store = await deviceLogin(ctx);
+        result = await deviceLogin(ctx);
       }
     }
   } catch (error) {
@@ -102,12 +102,28 @@ async function oauthLogin(ctx: CommandContext, options: LoginOptions): Promise<b
     return false;
   }
 
-  const first = store.modes[0];
-  if (first) setSessionMode(first);
-  ctx.addBlock({
-    type: 'success',
-    message: `Signed in as ${store.device_name}. Modes: ${store.modes.map(modeLabel).join(', ')}.`,
-  });
+  const { grant, replaced, revokeErrors } = result;
+  const modes = grant.modes.map(modeLabel).join(', ');
+  if (replaced.length > 0) {
+    ctx.addBlock({ type: 'info', message: `This sign-in replaces the earlier ${modes} sign-in. The CLI revoked the earlier one.` });
+    // A v3.7 grant can hold both modes. Its revoke also ends the mode that the new grant does not have.
+    const lost = [...new Set(replaced.flatMap((old) => old.modes))].filter((mode) => !grant.modes.includes(mode));
+    if (lost.length > 0) {
+      const lostModes = lost.map(modeLabel).join(', ');
+      ctx.addBlock({
+        type: 'info',
+        message: `The earlier sign-in also held ${lostModes}. It is signed out too. Run dodo login and choose ${lostModes} to sign in again.`,
+      });
+    }
+  }
+  for (const error of revokeErrors) {
+    ctx.addBlock({
+      type: 'error',
+      message: `The server did not confirm the revoke of the earlier sign-in (${error}). Revoke it in Settings > Connected Apps.`,
+    });
+  }
+  setSessionMode(grant.modes[0]!);
+  ctx.addBlock({ type: 'success', message: `Signed in to ${modes} as ${grant.device_name}.` });
   return true;
 }
 

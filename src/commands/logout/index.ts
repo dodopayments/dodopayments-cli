@@ -1,10 +1,10 @@
-import { clearConfig } from '../../utils/auth';
-import { oauthLogout, oauthModes } from '../../utils/oauth';
+import { clearConfig, clearSessionMode, getSessionMode, signedInModes, type Mode } from '../../utils/auth';
+import { oauthLogout } from '../../utils/oauth';
 import type { CommandContext } from '../../tui/CommandContext';
 
-type LogoutChoice = 'all' | 'test_mode' | 'live_mode';
+type LogoutChoice = 'all' | Mode;
 
-const modeLabels: Record<Exclude<LogoutChoice, 'all'>, string> = {
+const modeLabels: Record<Mode, string> = {
   test_mode: 'Test Mode',
   live_mode: 'Live Mode',
 };
@@ -18,6 +18,10 @@ function normalizeTarget(value: string): LogoutChoice | null {
   return null;
 }
 
+/**
+ * Signs out of the API keys and the browser sign-ins of `target`, and revokes the browser sign-ins
+ * on the server. In the TUI, the TUI closes when no account is left.
+ */
 export async function handleLogout(
   ctx: CommandContext,
   exit?: () => void,
@@ -41,10 +45,14 @@ export async function handleLogout(
     }
     target = normalized;
   } else {
+    const modes = await signedInModes();
+    if (modes.length === 0) {
+      ctx.addBlock({ type: 'error', message: 'Not signed in.' });
+      return;
+    }
     target = (await ctx.promptSelect('Sign out from', [
       { label: 'All accounts', value: 'all' },
-      { label: 'Test Mode', value: 'test_mode' },
-      { label: 'Live Mode', value: 'live_mode' },
+      ...modes.map((mode) => ({ label: modeLabels[mode], value: mode })),
     ])) as LogoutChoice;
 
     const targetLabel = target === 'all' ? 'all accounts' : modeLabels[target];
@@ -55,44 +63,46 @@ export async function handleLogout(
     }
   }
 
-  const result = await clearConfig(target);
-  let signedOut = false;
-  if (target === 'all') {
-    try {
-      signedOut = await oauthLogout();
-    } catch (error) {
-      // The local sign-in is deleted. The server revoke can fail when the network is down.
-      ctx.addBlock({ type: 'error', message: `The server did not confirm the revoke: ${error instanceof Error ? error.message : String(error)}` });
-      signedOut = true;
+  const apiKeys = await clearConfig(target);
+  const oauth = await oauthLogout(target);
+
+  for (const error of oauth.revokeErrors) {
+    ctx.addBlock({
+      type: 'error',
+      message: `The server did not confirm the revoke (${error}). The sign-in is deleted from this computer. Revoke it in Settings > Connected Apps.`,
+    });
+  }
+  if (apiKeys.hadInvalidConfig) {
+    ctx.addBlock({ type: 'error', message: 'The stored API keys could not be read. They are deleted.' });
+  }
+
+  const oauthModes = oauth.removed.flatMap((grant) => grant.modes);
+  const removed = [...new Set([...apiKeys.removedModes, ...oauthModes])];
+  if (target !== 'all') {
+    // A grant from v3.7 can hold both modes. A revoke ends it for both modes.
+    const alsoRemoved = oauthModes.filter((mode) => mode !== target);
+    if (alsoRemoved.length > 0) {
+      ctx.addBlock({
+        type: 'info',
+        message: `This browser sign-in also held ${modeLabels[alsoRemoved[0]!]}. It is signed out too.`,
+      });
     }
-  } else if (oauthModes().includes(target)) {
-    ctx.addBlock({ type: 'info', message: 'Your browser sign-in includes this mode. Run `dodo logout all` to end it.' });
   }
 
-  if (result.hadInvalidConfig) {
-    ctx.addBlock({ type: 'error', message: 'Stored credentials were invalid and have been cleared.' });
-    exitCli();
-    return;
+  const active = getSessionMode();
+  if (active && removed.includes(active)) clearSessionMode();
+
+  if (removed.length === 0 && !apiKeys.hadInvalidConfig) {
+    ctx.addBlock({
+      type: 'error',
+      message: target === 'all' ? 'No stored accounts found.' : `No ${modeLabels[target]} account is signed in.`,
+    });
+  } else {
+    ctx.addBlock({
+      type: 'success',
+      message: target === 'all' ? 'Logged out from all accounts.' : `Logged out from ${modeLabels[target]}.`,
+    });
   }
 
-  if (target === 'all') {
-    if (result.removedModes.length === 0 && !signedOut) {
-      ctx.addBlock({ type: 'error', message: 'No stored accounts found.' });
-      exitCli();
-      return;
-    }
-
-    ctx.addBlock({ type: 'success', message: 'Logged out from all accounts.' });
-    exitCli();
-    return;
-  }
-
-  if (result.removedModes.length === 0) {
-    ctx.addBlock({ type: 'error', message: `No ${modeLabels[target]} account is signed in.` });
-    exitCli();
-    return;
-  }
-
-  ctx.addBlock({ type: 'success', message: `Logged out from ${modeLabels[target]}.` });
-  exitCli();
+  if (ctx.invocation === 'cli' || (await signedInModes()).length === 0) exitCli();
 }

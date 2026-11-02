@@ -54,10 +54,11 @@ const App = () => {
 
   const refreshAuthInfo = () => {
     resolveCredentials(undefined, false)
-      .then(({ mode, apiKey }) => {
+      .then(({ mode, apiKey, source }) => {
         setSessionMode(mode);
-        const masked = apiKey.slice(0, 10) + '...' + apiKey.slice(-3);
-        setAuthInfo({ mode, key: masked });
+        // An OAuth access token is not a key to show.
+        const key = source === 'oauth' ? 'browser sign-in' : apiKey.slice(0, 10) + '...' + apiKey.slice(-3);
+        setAuthInfo({ mode, key });
       })
       .catch(() => setAuthInfo(null));
   };
